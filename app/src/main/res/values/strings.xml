@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HydroMate</string>
+    <string name="home">Home</string>
+    <string name="statistics">Statistics</string>
+    <string name="history">History</string>
+    <string name="settings">Settings</string>
+
+    <!-- Home Screen -->
+    <string name="daily_goal_reached">🎉 Daily goal reached! Great job!</string>
+    <string name="add_water">Add Water</string>
+    <string name="quick_add">Quick Add</string>
+    <string name="custom">Custom</string>
+    <string name="today_entries">Today\'s Water Intake</string>
+    <string name="no_entries">No water entries yet</string>
+    <string name="add_first_drink">Add your first drink above!</string>
+
+    <!-- Statistics Screen -->
+    <string name="week_statistics">Week Statistics</string>
+    <string name="weekly_overview">Weekly Overview</string>
+    <string name="daily_progress">Daily Progress</string>
+    <string name="total">Total</string>
+    <string name="daily_avg">Daily Avg</string>
+    <string name="goals_hit">Goals Hit</string>
+
+    <!-- History Screen -->
+    <string name="water_intake_calendar">Water Intake Calendar</string>
+    <string name="monthly_summary">Monthly Summary</string>
+    <string name="goal_reached">Goal reached</string>
+    <string name="some_progress">Some progress</string>
+    <string name="no_data">No data</string>
+
+    <!-- Settings Screen -->
+    <string name="daily_goal">Daily Goal</string>
+    <string name="character">Character</string>
+    <string name="notifications">Notifications</string>
+    <string name="about">About</string>
+    <string name="enable_reminders">Enable Reminders</string>
+    <string name="reminder_interval">Reminder Interval</string>
+    <string name="wake_up_time">Wake Up Time</string>
+    <string name="bed_time">Bed Time</string>
+
+    <!-- Dialogs -->
+    <string name="set_daily_goal">Set Daily Goal</string>
+    <string name="choose_your_buddy">Choose Your Buddy</string>
+    <string name="edit_quick_amounts">Edit Quick Amounts</string>
+    <string name="custom_amount">Custom Amount</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="add">Add</string>
+
+    <!-- Character messages -->
+    <string name="character_very_happy">Amazing! Goal completed! 🎉</string>
+    <string name="character_happy">Doing great! Keep it up! 😊</string>
+    <string name="character_content">Good progress! 👍</string>
+    <string name="character_slightly_thirsty">Time for some water! 💧</string>
+    <string name="character_thirsty">I\'m thirsty! Help me! 🥺</string>
+
+    <!-- Achievements -->
+    <string name="perfect_week">Perfect Week</string>
+    <string name="on_fire">On Fire</string>
+    <string name="hydration_hero">Hydration Hero</string>
+    <string name="consistent">Consistent</string>
+
+    <!-- Errors -->
+    <string name="error_generic">Something went wrong</string>
+    <string name="error_failed_to_add_water">Failed to add water entry</string>
+    <string name="error_failed_to_delete_entry">Failed to delete entry</string>
+    <string name="error_failed_to_load_statistics">Failed to load statistics</string>
+    <string name="error_failed_to_load_history">Failed to load history</string>
+    <string name="error_failed_to_load_settings">Failed to load settings</string>
+</resources>

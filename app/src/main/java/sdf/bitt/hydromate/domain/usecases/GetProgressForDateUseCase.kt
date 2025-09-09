@@ -1,0 +1,15 @@
+package sdf.bitt.hydromate.domain.usecases
+
+import kotlinx.coroutines.flow.Flow
+import sdf.bitt.hydromate.domain.entities.DailyProgress
+import sdf.bitt.hydromate.domain.repositories.WaterRepository
+import java.time.LocalDate
+import javax.inject.Inject
+
+class GetProgressForDateUseCase @Inject constructor(
+    private val repository: WaterRepository
+) {
+    operator fun invoke(date: LocalDate): Flow<DailyProgress> {
+        return repository.getProgressForDate(date)
+    }
+}
