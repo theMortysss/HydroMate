@@ -20,6 +20,7 @@ import sdf.bitt.hydromate.ui.components.CharacterSelectionDialog
 import sdf.bitt.hydromate.ui.components.CharacterSettingsCard
 import sdf.bitt.hydromate.ui.components.GoalSettingDialog
 import sdf.bitt.hydromate.ui.components.GoalSettingsCard
+import sdf.bitt.hydromate.ui.components.HydrationSettingsCard
 import sdf.bitt.hydromate.ui.components.NotificationSettingsCard
 import sdf.bitt.hydromate.ui.components.SettingsHeader
 import sdf.bitt.hydromate.ui.components.TimePickerDialog
@@ -156,6 +157,17 @@ fun SettingsScreen(
                 },
                 onQuickAmountsEdit = { amounts ->
                     viewModel.handleIntent(SettingsIntent.UpdateQuickAmounts(amounts))
+                }
+            )
+
+            HydrationSettingsCard(
+                hydrationThreshold = uiState.settings.hydrationThreshold,
+                showNetHydration = uiState.settings.showNetHydration,
+                onThresholdChange = { threshold ->
+                    viewModel.handleIntent(SettingsIntent.UpdateHydrationThreshold(threshold))
+                },
+                onShowNetHydrationToggle = { show ->
+                    viewModel.handleIntent(SettingsIntent.UpdateShowNetHydration(show))
                 }
             )
 

@@ -23,6 +23,10 @@ sealed class SettingsIntent {
     data class UpdateBedTime(val time: LocalTime) : SettingsIntent()
     data class UpdateQuickAmounts(val amounts: List<Int>) : SettingsIntent()
 
+    // NEW: Настройки гидратации
+    data class UpdateHydrationThreshold(val threshold: Float) : SettingsIntent()
+    data class UpdateShowNetHydration(val show: Boolean) : SettingsIntent()
+
     object ShowGoalDialog : SettingsIntent()
     object HideGoalDialog : SettingsIntent()
     object ShowCharacterDialog : SettingsIntent()

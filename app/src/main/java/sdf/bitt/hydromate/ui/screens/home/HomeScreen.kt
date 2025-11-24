@@ -2,10 +2,14 @@ package sdf.bitt.hydromate.ui.screens.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,6 +18,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -24,7 +29,11 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import kotlinx.coroutines.flow.collectLatest
+import sdf.bitt.hydromate.domain.entities.Drink
 import sdf.bitt.hydromate.ui.components.CharacterDisplay
+import sdf.bitt.hydromate.ui.components.CreateCustomDrinkDialog
+import sdf.bitt.hydromate.ui.components.DrinkSelectorDialog
+import sdf.bitt.hydromate.ui.components.HydrationProgressCard
 import sdf.bitt.hydromate.ui.components.ProgressCard
 import sdf.bitt.hydromate.ui.components.QuickAddButtons
 import sdf.bitt.hydromate.ui.components.TodayEntriesList
@@ -35,8 +44,13 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val drinks by viewModel.drinks.collectAsState()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+
+    var showDrinkSelector by remember { mutableStateOf(false) }
+    var showCreateDrink by remember { mutableStateOf(false) }
+
 
     // Handle side effects
     LaunchedEffect(viewModel) {
@@ -62,6 +76,12 @@ fun HomeScreen(
 
                 HomeEffect.HapticFeedback -> {
                     // Trigger haptic feedback
+                }
+
+                is HomeEffect.ShowHydrationInfo -> {
+                }
+                is HomeEffect.ShowSuccess -> {
+
                 }
             }
         }
@@ -132,19 +152,67 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Progress Card
-            ProgressCard(
-                currentAmount = uiState.currentAmount,
-                goalAmount = uiState.goalAmount,
-                progressPercentage = uiState.progressPercentage,
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Hydration Progress Card вместо старого ProgressCard
+            uiState.hydrationProgress?.let { progress ->
+                uiState.totalHydration?.let { hydration ->
+                    HydrationProgressCard(
+                        hydrationProgress = progress,
+                        totalHydration = hydration
+                    )
+                }
+            }
+
+            // NEW: Drink Selector Button
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showDrinkSelector = true },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = uiState.selectedDrink?.icon ?: "💧",
+                            fontSize = 32.sp
+                        )
+                        Column {
+                            Text(
+                                text = "Selected Drink",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Text(
+                                text = uiState.selectedDrink?.name ?: "Water",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = "Change drink"
+                    )
+                }
+            }
 
             // Quick Add Buttons
             QuickAddButtons(
                 amounts = uiState.quickAmounts,
                 onAmountClick = { amount ->
-                    viewModel.handleIntent(HomeIntent.AddWater(amount))
+                    uiState.selectedDrink?.let { drink ->
+                        viewModel.handleIntent(HomeIntent.AddWater(amount, drink))
+                    }
                 },
                 isLoading = uiState.isAddingWater,
                 modifier = Modifier.fillMaxWidth()
@@ -164,6 +232,23 @@ fun HomeScreen(
 
             Spacer(modifier.height(96.dp))
 
+        }
+        // Dialogs
+        if (showDrinkSelector) {
+            DrinkSelectorDialog(
+                drinks = uiState.drinks,
+                selectedDrink = uiState.selectedDrink,
+                onDrinkSelected = { viewModel.handleIntent(HomeIntent.SelectDrink(it)) },
+                onCreateCustomDrink = { showCreateDrink = true },
+                onDismiss = { showDrinkSelector = false }
+            )
+        }
+
+        if (showCreateDrink) {
+            CreateCustomDrinkDialog(
+                onDrinkCreated = { viewModel.handleIntent(HomeIntent.CreateCustomDrink(it)) },
+                onDismiss = { showCreateDrink = false }
+            )
         }
     }
 }

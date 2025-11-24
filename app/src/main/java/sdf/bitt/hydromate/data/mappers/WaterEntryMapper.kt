@@ -17,7 +17,12 @@ object WaterEntryMapper {
                 Instant.ofEpochSecond(entity.timestamp),
                 ZoneId.systemDefault()
             ),
-            type = DrinkType.valueOf(entity.drinkType)
+            drinkId = entity.drinkId,
+            type = try {
+                DrinkType.valueOf(entity.drinkType)
+            } catch (e: Exception) {
+                DrinkType.WATER // Default fallback
+            }
         )
     }
 
@@ -26,7 +31,8 @@ object WaterEntryMapper {
             id = domain.id,
             amount = domain.amount,
             timestamp = domain.timestamp.atZone(ZoneId.systemDefault()).toEpochSecond(),
-            drinkType = domain.type.name
+            drinkType = domain.type.name, // Deprecated но сохраняем
+            drinkId = domain.drinkId
         )
     }
 

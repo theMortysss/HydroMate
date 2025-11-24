@@ -27,7 +27,10 @@ object UserSettingsMapper {
                     json.decodeFromString<List<Int>>(it.quickAmounts)
                 } catch (e: Exception) {
                     listOf(250, 500, 750)
-                }
+                },
+                // NEW: Маппинг новых полей
+                hydrationThreshold = it.hydrationThreshold,
+                showNetHydration = it.showNetHydration
             )
         } ?: UserSettings() // Default settings if entity is null
     }
@@ -41,7 +44,10 @@ object UserSettingsMapper {
             notificationInterval = domain.notificationInterval,
             wakeUpTime = domain.wakeUpTime.format(timeFormatter),
             bedTime = domain.bedTime.format(timeFormatter),
-            quickAmounts = json.encodeToString(domain.quickAmounts)
+            quickAmounts = json.encodeToString(domain.quickAmounts),
+            // NEW: Маппинг новых полей
+            hydrationThreshold = domain.hydrationThreshold,
+            showNetHydration = domain.showNetHydration
         )
     }
 }

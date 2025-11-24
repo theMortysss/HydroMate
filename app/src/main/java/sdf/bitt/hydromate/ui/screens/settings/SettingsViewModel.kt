@@ -47,6 +47,10 @@ class SettingsViewModel @Inject constructor(
 
             SettingsIntent.RefreshSettings -> observeSettings()
             SettingsIntent.ClearError -> _uiState.update { it.copy(error = null) }
+            // NEW: Обработка настроек гидратации
+            is SettingsIntent.UpdateHydrationThreshold -> updateHydrationThreshold(intent.threshold)
+            is SettingsIntent.UpdateShowNetHydration -> updateShowNetHydration(intent.show)
+
         }
     }
 
@@ -152,6 +156,33 @@ class SettingsViewModel @Inject constructor(
                 .onFailure { exception ->
                     _uiState.update {
                         it.copy(error = exception.message ?: "Failed to update quick amounts")
+                    }
+                }
+        }
+    }
+
+    // NEW: Методы для настроек гидратации
+    private fun updateHydrationThreshold(threshold: Float) {
+        viewModelScope.launch {
+            val newSettings = _uiState.value.settings.copy(
+                hydrationThreshold = threshold.coerceIn(0.8f, 1.2f)
+            )
+            updateUserSettingsUseCase(newSettings)
+                .onFailure { exception ->
+                    _uiState.update {
+                        it.copy(error = exception.message ?: "Failed to update hydration threshold")
+                    }
+                }
+        }
+    }
+
+    private fun updateShowNetHydration(show: Boolean) {
+        viewModelScope.launch {
+            val newSettings = _uiState.value.settings.copy(showNetHydration = show)
+            updateUserSettingsUseCase(newSettings)
+                .onFailure { exception ->
+                    _uiState.update {
+                        it.copy(error = exception.message ?: "Failed to update display mode")
                     }
                 }
         }

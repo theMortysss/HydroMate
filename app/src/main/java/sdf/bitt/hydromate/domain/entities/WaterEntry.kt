@@ -6,13 +6,6 @@ data class WaterEntry(
     val id: Long = 0,
     val amount: Int, // в мл
     val timestamp: LocalDateTime,
+    val drinkId: Long = 1, // ID напитка (по умолчанию вода)
     val type: DrinkType = DrinkType.WATER
 )
-
-enum class DrinkType(val displayName: String, val icon: String) {
-    WATER("Water", "💧"),
-    TEA("Tea", "🍵"),
-    COFFEE("Coffee", "☕"),
-    JUICE("Juice", "🧃"),
-    OTHER("Other", "🥤")
-}

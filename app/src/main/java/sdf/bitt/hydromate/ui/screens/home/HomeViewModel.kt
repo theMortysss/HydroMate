@@ -6,9 +6,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import sdf.bitt.hydromate.domain.entities.Drink
 import sdf.bitt.hydromate.domain.entities.DrinkType
+import sdf.bitt.hydromate.domain.repositories.DrinkRepository
 import sdf.bitt.hydromate.domain.usecases.AddWaterEntryUseCase
 import sdf.bitt.hydromate.domain.usecases.CalculateCharacterStateUseCase
+import sdf.bitt.hydromate.domain.usecases.CalculateHydrationUseCase
 import sdf.bitt.hydromate.domain.usecases.DeleteWaterEntryUseCase
 import sdf.bitt.hydromate.domain.usecases.GetTodayProgressUseCase
 import sdf.bitt.hydromate.domain.usecases.GetUserSettingsUseCase
@@ -20,7 +23,9 @@ class HomeViewModel @Inject constructor(
     private val getTodayProgressUseCase: GetTodayProgressUseCase,
     private val getUserSettingsUseCase: GetUserSettingsUseCase,
     private val deleteWaterEntryUseCase: DeleteWaterEntryUseCase,
-    private val calculateCharacterStateUseCase: CalculateCharacterStateUseCase
+    private val calculateCharacterStateUseCase: CalculateCharacterStateUseCase,
+    private val calculateHydrationUseCase: CalculateHydrationUseCase,
+    private val drinkRepository: DrinkRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -29,16 +34,25 @@ class HomeViewModel @Inject constructor(
     private val _effects = Channel<HomeEffect>(Channel.BUFFERED)
     val effects: Flow<HomeEffect> = _effects.receiveAsFlow()
 
+    private val _drinks = drinkRepository.getAllActiveDrinks()
+    val drinks: StateFlow<List<Drink>> = _drinks.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
     init {
         observeData()
     }
 
     fun handleIntent(intent: HomeIntent) {
         when (intent) {
-            is HomeIntent.AddWater -> addWater(intent.amount, intent.type)
+            is HomeIntent.AddWater -> addWater(intent.amount, intent.drink)
             is HomeIntent.DeleteEntry -> deleteEntry(intent.entryId)
             HomeIntent.RefreshData -> refreshData()
             HomeIntent.ClearError -> clearError()
+            is HomeIntent.SelectDrink -> selectDrink(intent.drink)
+            is HomeIntent.CreateCustomDrink -> createCustomDrink(intent.drink)
         }
     }
 
@@ -46,18 +60,13 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
+            // NEW: Комбинируем все необходимые данные
             combine(
                 getTodayProgressUseCase(),
-                getUserSettingsUseCase()
-            ) { progress, settings ->
-                val characterState = calculateCharacterStateUseCase(progress)
-
-                HomeUiState(
-                    todayProgress = progress,
-                    userSettings = settings,
-                    characterState = characterState,
-                    isLoading = false
-                )
+                getUserSettingsUseCase(),
+                drinkRepository.getAllActiveDrinks()
+            ) { progress, settings, drinks ->
+                Triple(progress, settings, drinks)
             }.catch { exception ->
                 _uiState.update {
                     it.copy(
@@ -65,13 +74,41 @@ class HomeViewModel @Inject constructor(
                         error = exception.message ?: "Unknown error occurred"
                     )
                 }
-            }.collect { newState ->
+            }.collect { (progress, settings, drinks) ->
+                // Расчет состояния персонажа
+                val characterState = calculateCharacterStateUseCase(progress)
+
+                // NEW: Расчет гидратации
+                val drinksMap = drinks.associateBy { it.id }
+                val totalHydration = calculateHydrationUseCase.calculateTotal(
+                    progress.entries,
+                    drinksMap
+                )
+
+                val hydrationProgress = calculateHydrationUseCase.calculateProgress(
+                    netHydration = totalHydration.netHydration,
+                    dailyGoal = settings.dailyGoal,
+                    hydrationThreshold = settings.hydrationThreshold
+                )
+
                 val previousGoalReached = _uiState.value.todayProgress?.isGoalReached == true
-                val currentGoalReached = newState.todayProgress?.isGoalReached == true
+                val currentGoalReached = hydrationProgress.isGoalReached
 
-                _uiState.update { newState }
+                // Обновляем состояние
+                _uiState.update {
+                    it.copy(
+                        todayProgress = progress,
+                        userSettings = settings,
+                        characterState = characterState,
+                        totalHydration = totalHydration,
+                        hydrationProgress = hydrationProgress,
+                        drinks = drinks,
+                        selectedDrink = it.selectedDrink ?: drinks.firstOrNull { drink -> drink.id == 1L } ?: Drink.WATER,
+                        isLoading = false
+                    )
+                }
 
-                // Show celebration if goal was just reached
+                // Показать празднование достижения цели
                 if (!previousGoalReached && currentGoalReached) {
                     _effects.trySend(HomeEffect.ShowGoalReachedCelebration)
                 }
@@ -79,14 +116,38 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun addWater(amount: Int, type: DrinkType) {
+    private fun addWater(amount: Int, drink: Drink) {
         viewModelScope.launch {
             _uiState.update { it.copy(isAddingWater = true) }
 
-            addWaterEntryUseCase(amount, type)
+            // NEW: Рассчитываем гидратацию до добавления
+            val hydrationResult = calculateHydrationUseCase(amount, drink)
+
+            addWaterEntryUseCase(amount, drink)
                 .onSuccess {
                     _effects.trySend(HomeEffect.ShowAddWaterAnimation)
                     _effects.trySend(HomeEffect.HapticFeedback)
+
+                    // NEW: Показываем информацию о гидратации
+                    _effects.trySend(
+                        HomeEffect.ShowHydrationInfo(
+                            actualAmount = hydrationResult.actualAmount,
+                            effectiveAmount = hydrationResult.effectiveAmount,
+                            netHydration = hydrationResult.netHydration,
+                            drink = drink
+                        )
+                    )
+
+                    // Дополнительное сообщение если есть дегидратация
+                    if (hydrationResult.dehydrationAmount > 0) {
+                        _effects.trySend(
+                            HomeEffect.ShowSuccess(
+                                "Added ${amount}ml of ${drink.icon} ${drink.name}\n" +
+                                        "Net hydration: ${hydrationResult.netHydration}ml " +
+                                        "(${hydrationResult.dehydrationAmount}ml dehydration effect)"
+                            )
+                        )
+                    }
                 }
                 .onFailure { exception ->
                     _effects.trySend(
@@ -97,6 +158,33 @@ class HomeViewModel @Inject constructor(
                 }
 
             _uiState.update { it.copy(isAddingWater = false) }
+        }
+    }
+
+    // New
+    private fun selectDrink(drink: Drink) {
+        _uiState.update { it.copy(selectedDrink = drink) }
+    }
+
+    private fun createCustomDrink(drink: Drink) {
+        viewModelScope.launch {
+            drinkRepository.createCustomDrink(drink)
+                .onSuccess { drinkId ->
+                    _effects.trySend(
+                        HomeEffect.ShowSuccess("Custom drink \"${drink.name}\" created!")
+                    )
+
+                    // Автоматически выбираем созданный напиток
+                    val createdDrink = drink.copy(id = drinkId)
+                    _uiState.update { it.copy(selectedDrink = createdDrink) }
+                }
+                .onFailure { exception ->
+                    _effects.trySend(
+                        HomeEffect.ShowError(
+                            exception.message ?: "Failed to create custom drink"
+                        )
+                    )
+                }
         }
     }
 

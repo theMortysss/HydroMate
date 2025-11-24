@@ -9,6 +9,7 @@ import sdf.bitt.hydromate.data.local.dao.WaterEntryDao
 import sdf.bitt.hydromate.data.mappers.UserSettingsMapper
 import sdf.bitt.hydromate.data.mappers.WaterEntryMapper
 import sdf.bitt.hydromate.domain.entities.DailyProgress
+import sdf.bitt.hydromate.domain.entities.Drink
 import sdf.bitt.hydromate.domain.entities.DrinkType
 import sdf.bitt.hydromate.domain.entities.WaterEntry
 import sdf.bitt.hydromate.domain.entities.WeeklyStatistics
@@ -25,12 +26,13 @@ class WaterRepositoryImpl @Inject constructor(
     private val userSettingsDao: UserSettingsDao
 ) : WaterRepository {
 
-    override suspend fun addWaterEntry(amount: Int, type: DrinkType): Result<Long> {
+    override suspend fun addWaterEntry(amount: Int, drink: Drink): Result<Long> {
         return try {
             val entry = WaterEntry(
                 amount = amount,
                 timestamp = LocalDateTime.now(),
-                type = type
+                drinkId = drink.id,
+                type = drink.category
             )
             val id = waterEntryDao.insertEntry(WaterEntryMapper.toEntity(entry))
             Result.success(id)
