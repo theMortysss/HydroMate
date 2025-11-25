@@ -1,26 +1,32 @@
 package sdf.bitt.hydromate.ui.screens.history
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import sdf.bitt.hydromate.domain.entities.DailyProgress
+import sdf.bitt.hydromate.domain.repositories.DrinkRepository
+import sdf.bitt.hydromate.domain.usecases.CalculateHydrationUseCase
 import sdf.bitt.hydromate.domain.usecases.GetProgressForDateUseCase
+import sdf.bitt.hydromate.domain.usecases.GetUserSettingsUseCase
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
-    private val getProgressForDateUseCase: GetProgressForDateUseCase
+    private val getProgressForDateUseCase: GetProgressForDateUseCase,
+    private val getUserSettingsUseCase: GetUserSettingsUseCase,
+    private val drinkRepository: DrinkRepository,
+    private val calculateHydrationUseCase: CalculateHydrationUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
 
     init {
+        observeSettings()
         loadMonthlyData()
     }
 
@@ -36,6 +42,18 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
+    private fun observeSettings() {
+        viewModelScope.launch {
+            getUserSettingsUseCase()
+                .catch { }
+                .collect { settings ->
+                    _uiState.update {
+                        it.copy(showNetHydration = settings.showNetHydration)
+                    }
+                }
+        }
+    }
+
     private fun loadMonthlyData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -46,28 +64,51 @@ class HistoryViewModel @Inject constructor(
                 val startDate = month.atDay(1)
                 val endDate = month.atEndOfMonth()
 
+                // Получаем напитки
+                val drinks = drinkRepository.getAllActiveDrinks().first()
+                val drinksMap = drinks.associateBy { it.id }
+
                 // Collect all flows for the month
                 val flows = mutableListOf<Flow<Pair<LocalDate, DailyProgress>>>()
 
                 var date = startDate
                 while (!date.isAfter(endDate)) {
-                    val currentDate = date // Capture current value
+                    val currentDate = date
                     val progressFlow = getProgressForDateUseCase(currentDate)
-                        .map { progress -> currentDate to progress }
+                        .map { progress ->
+                            // Рассчитываем гидратацию для каждого дня
+                            val hydration = if (progress.entries.isNotEmpty()) {
+                                calculateHydrationUseCase.calculateTotal(
+                                    progress.entries,
+                                    drinksMap
+                                )
+                            } else {
+                                null
+                            }
+
+                            val enhancedProgress = progress.copy(
+                                effectiveHydration = hydration?.totalEffective
+                                    ?: progress.totalAmount,
+                                netHydration = hydration?.netHydration ?: progress.totalAmount
+                            )
+
+                            currentDate to enhancedProgress
+                        }
                         .catch {
-                            // In case of error for a specific day, emit empty progress
-                            emit(currentDate to DailyProgress(
-                                date = currentDate,
-                                totalAmount = 0,
-                                goalAmount = 2000,
-                                entries = emptyList()
-                            ))
+                            emit(
+                                currentDate to DailyProgress(
+                                    date = currentDate,
+                                    totalAmount = 0,
+                                    goalAmount = 2000,
+                                    entries = emptyList()
+                                )
+                            )
                         }
                     flows.add(progressFlow)
                     date = date.plusDays(1)
                 }
 
-                // Combine all flows and collect first emission
+                // Combine all flows
                 combine(flows) { progressArray ->
                     progressArray.toList()
                 }.first().let { progressList ->

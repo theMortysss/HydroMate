@@ -1,5 +1,6 @@
 package sdf.bitt.hydromate.data.repositories
 
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -85,7 +86,7 @@ class WaterRepositoryImpl @Inject constructor(
                 val progress = getProgressForDate(date).first()
                 dailyProgressList.add(progress)
             }
-
+            Log.e("LIST", dailyProgressList.toString())
             val totalAmount = dailyProgressList.sumOf { it.totalAmount }
             val averageDaily = if (dailyProgressList.isNotEmpty()) totalAmount / dailyProgressList.size else 0
             val daysGoalReached = dailyProgressList.count { it.isGoalReached }

@@ -10,12 +10,12 @@ plugins {
 
 android {
     namespace = "sdf.bitt.hydromate"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "sdf.bitt.hydromate"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 

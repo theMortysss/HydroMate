@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import sdf.bitt.hydromate.domain.entities.StatisticItem
 import sdf.bitt.hydromate.domain.entities.WeeklyStatistics
 
 @Composable
@@ -117,9 +118,3 @@ private fun StatisticCard(
     }
 }
 
-private data class StatisticItem(
-    val title: String,
-    val value: String,
-    val icon: String,
-    val description: String
-)

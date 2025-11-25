@@ -10,7 +10,10 @@ data class HistoryUiState(
     val selectedDate: LocalDate? = null,
     val selectedDateProgress: DailyProgress? = null,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+
+    // NEW: Настройка отображения
+    val showNetHydration: Boolean = true
 )
 
 sealed class HistoryIntent {

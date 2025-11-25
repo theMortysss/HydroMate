@@ -27,11 +27,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.History
@@ -53,6 +57,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.toRect
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -62,6 +67,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -75,13 +81,21 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import dev.chrisbanes.haze.ExperimentalHazeApi
+import dev.chrisbanes.haze.HazeInputScale
+import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import sdf.bitt.hydromate.ui.screens.history.HistoryScreen
 import sdf.bitt.hydromate.ui.screens.home.HomeScreen
 import sdf.bitt.hydromate.ui.screens.settings.SettingsScreen
 import sdf.bitt.hydromate.ui.screens.statistics.StatisticsScreen
+import sdf.bitt.hydromate.ui.theme.VeryThirstyRed
 
 sealed class Screen(
     val route: String,
@@ -104,7 +118,7 @@ sealed class BottomBarTab(
         route = Screen.Home.route,
         title = "Home",
         icon = Icons.Filled.Home,
-        color = Color(0xFFFA6FFF)
+        color = Color(0xFF81D4FA)
     )
 
     data object Statistics : BottomBarTab(
@@ -118,25 +132,44 @@ sealed class BottomBarTab(
         route = Screen.History.route,
         title = "History",
         icon = Icons.Outlined.History,
-        color = Color(0xFFFA6FFF)
+        color = Color(0xFFFFE082)
     )
 
     data object Settings : BottomBarTab(
         route = Screen.Settings.route,
         title = "Settings",
         icon = Icons.Filled.Settings,
-        color = Color(0xFFADFF64)
+        color = Color(0xFFAED581)
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalHazeApi::class)
 @Composable
 fun HydroMateNavigation() {
     val navController = rememberNavController()
     val hazeState = remember { HazeState() }
 
     Scaffold(
-        modifier = Modifier.systemBarsPadding(),
+        topBar = {
+            TopAppBar(
+                modifier = Modifier
+                    .hazeEffect(
+                        state = hazeState,
+                    ),
+                title = {
+                    Text(
+                        text = "HydroMate",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                ),
+                windowInsets = WindowInsets(0, 0, 0, 0)
+            )
+        },
         bottomBar = {
             val tabs = listOf(
                 BottomBarTab.Home,
@@ -151,20 +184,30 @@ fun HydroMateNavigation() {
                     .padding(vertical = 24.dp, horizontal = 64.dp)
                     .fillMaxWidth()
                     .height(64.dp)
-                    .hazeChild(state = hazeState, shape = CircleShape)
+                    .clip(CircleShape)
+                    .hazeEffect(
+                        state = hazeState,
+                        style = HazeStyle(
+                            backgroundColor = MaterialTheme.colorScheme.background,
+                            tint = HazeTint(
+                                color = MaterialTheme.colorScheme.background.copy(alpha = .7f),
+                            ),
+                            blurRadius = 30.dp,
+                        )
+                    )
                     .border(
-                        width = Dp.Hairline,
+                        width = 1.dp,
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = .8f),
-                                Color.White.copy(alpha = .2f),
+                                MaterialTheme.colorScheme.onBackground.copy(alpha = .8f),
+                                MaterialTheme.colorScheme.onBackground.copy(alpha = .2f)
                             ),
                         ),
                         shape = CircleShape
                     )
             ) {
                 BottomBarTabs(
-                    tabs,
+                    tabs = tabs,
                     selectedTab = selectedTabIndex,
                     onTabSelected = {
                         selectedTabIndex = tabs.indexOf(it)
@@ -226,30 +269,13 @@ fun HydroMateNavigation() {
                 }
             }
         },
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "HydroMate",
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
-            )
-        },
     ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
             modifier = Modifier
-                .haze(
-                    hazeState,
-                    backgroundColor = MaterialTheme.colorScheme.background,
-                    tint = Color.Black.copy(alpha = .2f),
-                    blurRadius = 30.dp,
+                .hazeSource(
+                    state = hazeState,
                 )
                 .padding(
                     top = innerPadding.calculateTopPadding(),
@@ -317,16 +343,15 @@ fun BottomBarTabs(
                 ) {
                     Icon(
                         imageVector = tab.icon,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onBackground,
                         contentDescription = "tab ${tab.title}"
                     )
                     Text(
                         text = tab.title,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
         }
     }
 }
-
