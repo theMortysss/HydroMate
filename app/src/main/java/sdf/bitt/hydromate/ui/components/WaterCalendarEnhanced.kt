@@ -3,15 +3,21 @@ package sdf.bitt.hydromate.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import sdf.bitt.hydromate.domain.entities.DailyProgress
+import sdf.bitt.hydromate.domain.entities.WaterEntry
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -200,7 +207,8 @@ fun DateDetailsModal(
     date: LocalDate,
     progress: DailyProgress,
     showNetHydration: Boolean,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onDeleteEntry: (Long) -> Unit = {}
 ) {
     val currentAmount = remember(progress, showNetHydration) {
         if (showNetHydration) progress.netHydration else progress.totalAmount
@@ -223,7 +231,10 @@ fun DateDetailsModal(
                 .fillMaxWidth()
                 .fillMaxHeight(0.85f)
                 .padding(16.dp),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
@@ -404,10 +415,222 @@ fun DateDetailsModal(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // Entries list (остальной код такой же)
-                // ... (код из оригинального DateDetailsModal)
+                // Entries list
+                if (progress.entries.isNotEmpty()) {
+                    Text(
+                        text = "Water Entries (${progress.entries.size})",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                    )
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(
+                            items = progress.entries.sortedByDescending { it.timestamp },
+                            key = { it.id }
+                        ) { entry ->
+                            EntryRowWithDelete(
+                                entry = entry,
+                                onDeleteClick = { onDeleteEntry(entry.id) }
+                            )
+                        }
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "💧",
+                                fontSize = 48.sp
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "No entries for this day",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Achievement status
+                if (currentAmount >= progress.goalAmount) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "🏆",
+                                fontSize = 24.sp,
+                                modifier = Modifier.padding(end = 12.dp)
+                            )
+                            Column {
+                                Text(
+                                    text = "Daily Goal Achieved!",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Great job staying hydrated!",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(
+                                        alpha = 0.7f
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun ProgressMetric(
+    label: String,
+    value: String,
+    icon: String
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = icon,
+            fontSize = 24.sp
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+    }
+}
+
+@Composable
+private fun EntryRowWithDelete(
+    entry: WaterEntry,
+    onDeleteClick: () -> Unit
+) {
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = entry.type.icon,
+                    fontSize = 20.sp
+                )
+                Column {
+                    Text(
+                        text = "${entry.amount}ml",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = entry.type.displayName,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                        Text(
+                            text = "•",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                        Text(
+                            text = entry.timestamp.format(DateTimeFormatter.ofPattern("HH:mm")),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            }
+
+            IconButton(
+                onClick = { showDeleteConfirmation = true },
+                modifier = Modifier.size(32.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete entry",
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
+                )
+            }
+        }
+    }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text("Delete Entry") },
+            text = {
+                Text("Are you sure you want to delete this ${entry.amount}ml ${entry.type.displayName} entry?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDeleteClick()
+                        showDeleteConfirmation = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
@@ -608,28 +831,6 @@ private fun SummaryMetric(
         )
         Text(
             subtitle,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-        )
-    }
-}
-
-@Composable
-private fun ProgressMetric(
-    label: String,
-    value: String,
-    icon: String
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(icon, fontSize = 24.sp)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            label,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )

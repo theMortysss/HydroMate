@@ -95,7 +95,6 @@ import sdf.bitt.hydromate.ui.screens.history.HistoryScreen
 import sdf.bitt.hydromate.ui.screens.home.HomeScreen
 import sdf.bitt.hydromate.ui.screens.settings.SettingsScreen
 import sdf.bitt.hydromate.ui.screens.statistics.StatisticsScreen
-import sdf.bitt.hydromate.ui.theme.VeryThirstyRed
 
 sealed class Screen(
     val route: String,

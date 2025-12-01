@@ -27,10 +27,14 @@ data class UserSettingsEntity(
     @ColumnInfo(name = "bed_time")
     val bedTime: String, // "HH:mm" format
 
-    @ColumnInfo(name = "quick_amounts")
-    val quickAmounts: String, // JSON string
+    // UPDATED: Храним JSON с полными пресетами
+    @ColumnInfo(name = "quick_add_presets", defaultValue = "[]")
+    val quickAddPresets: String, // JSON string: List<QuickAddPreset>
 
-    // NEW: Настройки гидратации
+    // Старое поле для обратной совместимости
+    @ColumnInfo(name = "quick_amounts")
+    val quickAmounts: String = "[]", // Deprecated
+
     @ColumnInfo(name = "hydration_threshold", defaultValue = "1.0")
     val hydrationThreshold: Float = 1.0f,
 

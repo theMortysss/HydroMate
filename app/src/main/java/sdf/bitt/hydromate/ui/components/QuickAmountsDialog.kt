@@ -14,11 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import sdf.bitt.hydromate.domain.entities.QuickAddPreset
 
 @Composable
 fun QuickAmountsDialog(
-    currentAmounts: List<Int>,
-    onAmountsChanged: (List<Int>) -> Unit,
+    currentAmounts: List<QuickAddPreset>,
+    onAmountsChanged: (List<QuickAddPreset>) -> Unit,
     onDismiss: () -> Unit
 ) {
     var amounts by remember { mutableStateOf(currentAmounts.toMutableList()) }
@@ -48,11 +49,11 @@ fun QuickAmountsDialog(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             OutlinedTextField(
-                                value = amount.toString(),
+                                value = amount.amount.toString(),
                                 onValueChange = { newValue ->
                                     newValue.toIntOrNull()?.let { newAmount ->
-                                        if (newAmount > 0 && newAmount <= 2000) {
-                                            amounts[index] = newAmount
+                                        if (newAmount in 1..2000) {
+                                            amounts[index].copy(amount = newAmount)
                                         }
                                     }
                                 },
@@ -77,21 +78,6 @@ fun QuickAmountsDialog(
                     }
                 }
 
-                if (amounts.size < 5) {
-                    TextButton(
-                        onClick = { amounts.add(250) },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Add Amount")
-                    }
-                }
-
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
@@ -103,7 +89,7 @@ fun QuickAmountsDialog(
                     }
                     TextButton(
                         onClick = {
-                            onAmountsChanged(amounts.filter { it > 0 })
+                            onAmountsChanged(amounts.filter { it.amount > 0 })
                             onDismiss()
                         }
                     ) {

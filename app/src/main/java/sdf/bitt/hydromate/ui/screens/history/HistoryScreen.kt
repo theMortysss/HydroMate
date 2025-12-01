@@ -46,9 +46,12 @@ fun HistoryScreen(
         DateDetailsModal(
             date = uiState.selectedDate!!,
             progress = progress,
-            showNetHydration = uiState.showNetHydration,
+            showNetHydration = uiState.userSettings?.showNetHydration ?: true,
             onDismiss = {
                 viewModel.handleIntent(HistoryIntent.ClearSelectedDate)
+            },
+            onDeleteEntry = { entryId ->
+                viewModel.handleIntent(HistoryIntent.DeleteEntry(entryId))
             }
         )
     }
@@ -104,7 +107,7 @@ fun HistoryScreen(
             )
 
             // Info badge если показываем чистую гидратацию
-            if (uiState.showNetHydration) {
+            if (uiState.userSettings?.showNetHydration ?: true) {
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
@@ -138,7 +141,7 @@ fun HistoryScreen(
             WaterCalendarEnhanced(
                 month = uiState.selectedMonth,
                 monthlyProgress = uiState.monthlyProgress,
-                showNetHydration = uiState.showNetHydration,
+                showNetHydration = uiState.userSettings?.showNetHydration ?: true,
                 onDateSelected = { date ->
                     viewModel.handleIntent(HistoryIntent.SelectDate(date))
                 },
@@ -148,7 +151,7 @@ fun HistoryScreen(
             // Monthly summary с учетом настройки
             MonthlySummaryEnhanced(
                 monthlyProgress = uiState.monthlyProgress.values.toList(),
-                showNetHydration = uiState.showNetHydration,
+                showNetHydration = uiState.userSettings?.showNetHydration ?: true,
                 modifier = Modifier.fillMaxWidth()
             )
 

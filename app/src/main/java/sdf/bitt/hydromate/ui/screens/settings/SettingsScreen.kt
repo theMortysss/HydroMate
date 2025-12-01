@@ -15,15 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
-import sdf.bitt.hydromate.ui.components.AboutCard
-import sdf.bitt.hydromate.ui.components.CharacterSelectionDialog
-import sdf.bitt.hydromate.ui.components.CharacterSettingsCard
-import sdf.bitt.hydromate.ui.components.GoalSettingDialog
-import sdf.bitt.hydromate.ui.components.GoalSettingsCard
-import sdf.bitt.hydromate.ui.components.HydrationSettingsCard
-import sdf.bitt.hydromate.ui.components.NotificationSettingsCard
-import sdf.bitt.hydromate.ui.components.SettingsHeader
-import sdf.bitt.hydromate.ui.components.TimePickerDialog
+import sdf.bitt.hydromate.ui.components.*
 
 @Composable
 fun SettingsScreen(
@@ -81,15 +73,10 @@ fun SettingsScreen(
             onTimeSelected = { time ->
                 when (uiState.timePickerType) {
                     TimePickerType.WAKE_UP -> viewModel.handleIntent(
-                        SettingsIntent.UpdateWakeUpTime(
-                            time
-                        )
+                        SettingsIntent.UpdateWakeUpTime(time)
                     )
-
                     TimePickerType.BED_TIME -> viewModel.handleIntent(
-                        SettingsIntent.UpdateBedTime(
-                            time
-                        )
+                        SettingsIntent.UpdateBedTime(time)
                     )
                 }
                 viewModel.handleIntent(SettingsIntent.HideTimePickerDialog)
@@ -99,22 +86,18 @@ fun SettingsScreen(
             }
         )
     }
+
     SnackbarHost(
         modifier = modifier.zIndex(1f),
         hostState = snackbarHostState
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             Text(
                 modifier = Modifier
                     .padding(4.dp)
                     .fillMaxWidth()
                     .padding(vertical = 30.dp)
-                    .graphicsLayer {
-                        shadowElevation = 5f
-                    }
+                    .graphicsLayer { shadowElevation = 5f }
                     .background(color = MaterialTheme.colorScheme.surfaceVariant)
                     .padding(vertical = 10.dp)
                     .align(Alignment.TopCenter),
@@ -128,8 +111,7 @@ fun SettingsScreen(
 
     if (uiState.isLoading) {
         Box(
-            modifier = modifier
-                .fillMaxSize(),
+            modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
@@ -152,7 +134,7 @@ fun SettingsScreen(
             // Goal Settings
             GoalSettingsCard(
                 dailyGoal = uiState.settings.dailyGoal,
-                quickAmounts = uiState.settings.quickAmounts,
+                quickAmounts = uiState.settings.quickAddPresets,
                 onGoalClick = {
                     viewModel.handleIntent(SettingsIntent.ShowGoalDialog)
                 },
@@ -161,6 +143,7 @@ fun SettingsScreen(
                 }
             )
 
+            // Hydration Settings
             HydrationSettingsCard(
                 hydrationThreshold = uiState.settings.hydrationThreshold,
                 showNetHydration = uiState.settings.showNetHydration,
@@ -180,8 +163,8 @@ fun SettingsScreen(
                 }
             )
 
-            // Notification Settings
-            NotificationSettingsCard(
+            // Notification Settings (Enhanced version)
+            NotificationSettingsCardEnhanced(
                 notificationsEnabled = uiState.settings.notificationsEnabled,
                 notificationInterval = uiState.settings.notificationInterval,
                 wakeUpTime = uiState.settings.wakeUpTime,
@@ -207,4 +190,3 @@ fun SettingsScreen(
         }
     }
 }
-

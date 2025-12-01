@@ -24,8 +24,20 @@ val OnSecondaryDark = Color(0xFF000000)
 val OnBackgroundDark = Color(0xFFE6E1E5)
 val OnSurfaceDark = Color(0xFFE6E1E5)
 
-// Accent colors for character states
-val HappyGreen = Color(0xFF4CAF50)
-val ContentBlue = Color(0xFF2196F3)
-val ThirstyOrange = Color(0xFFFF9800)
-val VeryThirstyRed = Color(0xFFE57373)
+// Light theme accent colors for character states
+val VERY_HAPPY = Color(0xFF4CAF50)
+val HAPPY = Color(0xFF8BC34A)
+val CONTENT = Color(0xFF2196F3)
+val SLIGHTLY_THIRSTY = Color(0xFFFF9800)
+val THIRSTY = Color(0xFFE57373)
+
+val VERY_HAPPY_Dark = Color(0xFF255728)
+val HAPPY_Dark = Color(0xFF456521)
+val CONTENT_Dark = Color(0xFF074C82)
+val SLIGHTLY_THIRSTY_Dark = Color(0xFF7F4C00)
+val THIRSTY_Dark = Color(0xFF911A1A)
+
+
+
+
+

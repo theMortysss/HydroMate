@@ -13,13 +13,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import sdf.bitt.hydromate.domain.entities.QuickAddPreset
 
 @Composable
 fun GoalSettingsCard(
     dailyGoal: Int,
-    quickAmounts: List<Int>,
+    quickAmounts: List<QuickAddPreset>,
     onGoalClick: () -> Unit,
-    onQuickAmountsEdit: (List<Int>) -> Unit,
+    onQuickAmountsEdit: (List<QuickAddPreset>) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showQuickAmountsDialog by remember { mutableStateOf(false) }
@@ -91,7 +92,7 @@ fun GoalSettingsCard(
                 itemsIndexed(quickAmounts) { _, amount ->
                     AssistChip(
                         onClick = { },
-                        label = { Text("${amount}ml") },
+                        label = { Text("${amount.amount}ml") },
                         enabled = false
                     )
                 }

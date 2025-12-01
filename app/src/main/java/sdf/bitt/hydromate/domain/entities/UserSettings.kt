@@ -9,10 +9,18 @@ data class UserSettings(
     val notificationInterval: Int = 60, // минут
     val wakeUpTime: LocalTime = LocalTime.of(8, 0),
     val bedTime: LocalTime = LocalTime.of(22, 0),
-    val quickAmounts: List<Int> = listOf(250, 500, 750),
+
+    // UPDATED: Теперь используем QuickAddPreset вместо простых Int
+    val quickAddPresets: List<QuickAddPreset> = QuickAddPreset.getDefaults(),
+
     val hydrationThreshold: Float = 1.0f, // Порог гидратации (0.8 - 1.2)
     val showNetHydration: Boolean = true // Показывать чистую гидратацию или общий объем
-)
+) {
+    // Обратная совместимость: получить только суммы для старого кода
+    @Deprecated("Use quickAddPresets instead")
+    val quickAmounts: List<Int>
+        get() = quickAddPresets.map { it.amount }
+}
 
 enum class CharacterType(val displayName: String, val emoji: String) {
     PENGUIN("Penguin", "🐧"),

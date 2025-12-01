@@ -19,7 +19,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -30,8 +29,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.flow.collectLatest
@@ -50,43 +47,38 @@ fun HomeScreen(
     // Состояния диалогов
     var showDrinkSelector by remember { mutableStateOf(false) }
     var showCreateDrink by remember { mutableStateOf(false) }
-    var showHydrationInfo by remember { mutableStateOf(false) }
+    var showEditPresets by remember { mutableStateOf(false) }
 
     // Handle side effects
-    LaunchedEffect(viewModel) {
+    LaunchedEffect(viewModel.effects) {
         viewModel.effects.collectLatest { effect ->
             when (effect) {
                 HomeEffect.ShowAddWaterAnimation -> {
                     // Trigger animation
                 }
-
                 HomeEffect.ShowGoalReachedCelebration -> {
                     snackbarHostState.showSnackbar(
                         message = "🎉 Daily goal reached! Great job!",
                         duration = SnackbarDuration.Short
                     )
                 }
-
                 is HomeEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
                         message = effect.message,
                         duration = SnackbarDuration.Short
                     )
                 }
-
                 is HomeEffect.ShowSuccess -> {
                     snackbarHostState.showSnackbar(
                         message = effect.message,
                         duration = SnackbarDuration.Short
                     )
                 }
-
                 HomeEffect.HapticFeedback -> {
                     // Trigger haptic feedback
                 }
-
                 is HomeEffect.ShowHydrationInfo -> {
-                    showHydrationInfo = true
+                    // Show hydration info
                 }
             }
         }
@@ -159,8 +151,8 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // NEW: Hydration Progress Card с учетом настройки
-            uiState.todayProgress?.let { progress ->
+            // Hydration Progress Card
+            uiState.todayProgress?.let {
                 uiState.hydrationProgress?.let { hydrationProgress ->
                     uiState.totalHydration?.let { totalHydration ->
                         val showNetHydration = uiState.userSettings?.showNetHydration ?: true
@@ -172,7 +164,6 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
 
-                        // Info badge about display mode
                         if (showNetHydration) {
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
@@ -246,7 +237,6 @@ fun HomeScreen(
                                 fontWeight = FontWeight.Bold
                             )
 
-                            // Show hydration info
                             val drink = uiState.selectedDrink
                             if (drink != null) {
                                 Row(
@@ -279,17 +269,19 @@ fun HomeScreen(
                 }
             }
 
-            // Quick Add Buttons
-            QuickAddButtons(
-                amounts = uiState.quickAmounts,
-                onAmountClick = { amount ->
-                    uiState.selectedDrink?.let { drink ->
-                        viewModel.handleIntent(HomeIntent.AddWater(amount, drink))
-                    }
-                },
-                isLoading = uiState.isAddingWater,
-                modifier = Modifier.fillMaxWidth()
-            )
+            // Quick Add Buttons (Enhanced with presets)
+            uiState.userSettings?.let { settings ->
+                QuickAddButtonsEnhanced(
+                    presets = settings.quickAddPresets,
+                    drinks = uiState.drinks,
+                    onPresetClick = { preset, drink ->
+                        viewModel.handleIntent(HomeIntent.AddWater(preset.amount, drink))
+                    },
+                    onEditPresets = { showEditPresets = true },
+                    isLoading = uiState.isAddingWater,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             // Today's Entries
             uiState.todayProgress?.let { progress ->
@@ -329,5 +321,18 @@ fun HomeScreen(
             },
             onDismiss = { showCreateDrink = false }
         )
+    }
+
+    if (showEditPresets) {
+        uiState.userSettings?.let { settings ->
+            EditQuickPresetsDialog(
+                currentPresets = settings.quickAddPresets,
+                drinks = uiState.drinks,
+                onPresetsChanged = { newPresets ->
+                    viewModel.handleIntent(HomeIntent.UpdateQuickPresets(newPresets))
+                },
+                onDismiss = { showEditPresets = false }
+            )
+        }
     }
 }

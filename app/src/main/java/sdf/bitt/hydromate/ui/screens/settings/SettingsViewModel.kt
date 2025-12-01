@@ -6,9 +6,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import sdf.bitt.hydromate.domain.entities.CharacterType
+import sdf.bitt.hydromate.domain.entities.QuickAddPreset
 import sdf.bitt.hydromate.domain.usecases.GetUserSettingsUseCase
 import sdf.bitt.hydromate.domain.usecases.UpdateDailyGoalUseCase
 import sdf.bitt.hydromate.domain.usecases.UpdateUserSettingsUseCase
+import sdf.bitt.hydromate.ui.notification.NotificationScheduler
 import java.time.LocalTime
 import javax.inject.Inject
 
@@ -16,7 +18,8 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val getUserSettingsUseCase: GetUserSettingsUseCase,
     private val updateUserSettingsUseCase: UpdateUserSettingsUseCase,
-    private val updateDailyGoalUseCase: UpdateDailyGoalUseCase
+    private val updateDailyGoalUseCase: UpdateDailyGoalUseCase,
+    private val notificationScheduler: NotificationScheduler
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -47,10 +50,10 @@ class SettingsViewModel @Inject constructor(
 
             SettingsIntent.RefreshSettings -> observeSettings()
             SettingsIntent.ClearError -> _uiState.update { it.copy(error = null) }
+
             // NEW: Обработка настроек гидратации
             is SettingsIntent.UpdateHydrationThreshold -> updateHydrationThreshold(intent.threshold)
             is SettingsIntent.UpdateShowNetHydration -> updateShowNetHydration(intent.show)
-
         }
     }
 
@@ -105,6 +108,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val newSettings = _uiState.value.settings.copy(notificationsEnabled = enabled)
             updateUserSettingsUseCase(newSettings)
+                .onSuccess {
+                    // Обновляем расписание уведомлений
+                    notificationScheduler.scheduleNotifications(newSettings)
+                }
                 .onFailure { exception ->
                     _uiState.update {
                         it.copy(error = exception.message ?: "Failed to update notifications")
@@ -117,6 +124,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val newSettings = _uiState.value.settings.copy(notificationInterval = intervalMinutes)
             updateUserSettingsUseCase(newSettings)
+                .onSuccess {
+                    // Обновляем расписание уведомлений
+                    notificationScheduler.scheduleNotifications(newSettings)
+                }
                 .onFailure { exception ->
                     _uiState.update {
                         it.copy(error = exception.message ?: "Failed to update notification interval")
@@ -129,6 +140,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val newSettings = _uiState.value.settings.copy(wakeUpTime = time)
             updateUserSettingsUseCase(newSettings)
+                .onSuccess {
+                    // Обновляем расписание уведомлений
+                    notificationScheduler.scheduleNotifications(newSettings)
+                }
                 .onFailure { exception ->
                     _uiState.update {
                         it.copy(error = exception.message ?: "Failed to update wake up time")
@@ -141,6 +156,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val newSettings = _uiState.value.settings.copy(bedTime = time)
             updateUserSettingsUseCase(newSettings)
+                .onSuccess {
+                    // Обновляем расписание уведомлений
+                    notificationScheduler.scheduleNotifications(newSettings)
+                }
                 .onFailure { exception ->
                     _uiState.update {
                         it.copy(error = exception.message ?: "Failed to update bed time")
@@ -149,9 +168,9 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun updateQuickAmounts(amounts: List<Int>) {
+    private fun updateQuickAmounts(amounts: List<QuickAddPreset>) {
         viewModelScope.launch {
-            val newSettings = _uiState.value.settings.copy(quickAmounts = amounts)
+            val newSettings = _uiState.value.settings.copy(quickAddPresets = amounts)
             updateUserSettingsUseCase(newSettings)
                 .onFailure { exception ->
                     _uiState.update {

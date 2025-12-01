@@ -5,6 +5,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import sdf.bitt.hydromate.data.local.entities.UserSettingsEntity
 import sdf.bitt.hydromate.domain.entities.CharacterType
+import sdf.bitt.hydromate.domain.entities.QuickAddPreset
 import sdf.bitt.hydromate.domain.entities.UserSettings
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -12,7 +13,10 @@ import java.time.format.DateTimeFormatter
 object UserSettingsMapper {
 
     private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-    private val json = Json { ignoreUnknownKeys = true }
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
 
     fun toDomain(entity: UserSettingsEntity?): UserSettings {
         return entity?.let {
@@ -23,12 +27,7 @@ object UserSettingsMapper {
                 notificationInterval = it.notificationInterval,
                 wakeUpTime = LocalTime.parse(it.wakeUpTime, timeFormatter),
                 bedTime = LocalTime.parse(it.bedTime, timeFormatter),
-                quickAmounts = try {
-                    json.decodeFromString<List<Int>>(it.quickAmounts)
-                } catch (e: Exception) {
-                    listOf(250, 500, 750)
-                },
-                // NEW: Маппинг новых полей
+                quickAddPresets = parseQuickAddPresets(it.quickAddPresets),
                 hydrationThreshold = it.hydrationThreshold,
                 showNetHydration = it.showNetHydration
             )
@@ -44,10 +43,36 @@ object UserSettingsMapper {
             notificationInterval = domain.notificationInterval,
             wakeUpTime = domain.wakeUpTime.format(timeFormatter),
             bedTime = domain.bedTime.format(timeFormatter),
-            quickAmounts = json.encodeToString(domain.quickAmounts),
-            // NEW: Маппинг новых полей
+            quickAddPresets = json.encodeToString(domain.quickAddPresets),
+            quickAmounts = json.encodeToString(domain.quickAddPresets.map { it.amount }), // Для обратной совместимости
             hydrationThreshold = domain.hydrationThreshold,
             showNetHydration = domain.showNetHydration
         )
+    }
+
+    private fun parseQuickAddPresets(jsonString: String): List<QuickAddPreset> {
+        return try {
+            if (jsonString.isBlank() || jsonString == "[]") {
+                QuickAddPreset.getDefaults()
+            } else {
+                json.decodeFromString<List<QuickAddPreset>>(jsonString)
+            }
+        } catch (e: Exception) {
+            // Fallback: пытаемся парсить как старый формат (List<Int>)
+            try {
+                val amounts = json.decodeFromString<List<Int>>(jsonString)
+                amounts.mapIndexed { index, amount ->
+                    QuickAddPreset(
+                        amount = amount,
+                        drinkId = 1, // Вода по умолчанию
+                        drinkName = "Water",
+                        drinkIcon = "💧",
+                        order = index
+                    )
+                }
+            } catch (e2: Exception) {
+                QuickAddPreset.getDefaults()
+            }
+        }
     }
 }

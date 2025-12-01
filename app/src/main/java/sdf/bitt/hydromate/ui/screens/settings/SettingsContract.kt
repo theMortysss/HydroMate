@@ -1,6 +1,7 @@
 package sdf.bitt.hydromate.ui.screens.settings
 
 import sdf.bitt.hydromate.domain.entities.CharacterType
+import sdf.bitt.hydromate.domain.entities.QuickAddPreset
 import sdf.bitt.hydromate.domain.entities.UserSettings
 import java.time.LocalTime
 
@@ -21,7 +22,7 @@ sealed class SettingsIntent {
     data class UpdateNotificationInterval(val intervalMinutes: Int) : SettingsIntent()
     data class UpdateWakeUpTime(val time: LocalTime) : SettingsIntent()
     data class UpdateBedTime(val time: LocalTime) : SettingsIntent()
-    data class UpdateQuickAmounts(val amounts: List<Int>) : SettingsIntent()
+    data class UpdateQuickAmounts(val amounts: List<QuickAddPreset>) : SettingsIntent()
 
     // NEW: Настройки гидратации
     data class UpdateHydrationThreshold(val threshold: Float) : SettingsIntent()

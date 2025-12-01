@@ -3,13 +3,18 @@ package sdf.bitt.hydromate.ui.screens.history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import sdf.bitt.hydromate.domain.entities.DailyProgress
 import sdf.bitt.hydromate.domain.repositories.DrinkRepository
 import sdf.bitt.hydromate.domain.usecases.CalculateHydrationUseCase
+import sdf.bitt.hydromate.domain.usecases.CheckGoalReachedUseCase
+import sdf.bitt.hydromate.domain.usecases.DeleteWaterEntryUseCase
 import sdf.bitt.hydromate.domain.usecases.GetProgressForDateUseCase
 import sdf.bitt.hydromate.domain.usecases.GetUserSettingsUseCase
+import sdf.bitt.hydromate.ui.notification.NotificationScheduler
+import sdf.bitt.hydromate.ui.screens.home.HomeEffect
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
@@ -19,11 +24,17 @@ class HistoryViewModel @Inject constructor(
     private val getProgressForDateUseCase: GetProgressForDateUseCase,
     private val getUserSettingsUseCase: GetUserSettingsUseCase,
     private val drinkRepository: DrinkRepository,
-    private val calculateHydrationUseCase: CalculateHydrationUseCase
+    private val calculateHydrationUseCase: CalculateHydrationUseCase,
+    private val deleteWaterEntryUseCase: DeleteWaterEntryUseCase,
+    private val checkGoalReachedUseCase: CheckGoalReachedUseCase,
+    private val notificationScheduler: NotificationScheduler,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
+
+    private val _effects = Channel<HomeEffect>(Channel.BUFFERED)
+    val effects: Flow<HomeEffect> = _effects.receiveAsFlow()
 
     init {
         observeSettings()
@@ -39,6 +50,7 @@ class HistoryViewModel @Inject constructor(
             HistoryIntent.ClearSelectedDate -> clearSelectedDate()
             HistoryIntent.RefreshData -> loadMonthlyData()
             HistoryIntent.ClearError -> clearError()
+            is HistoryIntent.DeleteEntry -> deleteEntry(intent.entryId)
         }
     }
 
@@ -48,7 +60,7 @@ class HistoryViewModel @Inject constructor(
                 .catch { }
                 .collect { settings ->
                     _uiState.update {
-                        it.copy(showNetHydration = settings.showNetHydration)
+                        it.copy(userSettings = settings)
                     }
                 }
         }
@@ -161,6 +173,39 @@ class HistoryViewModel @Inject constructor(
     private fun navigateMonth(monthOffset: Int) {
         val newMonth = _uiState.value.selectedMonth.plusMonths(monthOffset.toLong())
         selectMonth(newMonth)
+    }
+
+    private fun deleteEntry(entryId: Long) {
+        viewModelScope.launch {
+            deleteWaterEntryUseCase(entryId)
+                .onSuccess {
+                    // После удаления проверяем, возможно цель больше не достигнута
+                    checkAndHandleGoalAchievement()
+                }
+                .onFailure { exception ->
+                    _effects.trySend(
+                        HomeEffect.ShowError(
+                            exception.message ?: "Failed to delete entry"
+                        )
+                    )
+                }
+        }
+    }
+
+    private suspend fun checkAndHandleGoalAchievement() {
+        val settings = _uiState.value.userSettings ?: return
+        if (!settings.notificationsEnabled) return
+
+        checkGoalReachedUseCase()
+            .onSuccess { isGoalReached ->
+                if (isGoalReached) {
+                    // Цель достигнута - планируем напоминания на завтра
+                    notificationScheduler.scheduleNextDayReminder(settings)
+                } else {
+                    // Цель не достигнута - продолжаем обычное расписание
+                    notificationScheduler.scheduleNotifications(settings)
+                }
+            }
     }
 
     private fun clearSelectedDate() {
