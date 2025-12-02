@@ -17,10 +17,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import sdf.bitt.hydromate.ui.components.AddWaterForDateDialog
 import sdf.bitt.hydromate.ui.components.DateDetailsModal
 import sdf.bitt.hydromate.ui.components.MonthSelector
 import sdf.bitt.hydromate.ui.components.MonthlySummaryEnhanced
 import sdf.bitt.hydromate.ui.components.WaterCalendarEnhanced
+import java.time.LocalDate
 
 @Composable
 fun HistoryScreen(
@@ -52,6 +54,10 @@ fun HistoryScreen(
             },
             onDeleteEntry = { entryId ->
                 viewModel.handleIntent(HistoryIntent.DeleteEntry(entryId))
+            },
+            onAddMore = { date ->
+                viewModel.handleIntent(HistoryIntent.ShowAddWaterDialog(date))
+                viewModel.handleIntent(HistoryIntent.ClearSelectedDate)
             }
         )
     }
@@ -145,6 +151,9 @@ fun HistoryScreen(
                 onDateSelected = { date ->
                     viewModel.handleIntent(HistoryIntent.SelectDate(date))
                 },
+                onAddWaterClick = { date -> // Для пустых дат открываем диалог добавления
+                    viewModel.handleIntent(HistoryIntent.ShowAddWaterDialog(date))
+                },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -156,6 +165,25 @@ fun HistoryScreen(
             )
 
             Spacer(modifier = Modifier.height(96.dp))
+        }
+        if (uiState.showAddWaterDialog && uiState.dateForNewEntry != null) {
+            AddWaterForDateDialog(
+                date = uiState.dateForNewEntry!!,
+                drinks = uiState.drinks,
+                onAddEntry = { amount, drink, time ->
+                    viewModel.handleIntent(
+                        HistoryIntent.AddWaterForDate(
+                            date = uiState.dateForNewEntry!!,
+                            amount = amount,
+                            drink = drink,
+                            time = time
+                        )
+                    )
+                },
+                onDismiss = {
+                    viewModel.handleIntent(HistoryIntent.HideAddWaterDialog)
+                }
+            )
         }
     }
 }

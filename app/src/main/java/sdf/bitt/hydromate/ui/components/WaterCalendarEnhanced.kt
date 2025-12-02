@@ -1,5 +1,6 @@
 package sdf.bitt.hydromate.ui.components
 
+import android.graphics.Paint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -30,6 +32,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import sdf.bitt.hydromate.domain.entities.DailyProgress
 import sdf.bitt.hydromate.domain.entities.WaterEntry
+import sdf.bitt.hydromate.ui.screens.history.HistoryIntent
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -40,6 +43,7 @@ fun WaterCalendarEnhanced(
     monthlyProgress: Map<LocalDate, DailyProgress>,
     showNetHydration: Boolean,
     onDateSelected: (LocalDate) -> Unit,
+    onAddWaterClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -121,7 +125,8 @@ fun WaterCalendarEnhanced(
                             isCurrentMonth = dateToAdd.month == month.month,
                             progress = monthlyProgress[dateToAdd],
                             showNetHydration = showNetHydration,
-                            onDateSelected = onDateSelected
+                            onDateSelected = onDateSelected,
+                            onAddWaterClick = onAddWaterClick
                         )
                     }
                     currentDate = currentDate.plusDays(1)
@@ -137,14 +142,16 @@ fun WaterCalendarEnhanced(
 }
 
 @Composable
-private fun CalendarDayEnhanced(
+fun CalendarDayEnhanced(
     date: LocalDate,
     isCurrentMonth: Boolean,
     progress: DailyProgress?,
     showNetHydration: Boolean,
-    onDateSelected: (LocalDate) -> Unit
+    onDateSelected: (LocalDate) -> Unit,
+    onAddWaterClick: (LocalDate) -> Unit
 ) {
     val isToday = date == LocalDate.now()
+    val isPastOrToday = !date.isAfter(LocalDate.now())
     val hasData = progress != null && progress.totalAmount > 0
 
     val currentAmount = remember(progress, showNetHydration) {
@@ -173,34 +180,51 @@ private fun CalendarDayEnhanced(
 
     Box(
         modifier = Modifier
-            .size(32.dp)
+            .size(40.dp)
             .clip(CircleShape)
             .background(backgroundColor)
-            .clickable(enabled = isCurrentMonth && hasData) {
-                onDateSelected(date)
+            .clickable(enabled = isCurrentMonth && (hasData || isPastOrToday)) {
+                if (hasData) {
+                    onDateSelected(date)
+                } else if (isPastOrToday) {
+                    onAddWaterClick(date)
+                }
             },
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = date.dayOfMonth.toString(),
-            fontSize = 12.sp,
-            color = textColor,
-            fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
-        )
-
-        // Small indicator for partial progress
-        if (hasData && !isGoalReached) {
-            Box(
-                modifier = Modifier
-                    .size(4.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .align(Alignment.BottomCenter)
-                    .offset(y = (-2).dp)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = date.dayOfMonth.toString(),
+                fontSize = 12.sp,
+                color = textColor,
+                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
             )
+
+            // Индикатор для пустых дат текущего месяца
+            if (isCurrentMonth && !hasData && isPastOrToday && !isToday) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add water",
+                    modifier = Modifier.size(12.dp),
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                )
+            }
+
+            // Индикатор частичного прогресса
+            if (hasData && !isGoalReached) {
+                Box(
+                    modifier = Modifier
+                        .size(4.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+            }
         }
     }
 }
+
 
 @Composable
 fun DateDetailsModal(
@@ -208,8 +232,11 @@ fun DateDetailsModal(
     progress: DailyProgress,
     showNetHydration: Boolean,
     onDismiss: () -> Unit,
-    onDeleteEntry: (Long) -> Unit = {}
+    onDeleteEntry: (Long) -> Unit = {},
+    onAddMore: (LocalDate) -> Unit = {}
 ) {
+    val isPastOrToday = !date.isAfter(LocalDate.now())
+
     val currentAmount = remember(progress, showNetHydration) {
         if (showNetHydration) progress.netHydration else progress.totalAmount
     }
@@ -501,6 +528,24 @@ fun DateDetailsModal(
                                     )
                                 )
                             }
+                        }
+                    }
+                }
+                if (isPastOrToday) {
+                    FloatingActionButton(
+                        onClick = { onAddMore(date) },
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                            .padding(16.dp),
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = "Add more")
+                            Text("Add More")
                         }
                     }
                 }

@@ -7,7 +7,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import sdf.bitt.hydromate.domain.entities.DailyProgress
+import sdf.bitt.hydromate.domain.entities.Drink
 import sdf.bitt.hydromate.domain.repositories.DrinkRepository
+import sdf.bitt.hydromate.domain.usecases.AddWaterEntryForDateUseCase
 import sdf.bitt.hydromate.domain.usecases.CalculateHydrationUseCase
 import sdf.bitt.hydromate.domain.usecases.CheckGoalReachedUseCase
 import sdf.bitt.hydromate.domain.usecases.DeleteWaterEntryUseCase
@@ -16,7 +18,9 @@ import sdf.bitt.hydromate.domain.usecases.GetUserSettingsUseCase
 import sdf.bitt.hydromate.ui.notification.NotificationScheduler
 import sdf.bitt.hydromate.ui.screens.home.HomeEffect
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,17 +32,19 @@ class HistoryViewModel @Inject constructor(
     private val deleteWaterEntryUseCase: DeleteWaterEntryUseCase,
     private val checkGoalReachedUseCase: CheckGoalReachedUseCase,
     private val notificationScheduler: NotificationScheduler,
+    private val addWaterEntryForDateUseCase: AddWaterEntryForDateUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
 
-    private val _effects = Channel<HomeEffect>(Channel.BUFFERED)
-    val effects: Flow<HomeEffect> = _effects.receiveAsFlow()
+    private val _effects = Channel<HistoryEffect>(Channel.BUFFERED)
+    val effects: Flow<HistoryEffect> = _effects.receiveAsFlow()
 
     init {
         observeSettings()
         loadMonthlyData()
+        observeDrinks()
     }
 
     fun handleIntent(intent: HistoryIntent) {
@@ -51,6 +57,21 @@ class HistoryViewModel @Inject constructor(
             HistoryIntent.RefreshData -> loadMonthlyData()
             HistoryIntent.ClearError -> clearError()
             is HistoryIntent.DeleteEntry -> deleteEntry(intent.entryId)
+            is HistoryIntent.ShowAddWaterDialog -> showAddWaterDialog(intent.date)
+            HistoryIntent.HideAddWaterDialog -> hideAddWaterDialog()
+            is HistoryIntent.AddWaterForDate -> addWaterForDate(
+                intent.date, intent.amount, intent.drink, intent.time
+            )
+        }
+    }
+
+    private fun observeDrinks() {
+        viewModelScope.launch {
+            drinkRepository.getAllActiveDrinks()
+                .catch { }
+                .collect { drinks ->
+                    _uiState.update { it.copy(drinks = drinks) }
+                }
         }
     }
 
@@ -147,6 +168,24 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
+    private fun showAddWaterDialog(date: LocalDate) {
+        _uiState.update {
+            it.copy(
+                showAddWaterDialog = true,
+                dateForNewEntry = date
+            )
+        }
+    }
+
+    private fun hideAddWaterDialog() {
+        _uiState.update {
+            it.copy(
+                showAddWaterDialog = false,
+                dateForNewEntry = null
+            )
+        }
+    }
+
     private fun selectMonth(month: YearMonth) {
         _uiState.update {
             it.copy(
@@ -175,6 +214,36 @@ class HistoryViewModel @Inject constructor(
         selectMonth(newMonth)
     }
 
+    private fun addWaterForDate(
+        date: LocalDate,
+        amount: Int,
+        drink: Drink,
+        time: LocalDateTime
+    ) {
+        viewModelScope.launch {
+            // Создаем запись с указанной датой
+            addWaterEntryForDateUseCase(amount, drink, time)
+                .onSuccess {
+                    _effects.trySend(
+                        HistoryEffect.ShowSuccess(
+                            "Added ${amount}ml of ${drink.name} for ${date.format(
+                                DateTimeFormatter.ofPattern("MMM dd")
+                            )}"
+                        )
+                    )
+                    hideAddWaterDialog()
+                    loadMonthlyData() // Перезагружаем данные
+                }
+                .onFailure { exception ->
+                    _effects.trySend(
+                        HistoryEffect.ShowError(
+                            exception.message ?: "Failed to add water entry"
+                        )
+                    )
+                }
+        }
+    }
+
     private fun deleteEntry(entryId: Long) {
         viewModelScope.launch {
             deleteWaterEntryUseCase(entryId)
@@ -184,7 +253,7 @@ class HistoryViewModel @Inject constructor(
                 }
                 .onFailure { exception ->
                     _effects.trySend(
-                        HomeEffect.ShowError(
+                        HistoryEffect.ShowError(
                             exception.message ?: "Failed to delete entry"
                         )
                     )

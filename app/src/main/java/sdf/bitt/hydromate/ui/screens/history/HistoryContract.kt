@@ -4,9 +4,11 @@ import sdf.bitt.hydromate.domain.entities.DailyProgress
 import sdf.bitt.hydromate.domain.entities.Drink
 import sdf.bitt.hydromate.domain.entities.UserSettings
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.YearMonth
 
 data class HistoryUiState(
+    val drinks: List<Drink> = emptyList(),
     val userSettings: UserSettings? = null,
     val selectedMonth: YearMonth = YearMonth.now(),
     val monthlyProgress: Map<LocalDate, DailyProgress> = emptyMap(),
@@ -14,17 +16,27 @@ data class HistoryUiState(
     val selectedDateProgress: DailyProgress? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
+    val showAddWaterDialog: Boolean = false,
+    val dateForNewEntry: LocalDate? = null,
 )
 
 sealed class HistoryIntent {
     data class SelectMonth(val month: YearMonth) : HistoryIntent()
     data class SelectDate(val date: LocalDate) : HistoryIntent()
-    data class DeleteEntry(val entryId: Long) : HistoryIntent() // NEW
+    data class DeleteEntry(val entryId: Long) : HistoryIntent()
     object PreviousMonth : HistoryIntent()
     object NextMonth : HistoryIntent()
     object ClearSelectedDate : HistoryIntent()
     object RefreshData : HistoryIntent()
     object ClearError : HistoryIntent()
+    data class ShowAddWaterDialog(val date: LocalDate) : HistoryIntent()
+    object HideAddWaterDialog : HistoryIntent()
+    data class AddWaterForDate(
+        val date: LocalDate,
+        val amount: Int,
+        val drink: Drink,
+        val time: LocalDateTime
+    ) : HistoryIntent()
 }
 
 sealed class HistoryEffect {

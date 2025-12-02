@@ -27,11 +27,15 @@ class WaterRepositoryImpl @Inject constructor(
     private val userSettingsDao: UserSettingsDao
 ) : WaterRepository {
 
-    override suspend fun addWaterEntry(amount: Int, drink: Drink): Result<Long> {
+    override suspend fun addWaterEntry(
+        amount: Int,
+        drink: Drink,
+        timestamp: LocalDateTime // ДОБАВИЛИ параметр
+    ): Result<Long> {
         return try {
             val entry = WaterEntry(
                 amount = amount,
-                timestamp = LocalDateTime.now(),
+                timestamp = timestamp, // Используем переданную дату
                 drinkId = drink.id,
                 type = drink.category
             )
@@ -41,6 +45,7 @@ class WaterRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
 
     override suspend fun deleteWaterEntry(entryId: Long): Result<Unit> {
         return try {

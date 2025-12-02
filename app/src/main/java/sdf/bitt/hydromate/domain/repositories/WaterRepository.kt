@@ -7,12 +7,14 @@ import sdf.bitt.hydromate.domain.entities.DrinkType
 import sdf.bitt.hydromate.domain.entities.WaterEntry
 import sdf.bitt.hydromate.domain.entities.WeeklyStatistics
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 interface WaterRepository {
 
     suspend fun addWaterEntry(
         amount: Int,
-        drink: Drink = Drink.WATER
+        drink: Drink = Drink.WATER,
+        timestamp: LocalDateTime = LocalDateTime.now() // ДОБАВИЛИ
     ): Result<Long>
 
     suspend fun deleteWaterEntry(entryId: Long): Result<Unit>
