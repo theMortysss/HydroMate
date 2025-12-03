@@ -34,6 +34,8 @@ import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.flow.collectLatest
 import sdf.bitt.hydromate.domain.entities.Drink
 import sdf.bitt.hydromate.ui.components.*
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Composable
 fun HomeScreen(
@@ -45,7 +47,7 @@ fun HomeScreen(
     val hazeState = remember { HazeState() }
 
     // Состояния диалогов
-    var showDrinkSelector by remember { mutableStateOf(false) }
+    var showAddWaterDialog by remember { mutableStateOf(false) }
     var showCreateDrink by remember { mutableStateOf(false) }
     var showEditPresets by remember { mutableStateOf(false) }
 
@@ -202,7 +204,7 @@ fun HomeScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showDrinkSelector = true },
+                    .clickable { showAddWaterDialog = true },
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer
                 ),
@@ -299,17 +301,14 @@ fun HomeScreen(
     }
 
     // Dialogs
-    if (showDrinkSelector) {
-        DrinkSelectorDialog(
+    if (showAddWaterDialog) {
+        AddWaterForDateDialog(
+            date = LocalDate.now(),
             drinks = uiState.drinks,
-            selectedDrink = uiState.selectedDrink,
-            onDrinkSelected = { drink ->
-                viewModel.handleIntent(HomeIntent.SelectDrink(drink))
+            onAddEntry = { amount, drink, _ ->
+                viewModel.handleIntent(HomeIntent.AddWater(amount, drink))
             },
-            onCreateCustomDrink = {
-                showCreateDrink = true
-            },
-            onDismiss = { showDrinkSelector = false }
+            onDismiss = { showAddWaterDialog = false }
         )
     }
 

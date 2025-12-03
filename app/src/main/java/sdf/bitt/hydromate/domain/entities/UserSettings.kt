@@ -13,7 +13,6 @@ data class UserSettings(
     // UPDATED: Теперь используем QuickAddPreset вместо простых Int
     val quickAddPresets: List<QuickAddPreset> = QuickAddPreset.getDefaults(),
 
-    val hydrationThreshold: Float = 1.0f, // Порог гидратации (0.8 - 1.2)
     val showNetHydration: Boolean = true // Показывать чистую гидратацию или общий объем
 ) {
     // Обратная совместимость: получить только суммы для старого кода

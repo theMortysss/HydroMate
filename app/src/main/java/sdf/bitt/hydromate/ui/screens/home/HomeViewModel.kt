@@ -109,7 +109,6 @@ class HomeViewModel @Inject constructor(
                 val hydrationProgress = calculateHydrationUseCase.calculateProgress(
                     netHydration = currentHydration,
                     dailyGoal = settings.dailyGoal,
-                    hydrationThreshold = settings.hydrationThreshold
                 )
 
                 val enhancedProgress = progress.copy(

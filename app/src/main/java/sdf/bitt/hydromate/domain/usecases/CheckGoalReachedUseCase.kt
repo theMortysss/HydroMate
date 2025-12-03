@@ -42,7 +42,7 @@ class CheckGoalReachedUseCase @Inject constructor(
             }
 
             // Учитываем порог гидратации
-            val adjustedGoal = (progress.goalAmount * settings.hydrationThreshold).toInt()
+            val adjustedGoal = progress.goalAmount
 
             val isGoalReached = currentAmount >= adjustedGoal
 
@@ -75,7 +75,7 @@ class CheckGoalReachedUseCase @Inject constructor(
                 progress.totalAmount
             }
 
-            val adjustedGoal = (progress.goalAmount * settings.hydrationThreshold).toInt()
+            val adjustedGoal = progress.goalAmount
             val percentage = ((currentAmount.toFloat() / adjustedGoal) * 100).toInt()
             val remaining = (adjustedGoal - currentAmount).coerceAtLeast(0)
 

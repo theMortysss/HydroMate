@@ -43,12 +43,13 @@ fun AddWaterForDateDialog(
     onAddEntry: (amount: Int, drink: Drink, time: LocalDateTime) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val now = LocalDateTime.now()
     var amount by remember { mutableStateOf("") }
     var selectedDrink by remember {
         mutableStateOf(drinks.firstOrNull { it.id == 1L } ?: Drink.WATER)
     }
-    var selectedHour by remember { mutableStateOf(12) }
-    var selectedMinute by remember { mutableStateOf(0) }
+    var selectedHour by remember { mutableStateOf(now.hour) }
+    var selectedMinute by remember { mutableStateOf(now.minute) }
     var showDrinkSelector by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -378,13 +379,14 @@ fun AddWaterForDateDialog(
     // ═══════════════════════════════════════════════════════════════════════════════
 
     if (showDrinkSelector) {
-        CompactDrinkSelectorDialog(
+        DrinkSelectorDialog(
             drinks = drinks,
             selectedDrink = selectedDrink,
             onDrinkSelected = {
                 selectedDrink = it
                 showDrinkSelector = false
             },
+            onCreateCustomDrink = {},
             onDismiss = { showDrinkSelector = false }
         )
     }
@@ -401,84 +403,6 @@ fun AddWaterForDateDialog(
             onDismiss = { showTimePicker = false }
         )
     }
-}
-@Composable
-private fun CompactDrinkSelectorDialog(
-    drinks: List<Drink>,
-    selectedDrink: Drink,
-    onDrinkSelected: (Drink) -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Select Drink",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            LazyColumn(
-                modifier = Modifier.heightIn(max = 400.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(drinks) { drink ->
-                    val isSelected = drink.id == selectedDrink.id
-
-                    Card(
-                        onClick = { onDrinkSelected(drink) },
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected) {
-                                MaterialTheme.colorScheme.primaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.surface
-                            }
-                        ),
-                        border = if (isSelected) {
-                            BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-                        } else null
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(text = drink.icon, fontSize = 28.sp)
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = drink.name,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                Text(
-                                    text = "${(drink.hydrationMultiplier * 100).toInt()}% hydration",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                )
-                            }
-
-                            if (isSelected) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = "Selected",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close")
-            }
-        }
-    )
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

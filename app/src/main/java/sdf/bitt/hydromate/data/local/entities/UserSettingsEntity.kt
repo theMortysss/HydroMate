@@ -35,9 +35,6 @@ data class UserSettingsEntity(
     @ColumnInfo(name = "quick_amounts")
     val quickAmounts: String = "[]", // Deprecated
 
-    @ColumnInfo(name = "hydration_threshold", defaultValue = "1.0")
-    val hydrationThreshold: Float = 1.0f,
-
     @ColumnInfo(name = "show_net_hydration", defaultValue = "1")
     val showNetHydration: Boolean = true
 )

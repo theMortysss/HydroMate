@@ -83,6 +83,8 @@ class HistoryViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(userSettings = settings)
                     }
+                    // При изменении настроек перезагружаем данные
+                    loadMonthlyData()
                 }
         }
     }
@@ -101,7 +103,7 @@ class HistoryViewModel @Inject constructor(
                 val drinks = drinkRepository.getAllActiveDrinks().first()
                 val drinksMap = drinks.associateBy { it.id }
 
-                // Collect all flows for the month
+                // Собираем flows для всех дней месяца и подписываемся на изменения
                 val flows = mutableListOf<Flow<Pair<LocalDate, DailyProgress>>>()
 
                 var date = startDate
@@ -141,10 +143,10 @@ class HistoryViewModel @Inject constructor(
                     date = date.plusDays(1)
                 }
 
-                // Combine all flows
+                // FIXED: Используем combine для реактивного обновления
                 combine(flows) { progressArray ->
                     progressArray.toList()
-                }.first().let { progressList ->
+                }.collect { progressList ->
                     val monthlyProgress = progressList
                         .filter { (_, progress) -> progress.totalAmount > 0 }
                         .toMap()
@@ -154,6 +156,14 @@ class HistoryViewModel @Inject constructor(
                             monthlyProgress = monthlyProgress,
                             isLoading = false
                         )
+                    }
+
+                    // Обновляем selectedDateProgress если дата выбрана
+                    val selectedDate = _uiState.value.selectedDate
+                    if (selectedDate != null) {
+                        _uiState.update {
+                            it.copy(selectedDateProgress = monthlyProgress[selectedDate])
+                        }
                     }
                 }
 

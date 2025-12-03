@@ -28,7 +28,6 @@ object UserSettingsMapper {
                 wakeUpTime = LocalTime.parse(it.wakeUpTime, timeFormatter),
                 bedTime = LocalTime.parse(it.bedTime, timeFormatter),
                 quickAddPresets = parseQuickAddPresets(it.quickAddPresets),
-                hydrationThreshold = it.hydrationThreshold,
                 showNetHydration = it.showNetHydration
             )
         } ?: UserSettings() // Default settings if entity is null
@@ -45,7 +44,6 @@ object UserSettingsMapper {
             bedTime = domain.bedTime.format(timeFormatter),
             quickAddPresets = json.encodeToString(domain.quickAddPresets),
             quickAmounts = json.encodeToString(domain.quickAddPresets.map { it.amount }), // Для обратной совместимости
-            hydrationThreshold = domain.hydrationThreshold,
             showNetHydration = domain.showNetHydration
         )
     }

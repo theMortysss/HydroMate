@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import sdf.bitt.hydromate.domain.entities.CharacterType
 import sdf.bitt.hydromate.domain.entities.QuickAddPreset
+import sdf.bitt.hydromate.domain.repositories.DrinkRepository
 import sdf.bitt.hydromate.domain.usecases.GetUserSettingsUseCase
 import sdf.bitt.hydromate.domain.usecases.UpdateDailyGoalUseCase
 import sdf.bitt.hydromate.domain.usecases.UpdateUserSettingsUseCase
@@ -19,7 +20,8 @@ class SettingsViewModel @Inject constructor(
     private val getUserSettingsUseCase: GetUserSettingsUseCase,
     private val updateUserSettingsUseCase: UpdateUserSettingsUseCase,
     private val updateDailyGoalUseCase: UpdateDailyGoalUseCase,
-    private val notificationScheduler: NotificationScheduler
+    private val notificationScheduler: NotificationScheduler,
+    private val drinkRepository: DrinkRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -46,13 +48,13 @@ class SettingsViewModel @Inject constructor(
             is SettingsIntent.ShowTimePickerDialog -> _uiState.update {
                 it.copy(showTimePickerDialog = true, timePickerType = intent.type)
             }
+
             SettingsIntent.HideTimePickerDialog -> _uiState.update { it.copy(showTimePickerDialog = false) }
 
             SettingsIntent.RefreshSettings -> observeSettings()
             SettingsIntent.ClearError -> _uiState.update { it.copy(error = null) }
 
             // NEW: Обработка настроек гидратации
-            is SettingsIntent.UpdateHydrationThreshold -> updateHydrationThreshold(intent.threshold)
             is SettingsIntent.UpdateShowNetHydration -> updateShowNetHydration(intent.show)
         }
     }
@@ -61,23 +63,27 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            getUserSettingsUseCase()
-                .catch { exception ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = exception.message ?: "Failed to load settings"
-                        )
-                    }
+            combine(
+                getUserSettingsUseCase(),
+                drinkRepository.getAllActiveDrinks()
+            ) { settings, drinks ->
+                Pair(settings, drinks)
+            }.catch { exception ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = exception.message ?: "Failed to load settings"
+                    )
                 }
-                .collect { settings ->
-                    _uiState.update {
-                        it.copy(
-                            settings = settings,
-                            isLoading = false
-                        )
-                    }
+            }.collect { (settings, drinks) ->
+                _uiState.update {
+                    it.copy(
+                        drinks = drinks,
+                        settings = settings,
+                        isLoading = false
+                    )
                 }
+            }
         }
     }
 
@@ -122,7 +128,8 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateNotificationInterval(intervalMinutes: Int) {
         viewModelScope.launch {
-            val newSettings = _uiState.value.settings.copy(notificationInterval = intervalMinutes)
+            val newSettings =
+                _uiState.value.settings.copy(notificationInterval = intervalMinutes)
             updateUserSettingsUseCase(newSettings)
                 .onSuccess {
                     // Обновляем расписание уведомлений
@@ -130,7 +137,10 @@ class SettingsViewModel @Inject constructor(
                 }
                 .onFailure { exception ->
                     _uiState.update {
-                        it.copy(error = exception.message ?: "Failed to update notification interval")
+                        it.copy(
+                            error = exception.message
+                                ?: "Failed to update notification interval"
+                        )
                     }
                 }
         }
@@ -175,21 +185,6 @@ class SettingsViewModel @Inject constructor(
                 .onFailure { exception ->
                     _uiState.update {
                         it.copy(error = exception.message ?: "Failed to update quick amounts")
-                    }
-                }
-        }
-    }
-
-    // NEW: Методы для настроек гидратации
-    private fun updateHydrationThreshold(threshold: Float) {
-        viewModelScope.launch {
-            val newSettings = _uiState.value.settings.copy(
-                hydrationThreshold = threshold.coerceIn(0.8f, 1.2f)
-            )
-            updateUserSettingsUseCase(newSettings)
-                .onFailure { exception ->
-                    _uiState.update {
-                        it.copy(error = exception.message ?: "Failed to update hydration threshold")
                     }
                 }
         }

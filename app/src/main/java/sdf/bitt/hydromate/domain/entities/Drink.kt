@@ -30,7 +30,8 @@ data class Drink(
             name = "Water",
             icon = "💧",
             hydrationMultiplier = 1.0f,
-            category = DrinkType.WATER
+            category = DrinkType.WATER,
+            color = "#55afd6"
         )
 
         val TEA = Drink(
@@ -39,7 +40,8 @@ data class Drink(
             icon = "🍵",
             hydrationMultiplier = 0.95f,
             category = DrinkType.HOT_BEVERAGES,
-            containsCaffeine = true
+            containsCaffeine = true,
+            color = "#a77242"
         )
 
         val HERBAL_TEA = Drink(
@@ -47,7 +49,8 @@ data class Drink(
             name = "Herbal Tea",
             icon = "🫖",
             hydrationMultiplier = 1.0f,
-            category = DrinkType.HOT_BEVERAGES
+            category = DrinkType.HOT_BEVERAGES,
+            color = "#55afd6"
         )
 
         val COFFEE = Drink(
@@ -56,7 +59,8 @@ data class Drink(
             icon = "☕",
             hydrationMultiplier = 0.85f,
             category = DrinkType.HOT_BEVERAGES,
-            containsCaffeine = true
+            containsCaffeine = true,
+            color = "#95663b"
         )
 
         val JUICE = Drink(
@@ -64,7 +68,8 @@ data class Drink(
             name = "Juice",
             icon = "🧃",
             hydrationMultiplier = 0.9f,
-            category = DrinkType.JUICES
+            category = DrinkType.JUICES,
+            color = "#376ab7"
         )
 
         val SMOOTHIE = Drink(
@@ -72,7 +77,8 @@ data class Drink(
             name = "Smoothie",
             icon = "🥤",
             hydrationMultiplier = 0.85f,
-            category = DrinkType.JUICES
+            category = DrinkType.JUICES,
+            color = "#3669b5"
         )
 
         val MILK = Drink(
@@ -80,7 +86,8 @@ data class Drink(
             name = "Milk",
             icon = "🥛",
             hydrationMultiplier = 0.9f,
-            category = DrinkType.DAIRY
+            category = DrinkType.DAIRY,
+            color = "#376ab7"
         )
 
         val COCONUT_WATER = Drink(
@@ -88,7 +95,8 @@ data class Drink(
             name = "Coconut Water",
             icon = "🥥",
             hydrationMultiplier = 1.1f,
-            category = DrinkType.SPORTS
+            category = DrinkType.SPORTS,
+            color = "#57b3db"
         )
 
         val SPORTS_DRINK = Drink(
@@ -97,7 +105,7 @@ data class Drink(
             icon = "⚡",
             hydrationMultiplier = 1.0f,
             category = DrinkType.SPORTS,
-            color = "#FF9800"
+            color = "#55afd6"
         )
 
         val SODA = Drink(
@@ -105,7 +113,8 @@ data class Drink(
             name = "Soda",
             icon = "🥤",
             hydrationMultiplier = 0.7f,
-            category = DrinkType.SOFT_DRINKS
+            category = DrinkType.SOFT_DRINKS,
+            color = "#c68727"
         )
 
         val ENERGY_DRINK = Drink(
@@ -115,7 +124,7 @@ data class Drink(
             hydrationMultiplier = 0.75f,
             category = DrinkType.SOFT_DRINKS,
             containsCaffeine = true,
-            color = "#E91E63"
+            color = "#835a34"
         )
 
         val BEER = Drink(
@@ -125,7 +134,7 @@ data class Drink(
             hydrationMultiplier = 0.5f,
             category = DrinkType.ALCOHOL,
             containsAlcohol = true,
-            color = "#FFC107"
+            color = "#a33030"
         )
 
         val WINE = Drink(
@@ -135,7 +144,7 @@ data class Drink(
             hydrationMultiplier = 0.4f,
             category = DrinkType.ALCOHOL,
             containsAlcohol = true,
-            color = "#9C27B0"
+            color = "#841a1a"
         )
 
         val COCKTAIL = Drink(
@@ -145,7 +154,7 @@ data class Drink(
             hydrationMultiplier = 0.6f,
             category = DrinkType.ALCOHOL,
             containsAlcohol = true,
-            color = "#E91E63"
+            color = "#a83232"
         )
 
         val SOUP = Drink(
@@ -153,7 +162,8 @@ data class Drink(
             name = "Soup",
             icon = "🍲",
             hydrationMultiplier = 0.8f,
-            category = DrinkType.FOOD
+            category = DrinkType.FOOD,
+            color = "#3567b2"
         )
 
         fun getDefaultDrinks(): List<Drink> = listOf(

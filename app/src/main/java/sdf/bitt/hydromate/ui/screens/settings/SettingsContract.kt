@@ -1,11 +1,13 @@
 package sdf.bitt.hydromate.ui.screens.settings
 
 import sdf.bitt.hydromate.domain.entities.CharacterType
+import sdf.bitt.hydromate.domain.entities.Drink
 import sdf.bitt.hydromate.domain.entities.QuickAddPreset
 import sdf.bitt.hydromate.domain.entities.UserSettings
 import java.time.LocalTime
 
 data class SettingsUiState(
+    val drinks: List<Drink> = emptyList(),
     val settings: UserSettings = UserSettings(),
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -25,7 +27,6 @@ sealed class SettingsIntent {
     data class UpdateQuickAmounts(val amounts: List<QuickAddPreset>) : SettingsIntent()
 
     // NEW: Настройки гидратации
-    data class UpdateHydrationThreshold(val threshold: Float) : SettingsIntent()
     data class UpdateShowNetHydration(val show: Boolean) : SettingsIntent()
 
     object ShowGoalDialog : SettingsIntent()

@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -22,7 +23,7 @@ fun QuickAmountsDialog(
     onAmountsChanged: (List<QuickAddPreset>) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var amounts by remember { mutableStateOf(currentAmounts.toMutableList()) }
+    val amounts: SnapshotStateList<QuickAddPreset> = remember { mutableStateListOf(*currentAmounts.toTypedArray()) }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -52,9 +53,12 @@ fun QuickAmountsDialog(
                                 value = amount.amount.toString(),
                                 onValueChange = { newValue ->
                                     newValue.toIntOrNull()?.let { newAmount ->
-                                        if (newAmount in 1..2000) {
-                                            amounts[index].copy(amount = newAmount)
+                                        if (newAmount in 0..2000) {  // Allow 0 temporarily, filter on save
+                                            amounts[index] = amounts[index].copy(amount = newAmount)
                                         }
+                                    } ?: run {
+                                        // If empty or invalid, set to 0
+                                        amounts[index] = amounts[index].copy(amount = 0)
                                     }
                                 },
                                 label = { Text("Amount") },
@@ -78,7 +82,25 @@ fun QuickAmountsDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+//                Spacer(modifier = Modifier.height(8.dp))
+//
+//                Row(
+//                    modifier = Modifier.fillMaxWidth(),
+//                    horizontalArrangement = Arrangement.End
+//                ) {
+//                    IconButton(
+//                        onClick = {
+//                            amounts.add(QuickAddPreset(amount = 100))  // Add default 100ml
+//                        }
+//                    ) {
+//                        Icon(
+//                            imageVector = Icons.Default.Add,
+//                            contentDescription = "Add new amount"
+//                        )
+//                    }
+//                }
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),

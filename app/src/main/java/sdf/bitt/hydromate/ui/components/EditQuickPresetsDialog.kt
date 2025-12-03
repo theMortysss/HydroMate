@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -29,7 +30,7 @@ fun EditQuickPresetsDialog(
     onPresetsChanged: (List<QuickAddPreset>) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var presets by remember { mutableStateOf(currentPresets.toMutableList()) }
+    val presets: SnapshotStateList<QuickAddPreset> = remember { mutableStateListOf(*currentPresets.toTypedArray()) }
     var showAddDialog by remember { mutableStateOf(false) }
     var editingPreset by remember { mutableStateOf<QuickAddPreset?>(null) }
 
@@ -97,7 +98,6 @@ fun EditQuickPresetsDialog(
                             onEdit = { editingPreset = preset },
                             onDelete = {
                                 presets.removeAt(index)
-                                presets = presets.toMutableList()
                             }
                         )
                     }
@@ -157,11 +157,9 @@ fun EditQuickPresetsDialog(
                     val index = presets.indexOfFirst { it.id == editingPreset!!.id }
                     if (index != -1) {
                         presets[index] = newPreset
-                        presets = presets.toMutableList()
                     }
                 } else {
                     presets.add(newPreset.copy(order = presets.size))
-                    presets = presets.toMutableList()
                 }
                 showAddDialog = false
                 editingPreset = null
@@ -344,13 +342,14 @@ private fun AddEditPresetDialog(
     )
 
     if (showDrinkSelector) {
-        SimpleDrinkSelectorDialog(
+        DrinkSelectorDialog(
             drinks = drinks,
             selectedDrink = selectedDrink,
             onDrinkSelected = {
                 selectedDrink = it
                 showDrinkSelector = false
             },
+            onCreateCustomDrink = {},
             onDismiss = { showDrinkSelector = false }
         )
     }

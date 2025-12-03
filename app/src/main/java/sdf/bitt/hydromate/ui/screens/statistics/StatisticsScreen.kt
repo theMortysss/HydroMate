@@ -166,6 +166,8 @@ fun StatisticsScreen(
                             } else {
                                 data.totalActual
                             },
+                            showNetHydration = showNetHydration,
+                            totalDehydration = data.totalDehydration,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }

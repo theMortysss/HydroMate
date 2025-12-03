@@ -71,7 +71,7 @@ class WaterReminderReceiver : BroadcastReceiver() {
                         progress.totalAmount
                     }
 
-                    val adjustedGoal = (progress.goalAmount * settings.hydrationThreshold).toInt()
+                    val adjustedGoal = progress.goalAmount
 
                     // НОВАЯ ЛОГИКА: Проверяем, достигнута ли цель
                     val isGoalReached = currentAmount >= adjustedGoal

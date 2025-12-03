@@ -74,18 +74,16 @@ class CalculateHydrationUseCase @Inject constructor() {
     fun calculateProgress(
         netHydration: Int,
         dailyGoal: Int,
-        hydrationThreshold: Float = 1.0f
     ): HydrationProgress {
-        val adjustedGoal = (dailyGoal * hydrationThreshold).toInt()
-        val percentage = (netHydration.toFloat() / adjustedGoal * 100).coerceIn(0f, 100f)
-        val remaining = (adjustedGoal - netHydration).coerceAtLeast(0)
+        val percentage = (netHydration.toFloat() / dailyGoal * 100).coerceIn(0f, 100f)
+        val remaining = (dailyGoal - netHydration).coerceAtLeast(0)
 
         return HydrationProgress(
             current = netHydration,
-            goal = adjustedGoal,
+            goal = dailyGoal,
             percentage = percentage,
             remaining = remaining,
-            isGoalReached = netHydration >= adjustedGoal
+            isGoalReached = netHydration >= dailyGoal
         )
     }
 }

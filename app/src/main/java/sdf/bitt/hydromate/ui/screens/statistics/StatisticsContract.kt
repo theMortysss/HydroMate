@@ -23,7 +23,7 @@ sealed class StatisticsIntent {
     object ClearError : StatisticsIntent()
 }
 
-private fun getCurrentWeekStart(): LocalDate {
+fun getCurrentWeekStart(): LocalDate {
     val now = LocalDate.now()
     val dayOfWeek = now.dayOfWeek.value
     return now.minusDays((dayOfWeek - 1).toLong())

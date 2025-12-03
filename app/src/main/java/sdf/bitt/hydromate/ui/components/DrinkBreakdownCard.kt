@@ -26,14 +26,33 @@ import kotlin.math.sin
 fun DrinkBreakdownCard(
     drinkBreakdown: Map<Drink, Int>,
     totalAmount: Int,
+    showNetHydration: Boolean = false,
+    totalDehydration: Int = 0,
     modifier: Modifier = Modifier
 ) {
     if (drinkBreakdown.isEmpty()) {
         return
     }
 
-    val sortedDrinks = remember(drinkBreakdown) {
-        drinkBreakdown.entries
+    val breakdownDisplayed = remember(drinkBreakdown, showNetHydration, totalDehydration) {
+        if (showNetHydration) {
+            val dehydDrinks = drinkBreakdown.filter { it.key.containsCaffeine || it.key.containsAlcohol }
+            val sumRawDehyd = dehydDrinks.values.sum().toFloat()
+            drinkBreakdown.mapValues { (drink, raw) ->
+                val effective = raw * drink.hydrationMultiplier
+                if ((drink.containsCaffeine || drink.containsAlcohol) && sumRawDehyd > 0) {
+                    effective - (totalDehydration * (raw.toFloat() / sumRawDehyd))
+                } else {
+                    effective
+                }
+            }
+        } else {
+            drinkBreakdown.mapValues { (_, value) -> value.toFloat() }
+        }
+    }
+
+    val sortedDrinks = remember(breakdownDisplayed) {
+        breakdownDisplayed.entries
             .sortedByDescending { it.value }
             .take(10) // Показываем топ 10 напитков
     }
@@ -62,7 +81,7 @@ fun DrinkBreakdownCard(
             if (sortedDrinks.size > 1) {
                 DrinkPieChart(
                     drinkData = sortedDrinks,
-                    totalAmount = totalAmount,
+                    totalAmount = totalAmount.toFloat(),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
@@ -75,7 +94,7 @@ fun DrinkBreakdownCard(
                 DrinkBreakdownItem(
                     drink = drink,
                     amount = amount,
-                    totalAmount = totalAmount,
+                    totalAmount = totalAmount.toFloat(),
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -89,8 +108,8 @@ fun DrinkBreakdownCard(
 
 @Composable
 private fun DrinkPieChart(
-    drinkData: List<Map.Entry<Drink, Int>>,
-    totalAmount: Int,
+    drinkData: List<Map.Entry<Drink, Float>>,
+    totalAmount: Float,
     modifier: Modifier = Modifier
 ) {
     val animatedProgress by animateFloatAsState(
@@ -108,7 +127,7 @@ private fun DrinkPieChart(
         var currentAngle = -90f // Start from top
 
         drinkData.forEach { (drink, amount) ->
-            val percentage = amount.toFloat() / totalAmount
+            val percentage = amount / totalAmount
             val sweepAngle = 360f * percentage * animatedProgress
 
             val color = try {
@@ -153,11 +172,11 @@ private fun DrinkPieChart(
 @Composable
 private fun DrinkBreakdownItem(
     drink: Drink,
-    amount: Int,
-    totalAmount: Int,
+    amount: Float,
+    totalAmount: Float,
     modifier: Modifier = Modifier
 ) {
-    val percentage = (amount.toFloat() / totalAmount * 100).toInt()
+    val percentage = (amount / totalAmount * 100).toInt()
 
     val animatedProgress by animateFloatAsState(
         targetValue = percentage / 100f,
@@ -224,7 +243,7 @@ private fun DrinkBreakdownItem(
                     horizontalAlignment = Alignment.End
                 ) {
                     Text(
-                        text = "${amount}ml",
+                        text = "${amount.toInt()}ml",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = drinkColor

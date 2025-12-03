@@ -135,6 +135,7 @@ fun SettingsScreen(
             GoalSettingsCard(
                 dailyGoal = uiState.settings.dailyGoal,
                 quickAmounts = uiState.settings.quickAddPresets,
+                drinks = uiState.drinks,
                 onGoalClick = {
                     viewModel.handleIntent(SettingsIntent.ShowGoalDialog)
                 },
@@ -145,11 +146,7 @@ fun SettingsScreen(
 
             // Hydration Settings
             HydrationSettingsCard(
-                hydrationThreshold = uiState.settings.hydrationThreshold,
                 showNetHydration = uiState.settings.showNetHydration,
-                onThresholdChange = { threshold ->
-                    viewModel.handleIntent(SettingsIntent.UpdateHydrationThreshold(threshold))
-                },
                 onShowNetHydrationToggle = { show ->
                     viewModel.handleIntent(SettingsIntent.UpdateShowNetHydration(show))
                 }
