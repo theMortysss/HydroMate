@@ -12,6 +12,7 @@ import sdf.bitt.hydromate.domain.usecases.GetUserSettingsUseCase
 import sdf.bitt.hydromate.domain.usecases.GetWeeklyStatisticsUseCase
 import sdf.bitt.hydromate.domain.usecases.TotalHydration
 import java.time.LocalDate
+import java.time.DayOfWeek
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,13 +20,11 @@ class StatisticsViewModel @Inject constructor(
     private val getWeeklyStatisticsUseCase: GetWeeklyStatisticsUseCase,
     private val getUserSettingsUseCase: GetUserSettingsUseCase,
     private val drinkRepository: DrinkRepository,
-    private val calculateHydrationUseCase: CalculateHydrationUseCase
+    private val calculateHydrationUseCase: CalculateHydrationUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StatisticsUiState())
     val uiState: StateFlow<StatisticsUiState> = _uiState.asStateFlow()
-
-    private val _selectedWeekFlow = MutableStateFlow(getCurrentWeekStart())
 
     init {
         loadWeeklyStatistics()
@@ -61,9 +60,7 @@ class StatisticsViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
 
             combine(
-                _selectedWeekFlow.flatMapLatest { weekStart ->
-                    getWeeklyStatisticsUseCase(weekStart)
-                },
+                getWeeklyStatisticsUseCase(_uiState.value.selectedWeekStart),
                 getUserSettingsUseCase(),
                 drinkRepository.getAllActiveDrinks()
             ) { stats, settings, drinks ->
@@ -139,7 +136,6 @@ class StatisticsViewModel @Inject constructor(
                         weeklyStats = enhancedStats,
                         hydrationData = hydrationData,
                         showNetHydration = settings.showNetHydration,
-                        selectedWeekStart = _selectedWeekFlow.value,
                         isLoading = false
                     )
                 }
@@ -147,24 +143,94 @@ class StatisticsViewModel @Inject constructor(
         }
     }
 
-    private fun calculateStreakWithMode(
+    private suspend fun calculateStreakWithMode(
         dailyProgress: List<DailyProgress>,
         showNetHydration: Boolean
     ): Int {
-        var streak = 0
-        for (progress in dailyProgress.reversed()) {
-            val currentAmount = if (showNetHydration) {
-                progress.netHydration
-            } else {
-                progress.totalAmount
-            }
+        if (dailyProgress.isEmpty()) return 0
 
-            if (currentAmount >= progress.goalAmount) {
+        val today = LocalDate.now()
+        val weekStart = dailyProgress.minOf { it.date }
+        val weekEnd = dailyProgress.maxOf { it.date }
+        val refDate = if (today.isBefore(weekEnd)) today else weekEnd
+
+        val isCurrent = weekEnd >= today
+
+        val refProgress = dailyProgress.find { it.date == refDate } ?: return 0
+        val currentAmount = if (showNetHydration) {
+            refProgress.netHydration
+        } else {
+            refProgress.totalAmount
+        }
+        val refMet = currentAmount >= refProgress.goalAmount
+
+        // For current week, if today not met yet (ongoing day), count up to yesterday
+        val countUpTo = if (isCurrent && !refMet) {
+            refDate.minusDays(1)
+        } else {
+            refDate
+        }
+
+        val filteredInWeek = dailyProgress.filter { it.date <= countUpTo }.sortedByDescending { it.date }
+
+        // Fetch drinks and settings once
+        val settings = getUserSettingsUseCase().first()
+        val drinks = drinkRepository.getAllActiveDrinks().first()
+        val drinksMap = drinks.associateBy { it.id }
+
+        var streak = 0
+        var checkDate = countUpTo
+
+        // First, count within the week
+        for (progress in filteredInWeek) {
+            val amt = if (showNetHydration) progress.netHydration else progress.totalAmount
+            if (amt >= progress.goalAmount) {
                 streak++
+                checkDate = progress.date.minusDays(1)
             } else {
-                break
+                return streak
             }
         }
+
+        // If streak reached the start of the week without breaking, continue backward by loading previous weeks
+        var currentWeekStart = weekStart
+        while (true) {
+            val prevWeekStart = currentWeekStart.minusDays(7)
+            val prevStats = getWeeklyStatisticsUseCase(prevWeekStart).first()
+            if (prevStats.dailyProgress.isEmpty()) break
+
+            val prevEnhancedDailyProgress = prevStats.dailyProgress.map { dailyProgress ->
+                val dayEntries = dailyProgress.entries
+                val dayHydration = if (dayEntries.isNotEmpty()) {
+                    calculateHydrationUseCase.calculateTotal(dayEntries, drinksMap)
+                } else {
+                    null
+                }
+
+                dailyProgress.copy(
+                    effectiveHydration = dayHydration?.totalEffective ?: dailyProgress.totalAmount,
+                    netHydration = dayHydration?.netHydration ?: dailyProgress.totalAmount
+                )
+            }
+
+            val sortedPrev = prevEnhancedDailyProgress.sortedByDescending { it.date }
+
+            var continued = true
+            for (progress in sortedPrev) {
+                val amt = if (showNetHydration) progress.netHydration else progress.totalAmount
+                if (amt >= progress.goalAmount) {
+                    streak++
+                } else {
+                    continued = false
+                    break
+                }
+            }
+
+            if (!continued) break
+
+            currentWeekStart = prevWeekStart
+        }
+
         return streak
     }
 

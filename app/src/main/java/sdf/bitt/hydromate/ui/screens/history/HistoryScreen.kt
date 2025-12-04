@@ -22,6 +22,7 @@ import sdf.bitt.hydromate.ui.components.DateDetailsModal
 import sdf.bitt.hydromate.ui.components.MonthSelector
 import sdf.bitt.hydromate.ui.components.MonthlySummaryEnhanced
 import sdf.bitt.hydromate.ui.components.WaterCalendarEnhanced
+import sdf.bitt.hydromate.ui.screens.home.HomeIntent
 import java.time.LocalDate
 
 @Composable
@@ -179,6 +180,9 @@ fun HistoryScreen(
                             time = time
                         )
                     )
+                },
+                onDrinkCreated = { drink ->
+                    viewModel.handleIntent(HistoryIntent.CreateCustomDrink(drink))
                 },
                 onDismiss = {
                     viewModel.handleIntent(HistoryIntent.HideAddWaterDialog)

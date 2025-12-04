@@ -9,7 +9,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -28,8 +30,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.graphics.toColorInt
+import kotlinx.coroutines.launch
 import sdf.bitt.hydromate.domain.entities.Drink
 import sdf.bitt.hydromate.domain.entities.DrinkType
+import sdf.bitt.hydromate.utils.toPxInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +46,10 @@ fun DrinkSelectorDialog(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var expandedCategories by remember { mutableStateOf(setOf<DrinkType>()) }
+    var pendingScrollToCategory by remember { mutableStateOf<DrinkType?>(null) }
+
+    val coroutineScope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
 
     val filteredDrinks = remember(drinks, searchQuery) {
         if (searchQuery.isBlank()) {
@@ -54,6 +62,34 @@ fun DrinkSelectorDialog(
     val drinksByCategory = remember(filteredDrinks) {
         filteredDrinks.groupBy { it.category }
             .toSortedMap(compareBy { it.displayName })
+    }
+
+    // Функция для вычисления индекса первого напитка в категории
+    fun computeFirstDrinkIndex(targetCategory: DrinkType): Int {
+        val sortedCategories = drinksByCategory.keys.toList()
+        var index = 0
+        for (cat in sortedCategories) {
+            if (cat == targetCategory) {
+                return index + 1 // После хедера категории
+            }
+            index++ // Хедер
+            if (expandedCategories.contains(cat)) {
+                index += drinksByCategory[cat]?.size ?: 0 // Напитки, если раскрыто
+            }
+        }
+        return -1 // Не найдено (не должно происходить)
+    }
+
+    val scrollOffset = -120.dp.toPxInt()
+    // Автоматический скролл при раскрытии
+    LaunchedEffect(pendingScrollToCategory) {
+        pendingScrollToCategory?.let { category ->
+            val firstDrinkIndex = computeFirstDrinkIndex(category)
+            if (firstDrinkIndex >= 0) {
+                listState.animateScrollToItem(firstDrinkIndex, scrollOffset)
+            }
+            pendingScrollToCategory = null
+        }
     }
 
     Dialog(
@@ -133,6 +169,7 @@ fun DrinkSelectorDialog(
 
                 // Drinks list
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth(),
@@ -140,31 +177,43 @@ fun DrinkSelectorDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     drinksByCategory.forEach { (category, categoryDrinks) ->
-                        item {
+                        item(key = "header_$category") {
                             CategoryHeader(
                                 category = category,
                                 isExpanded = expandedCategories.contains(category),
                                 drinkCount = categoryDrinks.size,
                                 onToggle = {
-                                    expandedCategories = if (expandedCategories.contains(category)) {
-                                        expandedCategories - category
+                                    val isCurrentlyExpanded = expandedCategories.contains(category)
+                                    if (isCurrentlyExpanded) {
+                                        expandedCategories = expandedCategories - category
                                     } else {
-                                        expandedCategories + category
+                                        expandedCategories = expandedCategories + category
+                                        pendingScrollToCategory = category // Запуск скролла
                                     }
                                 }
                             )
                         }
 
                         if (expandedCategories.contains(category)) {
-                            items(categoryDrinks) { drink ->
-                                DrinkItem(
-                                    drink = drink,
-                                    isSelected = drink.id == selectedDrink?.id,
-                                    onClick = {
-                                        onDrinkSelected(drink)
-                                        onDismiss()
-                                    }
-                                )
+                            // Анимированные элементы напитков
+                            items(
+                                items = categoryDrinks,
+                                key = { drink -> "drink_${category}_${drink.id}" }
+                            ) { drink ->
+                                AnimatedVisibility(
+                                    visible = expandedCategories.contains(category),
+                                    enter = fadeIn() + expandVertically(expandFrom = Alignment.Top),
+                                    exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top)
+                                ) {
+                                    DrinkItem(
+                                        drink = drink,
+                                        isSelected = drink.id == selectedDrink?.id,
+                                        onClick = {
+                                            onDrinkSelected(drink)
+                                            onDismiss()
+                                        }
+                                    )
+                                }
                             }
                         }
                     }

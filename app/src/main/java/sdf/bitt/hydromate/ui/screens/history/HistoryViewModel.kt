@@ -62,6 +62,7 @@ class HistoryViewModel @Inject constructor(
             is HistoryIntent.AddWaterForDate -> addWaterForDate(
                 intent.date, intent.amount, intent.drink, intent.time
             )
+            is HistoryIntent.CreateCustomDrink -> createCustomDrink(intent.drink)
         }
     }
 
@@ -285,6 +286,24 @@ class HistoryViewModel @Inject constructor(
                     notificationScheduler.scheduleNotifications(settings)
                 }
             }
+    }
+
+    private fun createCustomDrink(drink: Drink) {
+        viewModelScope.launch {
+            drinkRepository.createCustomDrink(drink)
+                .onSuccess { drinkId ->
+                    _effects.trySend(
+                        HistoryEffect.ShowSuccess("Custom drink \"${drink.name}\" created!")
+                    )
+                }
+                .onFailure { exception ->
+                    _effects.trySend(
+                        HistoryEffect.ShowError(
+                            exception.message ?: "Failed to create custom drink"
+                        )
+                    )
+                }
+        }
     }
 
     private fun clearSelectedDate() {

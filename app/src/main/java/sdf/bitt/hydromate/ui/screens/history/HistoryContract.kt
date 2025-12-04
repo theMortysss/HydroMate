@@ -3,6 +3,7 @@ package sdf.bitt.hydromate.ui.screens.history
 import sdf.bitt.hydromate.domain.entities.DailyProgress
 import sdf.bitt.hydromate.domain.entities.Drink
 import sdf.bitt.hydromate.domain.entities.UserSettings
+import sdf.bitt.hydromate.ui.screens.home.HomeIntent
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -31,6 +32,7 @@ sealed class HistoryIntent {
     object ClearError : HistoryIntent()
     data class ShowAddWaterDialog(val date: LocalDate) : HistoryIntent()
     object HideAddWaterDialog : HistoryIntent()
+    data class CreateCustomDrink(val drink: Drink) : HistoryIntent()
     data class AddWaterForDate(
         val date: LocalDate,
         val amount: Int,

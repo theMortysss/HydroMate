@@ -31,6 +31,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.graphics.toColorInt
 import sdf.bitt.hydromate.domain.entities.Drink
 import sdf.bitt.hydromate.domain.entities.DrinkType
+import sdf.bitt.hydromate.ui.screens.home.HomeIntent
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -41,6 +42,7 @@ fun AddWaterForDateDialog(
     date: LocalDate,
     drinks: List<Drink>,
     onAddEntry: (amount: Int, drink: Drink, time: LocalDateTime) -> Unit,
+    onDrinkCreated: (Drink) -> Unit,
     onDismiss: () -> Unit
 ) {
     val now = LocalDateTime.now()
@@ -52,6 +54,7 @@ fun AddWaterForDateDialog(
     var selectedMinute by remember { mutableStateOf(now.minute) }
     var showDrinkSelector by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showCreateDrink by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy")
@@ -386,8 +389,15 @@ fun AddWaterForDateDialog(
                 selectedDrink = it
                 showDrinkSelector = false
             },
-            onCreateCustomDrink = {},
+            onCreateCustomDrink = { showCreateDrink = true },
             onDismiss = { showDrinkSelector = false }
+        )
+    }
+
+    if (showCreateDrink) {
+        CreateCustomDrinkDialog(
+            onDrinkCreated = onDrinkCreated,
+            onDismiss = { showCreateDrink = false }
         )
     }
 

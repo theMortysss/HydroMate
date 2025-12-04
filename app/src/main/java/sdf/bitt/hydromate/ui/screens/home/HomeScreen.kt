@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
@@ -48,7 +49,6 @@ fun HomeScreen(
 
     // Состояния диалогов
     var showAddWaterDialog by remember { mutableStateOf(false) }
-    var showCreateDrink by remember { mutableStateOf(false) }
     var showEditPresets by remember { mutableStateOf(false) }
 
     // Handle side effects
@@ -200,73 +200,65 @@ fun HomeScreen(
                 }
             }
 
-            // Drink Selector Button
+            // Custom Add Water Button
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showAddWaterDialog = true },
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
                 ),
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(20.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(20.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = uiState.selectedDrink?.icon ?: "💧",
-                            fontSize = 32.sp
-                        )
+                        Surface(
+                            modifier = Modifier.size(56.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                        ) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                        }
+
                         Column {
                             Text(
-                                text = "Selected Drink",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(
-                                    alpha = 0.7f
-                                )
+                                text = "Add Custom Entry",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             Text(
-                                text = uiState.selectedDrink?.name ?: "Water",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                text = "Choose drink type & amount",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                             )
-
-                            val drink = uiState.selectedDrink
-                            if (drink != null) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "${(drink.hydrationMultiplier * 100).toInt()}% hydration",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(
-                                            alpha = 0.6f
-                                        )
-                                    )
-                                    if (drink.containsCaffeine) {
-                                        Text("☕", style = MaterialTheme.typography.bodySmall)
-                                    }
-                                    if (drink.containsAlcohol) {
-                                        Text("🍺", style = MaterialTheme.typography.bodySmall)
-                                    }
-                                }
-                            }
                         }
                     }
 
                     Icon(
                         imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "Change drink",
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        contentDescription = "Open custom entry",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -308,17 +300,10 @@ fun HomeScreen(
             onAddEntry = { amount, drink, _ ->
                 viewModel.handleIntent(HomeIntent.AddWater(amount, drink))
             },
-            onDismiss = { showAddWaterDialog = false }
-        )
-    }
-
-    if (showCreateDrink) {
-        CreateCustomDrinkDialog(
             onDrinkCreated = { drink ->
                 viewModel.handleIntent(HomeIntent.CreateCustomDrink(drink))
-                showCreateDrink = false
             },
-            onDismiss = { showCreateDrink = false }
+            onDismiss = { showAddWaterDialog = false }
         )
     }
 

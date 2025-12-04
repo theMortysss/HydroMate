@@ -64,52 +64,7 @@ fun QuickAddButtonsEnhanced(
                     enabled = !isLoading
                 )
             }
-
-            item {
-                OutlinedButton(
-                    onClick = { showCustomDialog = true },
-                    enabled = !isLoading,
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .height(72.dp)
-                        .widthIn(min = 80.dp)
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Custom amount",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Custom",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-            }
         }
-    }
-
-    if (showCustomDialog) {
-        CustomAmountDialog(
-            drinks = drinks,
-            onAmountSelected = { amount, drink ->
-                val customPreset = QuickAddPreset(
-                    amount = amount,
-                    drinkId = drink.id,
-                    drinkName = drink.name,
-                    drinkIcon = drink.icon
-                )
-                onPresetClick(customPreset, drink)
-                showCustomDialog = false
-            },
-            onDismiss = { showCustomDialog = false }
-        )
     }
 }
 

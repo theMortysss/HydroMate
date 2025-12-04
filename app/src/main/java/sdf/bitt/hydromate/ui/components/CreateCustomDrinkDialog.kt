@@ -297,6 +297,7 @@ fun CreateCustomDrinkDialog(
                                 color = selectedColor
                             )
                             onDrinkCreated(drink)
+                            onDismiss()
                         },
                         enabled = isValid,
                         modifier = Modifier.weight(1f)
