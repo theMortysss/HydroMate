@@ -14,11 +14,11 @@ object DrinkMapper {
             hydrationMultiplier = entity.hydrationMultiplier,
             category = try {
                 DrinkType.valueOf(entity.category)
-            } catch (e: Exception) {
+            } catch (e: IllegalArgumentException) {
                 DrinkType.CUSTOM
             },
-            containsCaffeine = entity.containsCaffeine,
-            containsAlcohol = entity.containsAlcohol,
+            caffeineContent = entity.caffeineContent,
+            alcoholPercentage = entity.alcoholPercentage,
             isCustom = entity.isCustom,
             color = entity.color
         )
@@ -31,18 +31,16 @@ object DrinkMapper {
             icon = domain.icon,
             hydrationMultiplier = domain.hydrationMultiplier,
             category = domain.category.name,
-            containsCaffeine = domain.containsCaffeine,
-            containsAlcohol = domain.containsAlcohol,
+            caffeineContent = domain.caffeineContent,
+            alcoholPercentage = domain.alcoholPercentage,
             isCustom = domain.isCustom,
-            color = domain.color
+            color = domain.color,
         )
     }
 
-    fun toDomainList(entities: List<DrinkEntity>): List<Drink> {
-        return entities.map { toDomain(it) }
-    }
+    fun toDomainList(entities: List<DrinkEntity>): List<Drink> =
+        entities.map { toDomain(it) }
 
-    fun toEntityList(domains: List<Drink>): List<DrinkEntity> {
-        return domains.map { toEntity(it) }
-    }
+    fun toEntityList(drinks: List<Drink>): List<DrinkEntity> =
+        drinks.map { toEntity(it) }
 }

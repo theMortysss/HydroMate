@@ -172,12 +172,12 @@ class HomeViewModel @Inject constructor(
                         )
                     )
 
-                    if (hydrationResult.dehydrationAmount > 0) {
+                    if (hydrationResult.totalDehydration > 0) {
                         _effects.trySend(
                             HomeEffect.ShowSuccess(
                                 "Added ${amount}ml of ${drink.icon} ${drink.name}\n" +
                                         "Net hydration: ${hydrationResult.netHydration}ml " +
-                                        "(${hydrationResult.dehydrationAmount}ml dehydration effect)"
+                                        "(${hydrationResult.totalDehydration}ml dehydration effect)"
                             )
                         )
                     }

@@ -19,13 +19,13 @@ data class DrinkEntity(
     val hydrationMultiplier: Float,
 
     @ColumnInfo(name = "category")
-    val category: String,
+    val category: String, // храним как String (название enum)
 
-    @ColumnInfo(name = "contains_caffeine")
-    val containsCaffeine: Boolean = false,
+    @ColumnInfo(name = "caffeine_content")
+    val caffeineContent: Int = 0, // мг на 250 мл
 
-    @ColumnInfo(name = "contains_alcohol")
-    val containsAlcohol: Boolean = false,
+    @ColumnInfo(name = "alcohol_percentage")
+    val alcoholPercentage: Float = 0f, // %
 
     @ColumnInfo(name = "is_custom")
     val isCustom: Boolean = false,
