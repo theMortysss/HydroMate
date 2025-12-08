@@ -1,12 +1,9 @@
 package sdf.bitt.hydromate.data.mappers
 
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import sdf.bitt.hydromate.data.local.entities.UserSettingsEntity
-import sdf.bitt.hydromate.domain.entities.CharacterType
-import sdf.bitt.hydromate.domain.entities.QuickAddPreset
-import sdf.bitt.hydromate.domain.entities.UserSettings
+import sdf.bitt.hydromate.domain.entities.*
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -20,6 +17,15 @@ object UserSettingsMapper {
 
     fun toDomain(entity: UserSettingsEntity?): UserSettings {
         return entity?.let {
+            val profile = UserProfile(
+                gender = Gender.fromString(it.profileGender),
+                weightKg = it.profileWeightKg,
+                activityLevel = ActivityLevel.fromString(it.profileActivityLevel),
+                climate = Climate.fromString(it.profileClimate),
+                isManualGoal = it.isManualGoal,
+                manualGoal = it.manualGoal
+            )
+
             UserSettings(
                 dailyGoal = it.dailyGoal,
                 selectedCharacter = CharacterType.valueOf(it.selectedCharacter),
@@ -28,7 +34,8 @@ object UserSettingsMapper {
                 wakeUpTime = LocalTime.parse(it.wakeUpTime, timeFormatter),
                 bedTime = LocalTime.parse(it.bedTime, timeFormatter),
                 quickAddPresets = parseQuickAddPresets(it.quickAddPresets),
-                showNetHydration = it.showNetHydration
+                showNetHydration = it.showNetHydration,
+                profile = profile
             )
         } ?: UserSettings() // Default settings if entity is null
     }
@@ -43,8 +50,14 @@ object UserSettingsMapper {
             wakeUpTime = domain.wakeUpTime.format(timeFormatter),
             bedTime = domain.bedTime.format(timeFormatter),
             quickAddPresets = json.encodeToString(domain.quickAddPresets),
-            quickAmounts = json.encodeToString(domain.quickAddPresets.map { it.amount }), // Для обратной совместимости
-            showNetHydration = domain.showNetHydration
+            quickAmounts = json.encodeToString(domain.quickAddPresets.map { it.amount }),
+            showNetHydration = domain.showNetHydration,
+            profileGender = domain.profile.gender.name,
+            profileWeightKg = domain.profile.weightKg,
+            profileActivityLevel = domain.profile.activityLevel.name,
+            profileClimate = domain.profile.climate.name,
+            isManualGoal = domain.profile.isManualGoal,
+            manualGoal = domain.profile.manualGoal
         )
     }
 
@@ -56,13 +69,12 @@ object UserSettingsMapper {
                 json.decodeFromString<List<QuickAddPreset>>(jsonString)
             }
         } catch (e: Exception) {
-            // Fallback: пытаемся парсить как старый формат (List<Int>)
             try {
                 val amounts = json.decodeFromString<List<Int>>(jsonString)
                 amounts.mapIndexed { index, amount ->
                     QuickAddPreset(
                         amount = amount,
-                        drinkId = 1, // Вода по умолчанию
+                        drinkId = 1,
                         drinkName = "Water",
                         drinkIcon = "💧",
                         order = index

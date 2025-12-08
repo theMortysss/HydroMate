@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import sdf.bitt.hydromate.domain.entities.CharacterType
 import sdf.bitt.hydromate.domain.entities.QuickAddPreset
+import sdf.bitt.hydromate.domain.entities.UserProfile
 import sdf.bitt.hydromate.domain.repositories.DrinkRepository
+import sdf.bitt.hydromate.domain.usecases.CalculateRecommendedGoalUseCase
 import sdf.bitt.hydromate.domain.usecases.GetUserSettingsUseCase
 import sdf.bitt.hydromate.domain.usecases.UpdateDailyGoalUseCase
 import sdf.bitt.hydromate.domain.usecases.UpdateUserSettingsUseCase
@@ -22,6 +24,7 @@ class SettingsViewModel @Inject constructor(
     private val updateDailyGoalUseCase: UpdateDailyGoalUseCase,
     private val notificationScheduler: NotificationScheduler,
     private val drinkRepository: DrinkRepository,
+    private val calculateRecommendedGoalUseCase: CalculateRecommendedGoalUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -29,6 +32,15 @@ class SettingsViewModel @Inject constructor(
 
     init {
         observeSettings()
+        // Calculate initial recommended goal
+        viewModelScope.launch {
+            getUserSettingsUseCase().first().let { settings ->
+                if (!settings.profile.isManualGoal) {
+                    val result = calculateRecommendedGoalUseCase(settings.profile)
+                    _uiState.update { it.copy(recommendedGoal = result) }
+                }
+            }
+        }
     }
 
     fun handleIntent(intent: SettingsIntent) {
@@ -54,8 +66,12 @@ class SettingsViewModel @Inject constructor(
             SettingsIntent.RefreshSettings -> observeSettings()
             SettingsIntent.ClearError -> _uiState.update { it.copy(error = null) }
 
-            // NEW: Обработка настроек гидратации
+            // Обработка настроек гидратации
             is SettingsIntent.UpdateShowNetHydration -> updateShowNetHydration(intent.show)
+            is SettingsIntent.CalculateRecommendedGoal -> calculateRecommendedGoalForProfile(intent.profile)
+            SettingsIntent.HideProfileDialog -> _uiState.update { it.copy(showProfileDialog = false) }
+            SettingsIntent.ShowProfileDialog -> _uiState.update { it.copy(showProfileDialog = true) }
+            is SettingsIntent.UpdateProfile -> updateProfile(intent.profile)
         }
     }
 
@@ -83,6 +99,46 @@ class SettingsViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
+            }
+        }
+    }
+
+    private fun updateProfile(profile: UserProfile) {
+        viewModelScope.launch {
+            // 1. Рассчитываем новую рекомендуемую норму
+            val recommendedResult = calculateRecommendedGoalUseCase(profile)
+
+            // 2. Обновляем settings с новым профилем
+            val newSettings = _uiState.value.settings.copy(
+                profile = profile,
+                // Если не ручной режим - обновляем dailyGoal расчетным значением
+                dailyGoal = if (!profile.isManualGoal) {
+                    recommendedResult.recommendedGoal
+                } else {
+                    _uiState.value.settings.dailyGoal
+                }
+            )
+
+            // 3. Сохраняем
+            updateUserSettingsUseCase(newSettings)
+                .onSuccess {
+                    _uiState.update {
+                        it.copy(recommendedGoal = recommendedResult)
+                    }
+                }
+                .onFailure { exception ->
+                    _uiState.update {
+                        it.copy(error = exception.message ?: "Failed to update profile")
+                    }
+                }
+        }
+    }
+
+    private fun calculateRecommendedGoalForProfile(profile: UserProfile) {
+        viewModelScope.launch {
+            val result = calculateRecommendedGoalUseCase(profile)
+            _uiState.update {
+                it.copy(recommendedGoal = result)
             }
         }
     }

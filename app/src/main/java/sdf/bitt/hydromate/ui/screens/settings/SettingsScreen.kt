@@ -87,6 +87,24 @@ fun SettingsScreen(
         )
     }
 
+    // Profile dialog
+    if (uiState.showProfileDialog) {
+        HydrationProfileDialog(
+            currentProfile = uiState.settings.profile,
+            currentRecommendedGoal = uiState.recommendedGoal,
+            onProfileUpdated = { newProfile ->
+                viewModel.handleIntent(SettingsIntent.UpdateProfile(newProfile))
+                viewModel.handleIntent(SettingsIntent.HideProfileDialog)
+            },
+            onCalculateGoal = { profile ->
+                viewModel.handleIntent(SettingsIntent.CalculateRecommendedGoal(profile))
+            },
+            onDismiss = {
+                viewModel.handleIntent(SettingsIntent.HideProfileDialog)
+            }
+        )
+    }
+
     SnackbarHost(
         modifier = modifier.zIndex(1f),
         hostState = snackbarHostState
@@ -131,18 +149,27 @@ fun SettingsScreen(
                 selectedCharacter = uiState.settings.selectedCharacter
             )
 
-            // Goal Settings
-            GoalSettingsCard(
-                dailyGoal = uiState.settings.dailyGoal,
-                quickAmounts = uiState.settings.quickAddPresets,
-                drinks = uiState.drinks,
-                onGoalClick = {
-                    viewModel.handleIntent(SettingsIntent.ShowGoalDialog)
-                },
-                onQuickAmountsEdit = { amounts ->
-                    viewModel.handleIntent(SettingsIntent.UpdateQuickAmounts(amounts))
+            // Hydration Calculator Card (вместо обычной Goal Settings Card)
+            HydrationCalculatorCard(
+                profile = uiState.settings.profile,
+                recommendedGoal = uiState.recommendedGoal,
+                onProfileClick = {
+                    viewModel.handleIntent(SettingsIntent.ShowProfileDialog)
                 }
             )
+
+//            // Goal Settings
+//            GoalSettingsCard(
+//                dailyGoal = uiState.settings.dailyGoal,
+//                quickAmounts = uiState.settings.quickAddPresets,
+//                drinks = uiState.drinks,
+//                onGoalClick = {
+//                    viewModel.handleIntent(SettingsIntent.ShowGoalDialog)
+//                },
+//                onQuickAmountsEdit = { amounts ->
+//                    viewModel.handleIntent(SettingsIntent.UpdateQuickAmounts(amounts))
+//                }
+//            )
 
             // Hydration Settings
             HydrationSettingsCard(
