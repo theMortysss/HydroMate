@@ -27,6 +27,9 @@ class HydroMateNotificationManager @Inject constructor(
         const val CHANNEL_NAME_ACHIEVEMENTS = "Achievements"
         const val NOTIFICATION_ID_REMINDER = 1001
         const val NOTIFICATION_ID_ACHIEVEMENT = 1002
+
+        const val ACTION_SNOOZE = "sdf.bitt.hydromate.ACTION_SNOOZE"
+        const val EXTRA_SNOOZE_MINUTES = "snooze_minutes"
     }
 
     init {
@@ -35,7 +38,6 @@ class HydroMateNotificationManager @Inject constructor(
 
     private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Channel для напоминаний
             val reminderChannel = NotificationChannel(
                 CHANNEL_ID_REMINDERS,
                 CHANNEL_NAME_REMINDERS,
@@ -46,7 +48,6 @@ class HydroMateNotificationManager @Inject constructor(
                 setShowBadge(true)
             }
 
-            // Channel для достижений
             val achievementChannel = NotificationChannel(
                 CHANNEL_ID_ACHIEVEMENTS,
                 CHANNEL_NAME_ACHIEVEMENTS,
@@ -64,10 +65,13 @@ class HydroMateNotificationManager @Inject constructor(
         }
     }
 
-    /**
-     * Показывает обычное напоминание о необходимости выпить воду
-     */
-    fun showHydrationReminder(currentAmount: Int, goalAmount: Int) {
+    fun showHydrationReminder(
+        currentAmount: Int,
+        goalAmount: Int,
+        showProgress: Boolean = true,
+        canSnooze: Boolean = true,
+        snoozeMinutes: Int = 10
+    ) {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -84,7 +88,7 @@ class HydroMateNotificationManager @Inject constructor(
 
         val (title, message) = getReminderContent(progressPercentage, remainingAmount)
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID_REMINDERS)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID_REMINDERS)
             .setSmallIcon(R.drawable.ic_water_drop)
             .setContentTitle(title)
             .setContentText(message)
@@ -92,20 +96,114 @@ class HydroMateNotificationManager @Inject constructor(
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
-            .setProgress(100, progressPercentage, false)
-            .build()
+
+        // Добавляем прогресс если включено
+        if (showProgress) {
+            builder.setProgress(100, progressPercentage, false)
+        }
+
+        // Добавляем кнопку отсрочки если включено
+        if (canSnooze && snoozeMinutes > 0) {
+            val snoozeIntent = Intent(context, SnoozeActionReceiver::class.java).apply {
+                action = ACTION_SNOOZE
+                putExtra(EXTRA_SNOOZE_MINUTES, snoozeMinutes)
+            }
+
+            val snoozePendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                snoozeIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            builder.addAction(
+                R.drawable.ic_water_drop,
+                "Snooze $snoozeMinutes min",
+                snoozePendingIntent
+            )
+        }
 
         try {
-            notificationManager.notify(NOTIFICATION_ID_REMINDER, notification)
+            notificationManager.notify(NOTIFICATION_ID_REMINDER, builder.build())
         } catch (e: SecurityException) {
             e.printStackTrace()
         }
     }
 
-    /**
-     * Показывает поздравительное уведомление при достижении цели
-     */
-    fun showGoalAchievedNotification(currentAmount: Int, goalAmount: Int) {
+    fun showCustomHydrationReminder(
+        currentAmount: Int,
+        goalAmount: Int,
+        reminderLabel: String,
+        showProgress: Boolean = true,
+        canSnooze: Boolean = true,
+        snoozeMinutes: Int = 10,
+        isGoalReached: Boolean = false
+    ) {
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val remainingAmount = (goalAmount - currentAmount).coerceAtLeast(0)
+        val progressPercentage = ((currentAmount.toFloat() / goalAmount) * 100).toInt()
+
+        val message = if (isGoalReached) {
+            "You've already reached your goal today! Great job! 🎉"
+        } else {
+            "You've consumed ${currentAmount}ml. ${remainingAmount}ml remaining to reach your goal."
+        }
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID_REMINDERS)
+            .setSmallIcon(R.drawable.ic_water_drop)
+            .setContentTitle("💧 $reminderLabel")
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+
+        if (showProgress && !isGoalReached) {
+            builder.setProgress(100, progressPercentage, false)
+        }
+
+        if (canSnooze && snoozeMinutes > 0 && !isGoalReached) {
+            val snoozeIntent = Intent(context, SnoozeActionReceiver::class.java).apply {
+                action = ACTION_SNOOZE
+                putExtra(EXTRA_SNOOZE_MINUTES, snoozeMinutes)
+            }
+
+            val snoozePendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                snoozeIntent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            builder.addAction(
+                R.drawable.ic_water_drop,
+                "Snooze $snoozeMinutes min",
+                snoozePendingIntent
+            )
+        }
+
+        try {
+            notificationManager.notify(NOTIFICATION_ID_REMINDER, builder.build())
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+    }
+
+    fun showGoalAchievedNotification(
+        currentAmount: Int,
+        goalAmount: Int,
+        showProgress: Boolean = true
+    ) {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -124,7 +222,7 @@ class HydroMateNotificationManager @Inject constructor(
             "You've reached your daily hydration goal of ${goalAmount}ml! Great job staying healthy! 🌟"
         }
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID_ACHIEVEMENTS)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID_ACHIEVEMENTS)
             .setSmallIcon(R.drawable.ic_water_drop)
             .setContentTitle("🎉 Daily Goal Achieved!")
             .setContentText(message)
@@ -133,13 +231,14 @@ class HydroMateNotificationManager @Inject constructor(
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
-            .build()
+
+        if (showProgress) {
+            builder.setProgress(100, 100, false)
+        }
 
         try {
-            // Отменяем предыдущие напоминания
             notificationManager.cancel(NOTIFICATION_ID_REMINDER)
-            // Показываем поздравление
-            notificationManager.notify(NOTIFICATION_ID_ACHIEVEMENT, notification)
+            notificationManager.notify(NOTIFICATION_ID_ACHIEVEMENT, builder.build())
         } catch (e: SecurityException) {
             e.printStackTrace()
         }

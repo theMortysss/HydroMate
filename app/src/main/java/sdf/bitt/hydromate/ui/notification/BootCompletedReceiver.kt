@@ -3,6 +3,7 @@ package sdf.bitt.hydromate.ui.notification
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,17 +28,32 @@ class BootCompletedReceiver : BroadcastReceiver() {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED ||
             intent.action == "android.intent.action.QUICKBOOT_POWERON"
         ) {
+            Log.d(TAG, "Boot completed, restoring notifications")
+
             // Восстанавливаем расписание уведомлений после перезагрузки
             scope.launch {
                 try {
                     val settings = getUserSettingsUseCase().first()
+
                     if (settings.notificationsEnabled) {
+                        // Восстанавливаем основное расписание
                         notificationScheduler.scheduleNotifications(settings)
+
+                        // Восстанавливаем отложенное напоминание если было
+                        notificationScheduler.restoreSnoozeReminderIfNeeded(settings)
+
+                        Log.d(TAG, "Notifications restored successfully")
+                    } else {
+                        Log.d(TAG, "Notifications disabled, skipping restore")
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e(TAG, "Failed to restore notifications", e)
                 }
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "BootCompletedReceiver"
     }
 }

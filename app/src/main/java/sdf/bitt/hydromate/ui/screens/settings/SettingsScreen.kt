@@ -187,25 +187,38 @@ fun SettingsScreen(
                 }
             )
 
-            // Notification Settings (Enhanced version)
-            NotificationSettingsCardEnhanced(
-                notificationsEnabled = uiState.settings.notificationsEnabled,
-                notificationInterval = uiState.settings.notificationInterval,
-                wakeUpTime = uiState.settings.wakeUpTime,
-                bedTime = uiState.settings.bedTime,
-                onNotificationsToggle = { enabled ->
-                    viewModel.handleIntent(SettingsIntent.UpdateNotifications(enabled))
+            NotificationSettingsCard(
+                settings = uiState.settings,
+                onSettingsUpdate = { updatedSettings ->
+                    viewModel.handleIntent(SettingsIntent.UpdateSettings(settings = updatedSettings))
                 },
-                onIntervalChange = { interval ->
-                    viewModel.handleIntent(SettingsIntent.UpdateNotificationInterval(interval))
-                },
-                onWakeUpTimeClick = {
+                onWakeUpTimeClick ={
                     viewModel.handleIntent(SettingsIntent.ShowTimePickerDialog(TimePickerType.WAKE_UP))
                 },
                 onBedTimeClick = {
                     viewModel.handleIntent(SettingsIntent.ShowTimePickerDialog(TimePickerType.BED_TIME))
-                }
+                },
             )
+
+//            // Notification Settings (Enhanced version)
+//            NotificationSettingsCard(
+//                notificationsEnabled = uiState.settings.notificationsEnabled,
+//                notificationInterval = uiState.settings.notificationInterval,
+//                wakeUpTime = uiState.settings.wakeUpTime,
+//                bedTime = uiState.settings.bedTime,
+//                onNotificationsToggle = { enabled ->
+//                    viewModel.handleIntent(SettingsIntent.UpdateNotifications(enabled))
+//                },
+//                onIntervalChange = { interval ->
+//                    viewModel.handleIntent(SettingsIntent.UpdateNotificationInterval(interval))
+//                },
+//                onWakeUpTimeClick = {
+//                    viewModel.handleIntent(SettingsIntent.ShowTimePickerDialog(TimePickerType.WAKE_UP))
+//                },
+//                onBedTimeClick = {
+//                    viewModel.handleIntent(SettingsIntent.ShowTimePickerDialog(TimePickerType.BED_TIME))
+//                }
+//            )
 
             // About Section
             AboutCard()

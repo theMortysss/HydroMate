@@ -15,11 +15,9 @@ data class UserSettingsEntity(
     @ColumnInfo(name = "selected_character")
     val selectedCharacter: String,
 
+    // Базовые настройки уведомлений
     @ColumnInfo(name = "notifications_enabled")
     val notificationsEnabled: Boolean,
-
-    @ColumnInfo(name = "notification_interval")
-    val notificationInterval: Int,
 
     @ColumnInfo(name = "wake_up_time")
     val wakeUpTime: String, // "HH:mm" format
@@ -27,8 +25,40 @@ data class UserSettingsEntity(
     @ColumnInfo(name = "bed_time")
     val bedTime: String, // "HH:mm" format
 
+    // Умные напоминания
+    @ColumnInfo(name = "smart_reminders_enabled", defaultValue = "1")
+    val smartRemindersEnabled: Boolean = true,
+
+    @ColumnInfo(name = "notification_interval") // Deprecated, для обратной совместимости
+    val notificationInterval: Int = 60,
+
+    @ColumnInfo(name = "reminder_interval_minutes", defaultValue = "60")
+    val reminderIntervalMinutes: Int = 60,
+
+    @ColumnInfo(name = "smart_reminder_days", defaultValue = "MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY,SATURDAY,SUNDAY")
+    val smartReminderDays: String = "MONDAY,TUESDAY,WEDNESDAY,THURSDAY,FRIDAY,SATURDAY,SUNDAY",
+
+    // Персональные напоминания
+    @ColumnInfo(name = "custom_reminders_enabled", defaultValue = "0")
+    val customRemindersEnabled: Boolean = false,
+
+    @ColumnInfo(name = "custom_reminders", defaultValue = "[]")
+    val customReminders: String = "[]", // JSON: List<CustomReminder>
+
+    // Отсрочка
+    @ColumnInfo(name = "snooze_enabled", defaultValue = "1")
+    val snoozeEnabled: Boolean = true,
+
+    @ColumnInfo(name = "snooze_delay_minutes", defaultValue = "10")
+    val snoozeDelayMinutes: Int = 10,
+
+    // Прогресс в уведомлениях
+    @ColumnInfo(name = "show_progress_in_notification", defaultValue = "1")
+    val showProgressInNotification: Boolean = true,
+
+    // Quick add presets
     @ColumnInfo(name = "quick_add_presets", defaultValue = "[]")
-    val quickAddPresets: String, // JSON string: List<QuickAddPreset>
+    val quickAddPresets: String,
 
     @ColumnInfo(name = "quick_amounts")
     val quickAmounts: String = "[]", // Deprecated
@@ -36,7 +66,7 @@ data class UserSettingsEntity(
     @ColumnInfo(name = "show_net_hydration", defaultValue = "1")
     val showNetHydration: Boolean = true,
 
-    // NEW: Hydration profile fields
+    // Hydration profile fields
     @ColumnInfo(name = "profile_gender", defaultValue = "PREFER_NOT_TO_SAY")
     val profileGender: String = "PREFER_NOT_TO_SAY",
 

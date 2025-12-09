@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import sdf.bitt.hydromate.domain.entities.CharacterType
 import sdf.bitt.hydromate.domain.entities.QuickAddPreset
 import sdf.bitt.hydromate.domain.entities.UserProfile
+import sdf.bitt.hydromate.domain.entities.UserSettings
 import sdf.bitt.hydromate.domain.repositories.DrinkRepository
 import sdf.bitt.hydromate.domain.usecases.CalculateRecommendedGoalUseCase
 import sdf.bitt.hydromate.domain.usecases.GetUserSettingsUseCase
@@ -47,11 +48,12 @@ class SettingsViewModel @Inject constructor(
         when (intent) {
             is SettingsIntent.UpdateDailyGoal -> updateDailyGoal(intent.goal)
             is SettingsIntent.UpdateCharacter -> updateCharacter(intent.character)
-            is SettingsIntent.UpdateNotifications -> updateNotifications(intent.enabled)
-            is SettingsIntent.UpdateNotificationInterval -> updateNotificationInterval(intent.intervalMinutes)
+//            is SettingsIntent.UpdateNotifications -> updateNotifications(intent.enabled)
+//            is SettingsIntent.UpdateNotificationInterval -> updateNotificationInterval(intent.intervalMinutes)
             is SettingsIntent.UpdateWakeUpTime -> updateWakeUpTime(intent.time)
             is SettingsIntent.UpdateBedTime -> updateBedTime(intent.time)
             is SettingsIntent.UpdateQuickAmounts -> updateQuickAmounts(intent.amounts)
+            is SettingsIntent.UpdateSettings -> updateSettings(intent.settings)
 
             SettingsIntent.ShowGoalDialog -> _uiState.update { it.copy(showGoalDialog = true) }
             SettingsIntent.HideGoalDialog -> _uiState.update { it.copy(showGoalDialog = false) }
@@ -197,6 +199,21 @@ class SettingsViewModel @Inject constructor(
                             error = exception.message
                                 ?: "Failed to update notification interval"
                         )
+                    }
+                }
+        }
+    }
+
+    private fun updateSettings(settings: UserSettings) {
+        viewModelScope.launch {
+            updateUserSettingsUseCase(settings)
+                .onSuccess {
+                    // Обновляем расписание уведомлений
+                    notificationScheduler.scheduleNotifications(settings)
+                }
+                .onFailure { exception ->
+                    _uiState.update {
+                        it.copy(error = exception.message ?: "Failed to update settings")
                     }
                 }
         }

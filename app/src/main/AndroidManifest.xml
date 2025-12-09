@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
         android:name=".HydroMateApplication"
@@ -19,26 +20,40 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HydroMate"
         tools:targetApi="35">
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.HydroMate">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <!-- Основной receiver для напоминаний -->
         <receiver
             android:name=".ui.notification.WaterReminderReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="sdf.bitt.hydromate.ACTION_WATER_REMINDER" />
+                <action android:name="sdf.bitt.hydromate.ACTION_SMART_REMINDER" />
+                <action android:name="sdf.bitt.hydromate.ACTION_CUSTOM_REMINDER" />
+                <action android:name="sdf.bitt.hydromate.ACTION_SNOOZE_REMINDER" />
             </intent-filter>
         </receiver>
 
+        <!-- Receiver для отсрочки уведомлений -->
+        <receiver
+            android:name=".ui.notification.SnoozeActionReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="sdf.bitt.hydromate.ACTION_SNOOZE" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Receiver для восстановления после перезагрузки -->
         <receiver
             android:name=".ui.notification.BootCompletedReceiver"
             android:enabled="true"

@@ -13,12 +13,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -50,6 +47,8 @@ class MainActivity : ComponentActivity() {
         if (isGranted) {
             // Разрешение получено, проверяем exact alarm
             checkExactAlarmPermission()
+            // Инициализируем уведомления после получения разрешения
+            initializeNotifications()
         } else {
             // Разрешение отклонено
             showPermissionRationale = true
@@ -95,17 +94,42 @@ class MainActivity : ComponentActivity() {
         checkAndRequestPermissions()
     }
 
+    /**
+     * FIXED: Проверка разрешений только при первом запуске
+     * Не инициализирует уведомления автоматически
+     */
     private fun checkAndRequestPermissions() {
         lifecycleScope.launch {
             try {
                 val settings = getUserSettingsUseCase().first()
 
                 // Запрашиваем разрешения только если уведомления включены
-                if (settings.notificationsEnabled) {
+                // и это первый запуск (разрешения еще не были запрошены)
+                if (settings.notificationsEnabled && !hasRequestedPermissions()) {
                     checkNotificationPermission()
+                    markPermissionsRequested()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+        }
+    }
+
+    /**
+     * Инициализирует уведомления
+     * Вызывается только после получения всех необходимых разрешений
+     */
+    private fun initializeNotifications() {
+        lifecycleScope.launch {
+            try {
+                val settings = getUserSettingsUseCase().first()
+                if (settings.notificationsEnabled) {
+                    // scheduleNotifications сам проверит, нужно ли перепланировать
+                    notificationScheduler.scheduleNotifications(settings)
+                    android.util.Log.d("MainActivity", "Notifications initialized")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Failed to initialize notifications", e)
             }
         }
     }
@@ -159,6 +183,22 @@ class MainActivity : ComponentActivity() {
             }
             startActivity(intent)
         }
+    }
+
+    /**
+     * Проверяет, были ли уже запрошены разрешения
+     */
+    private fun hasRequestedPermissions(): Boolean {
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        return prefs.getBoolean("permissions_requested", false)
+    }
+
+    /**
+     * Отмечает, что разрешения были запрошены
+     */
+    private fun markPermissionsRequested() {
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        prefs.edit().putBoolean("permissions_requested", true).apply()
     }
 }
 

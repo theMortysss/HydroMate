@@ -420,7 +420,7 @@ fun AddWaterForDateDialog(
 // ═══════════════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun TimePickerDialog(
+fun TimePickerDialog(
     initialHour: Int,
     initialMinute: Int,
     onTimeSelected: (hour: Int, minute: Int) -> Unit,

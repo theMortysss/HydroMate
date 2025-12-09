@@ -4,6 +4,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import sdf.bitt.hydromate.data.local.entities.UserSettingsEntity
 import sdf.bitt.hydromate.domain.entities.*
+import java.time.DayOfWeek
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -30,14 +31,22 @@ object UserSettingsMapper {
                 dailyGoal = it.dailyGoal,
                 selectedCharacter = CharacterType.valueOf(it.selectedCharacter),
                 notificationsEnabled = it.notificationsEnabled,
-                notificationInterval = it.notificationInterval,
                 wakeUpTime = LocalTime.parse(it.wakeUpTime, timeFormatter),
                 bedTime = LocalTime.parse(it.bedTime, timeFormatter),
+                smartRemindersEnabled = it.smartRemindersEnabled,
+                notificationInterval = it.notificationInterval,
+                reminderInterval = ReminderInterval.fromMinutes(it.reminderIntervalMinutes),
+                smartReminderDays = parseDaysOfWeek(it.smartReminderDays),
+                customRemindersEnabled = it.customRemindersEnabled,
+                customReminders = parseCustomReminders(it.customReminders),
+                snoozeEnabled = it.snoozeEnabled,
+                snoozeDelay = SnoozeDelay.fromMinutes(it.snoozeDelayMinutes),
+                showProgressInNotification = it.showProgressInNotification,
                 quickAddPresets = parseQuickAddPresets(it.quickAddPresets),
                 showNetHydration = it.showNetHydration,
                 profile = profile
             )
-        } ?: UserSettings() // Default settings if entity is null
+        } ?: UserSettings()
     }
 
     fun toEntity(domain: UserSettings): UserSettingsEntity {
@@ -46,9 +55,17 @@ object UserSettingsMapper {
             dailyGoal = domain.dailyGoal,
             selectedCharacter = domain.selectedCharacter.name,
             notificationsEnabled = domain.notificationsEnabled,
-            notificationInterval = domain.notificationInterval,
             wakeUpTime = domain.wakeUpTime.format(timeFormatter),
             bedTime = domain.bedTime.format(timeFormatter),
+            smartRemindersEnabled = domain.smartRemindersEnabled,
+            notificationInterval = domain.notificationInterval,
+            reminderIntervalMinutes = domain.reminderInterval.minutes,
+            smartReminderDays = serializeDaysOfWeek(domain.smartReminderDays),
+            customRemindersEnabled = domain.customRemindersEnabled,
+            customReminders = json.encodeToString(domain.customReminders),
+            snoozeEnabled = domain.snoozeEnabled,
+            snoozeDelayMinutes = domain.snoozeDelay.minutes,
+            showProgressInNotification = domain.showProgressInNotification,
             quickAddPresets = json.encodeToString(domain.quickAddPresets),
             quickAmounts = json.encodeToString(domain.quickAddPresets.map { it.amount }),
             showNetHydration = domain.showNetHydration,
@@ -84,5 +101,41 @@ object UserSettingsMapper {
                 QuickAddPreset.getDefaults()
             }
         }
+    }
+
+    private fun parseCustomReminders(jsonString: String): List<CustomReminder> {
+        return try {
+            if (jsonString.isBlank() || jsonString == "[]") {
+                emptyList()
+            } else {
+                json.decodeFromString<List<CustomReminder>>(jsonString)
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    private fun parseDaysOfWeek(value: String): Set<DayOfWeek> {
+        return try {
+            if (value.isBlank()) {
+                DayOfWeek.values().toSet()
+            } else {
+                value.split(",")
+                    .mapNotNull {
+                        try {
+                            DayOfWeek.valueOf(it.trim())
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                    .toSet()
+            }
+        } catch (e: Exception) {
+            DayOfWeek.values().toSet()
+        }
+    }
+
+    private fun serializeDaysOfWeek(days: Set<DayOfWeek>): String {
+        return days.joinToString(",") { it.name }
     }
 }

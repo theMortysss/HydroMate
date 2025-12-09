@@ -20,8 +20,8 @@ data class SettingsUiState(
 sealed class SettingsIntent {
     data class UpdateDailyGoal(val goal: Int) : SettingsIntent()
     data class UpdateCharacter(val character: CharacterType) : SettingsIntent()
-    data class UpdateNotifications(val enabled: Boolean) : SettingsIntent()
-    data class UpdateNotificationInterval(val intervalMinutes: Int) : SettingsIntent()
+//    data class UpdateNotifications(val enabled: Boolean) : SettingsIntent()
+//    data class UpdateNotificationInterval(val intervalMinutes: Int) : SettingsIntent()
     data class UpdateWakeUpTime(val time: LocalTime) : SettingsIntent()
     data class UpdateBedTime(val time: LocalTime) : SettingsIntent()
     data class UpdateQuickAmounts(val amounts: List<QuickAddPreset>) : SettingsIntent()
@@ -29,6 +29,8 @@ sealed class SettingsIntent {
 
     data class UpdateProfile(val profile: UserProfile) : SettingsIntent()
     data class CalculateRecommendedGoal(val profile: UserProfile) : SettingsIntent()
+
+    data class UpdateSettings(val settings: UserSettings) : SettingsIntent()
 
     object ShowGoalDialog : SettingsIntent()
     object HideGoalDialog : SettingsIntent()
