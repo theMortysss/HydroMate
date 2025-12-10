@@ -129,6 +129,7 @@ class NotificationScheduler @Inject constructor(
         currentTime: LocalTime
     ) {
         val intervalMinutes = settings.reminderInterval.minutes
+
         val wakeUpTime = settings.wakeUpTime
         val bedTime = settings.bedTime
 
