@@ -1,5 +1,6 @@
 package sdf.bitt.hydromate.ui.screens.statistics
 
+import sdf.bitt.hydromate.domain.entities.CharacterType
 import sdf.bitt.hydromate.domain.entities.WeeklyStatistics
 import sdf.bitt.hydromate.domain.usecases.TotalHydration
 import java.time.LocalDate

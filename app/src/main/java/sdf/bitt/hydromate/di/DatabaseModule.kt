@@ -8,7 +8,10 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import sdf.bitt.hydromate.data.local.HydroMateDatabase
+import sdf.bitt.hydromate.data.local.dao.AchievementDao
+import sdf.bitt.hydromate.data.local.dao.ChallengeDao
 import sdf.bitt.hydromate.data.local.dao.DrinkDao
+import sdf.bitt.hydromate.data.local.dao.UserProfileDao
 import sdf.bitt.hydromate.data.local.dao.UserSettingsDao
 import sdf.bitt.hydromate.data.local.dao.WaterEntryDao
 import javax.inject.Singleton
@@ -42,5 +45,21 @@ object DatabaseModule {
     @Provides
     fun provideDrinkDao(database: HydroMateDatabase): DrinkDao {
         return database.drinkDao()
+    }
+
+    // NEW PROVIDES
+    @Provides
+    fun provideUserProfileDao(database: HydroMateDatabase): UserProfileDao {
+        return database.userProfileDao()
+    }
+
+    @Provides
+    fun provideChallengeDao(database: HydroMateDatabase): ChallengeDao {
+        return database.challengeDao()
+    }
+
+    @Provides
+    fun provideAchievementDao(database: HydroMateDatabase): AchievementDao {
+        return database.achievementDao()
     }
 }

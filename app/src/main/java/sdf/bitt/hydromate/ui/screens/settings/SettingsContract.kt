@@ -11,15 +11,16 @@ data class SettingsUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val showGoalDialog: Boolean = false,
-    val showCharacterDialog: Boolean = false,
+//    val showCharacterDialog: Boolean = false,
     val showTimePickerDialog: Boolean = false,
     val showProfileDialog: Boolean = false,
-    val timePickerType: TimePickerType = TimePickerType.WAKE_UP
+    val timePickerType: TimePickerType = TimePickerType.WAKE_UP,
+    val selectedCharacter: CharacterType = CharacterType.PENGUIN
 )
 
 sealed class SettingsIntent {
     data class UpdateDailyGoal(val goal: Int) : SettingsIntent()
-    data class UpdateCharacter(val character: CharacterType) : SettingsIntent()
+//    data class UpdateCharacter(val character: CharacterType) : SettingsIntent()
 //    data class UpdateNotifications(val enabled: Boolean) : SettingsIntent()
 //    data class UpdateNotificationInterval(val intervalMinutes: Int) : SettingsIntent()
     data class UpdateWakeUpTime(val time: LocalTime) : SettingsIntent()
@@ -34,8 +35,8 @@ sealed class SettingsIntent {
 
     object ShowGoalDialog : SettingsIntent()
     object HideGoalDialog : SettingsIntent()
-    object ShowCharacterDialog : SettingsIntent()
-    object HideCharacterDialog : SettingsIntent()
+//    object ShowCharacterDialog : SettingsIntent()
+//    object HideCharacterDialog : SettingsIntent()
     object ShowProfileDialog : SettingsIntent() // NEW
     object HideProfileDialog : SettingsIntent() // NEW
     data class ShowTimePickerDialog(val type: TimePickerType) : SettingsIntent()

@@ -48,6 +48,7 @@ android {
 dependencies {
     // Haze
     implementation(libs.haze.jetpack.compose)
+    implementation(libs.androidx.compose.foundation)
     // Date/Time API for older Android versions
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     // Firebase

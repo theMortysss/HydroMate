@@ -12,8 +12,8 @@ data class UserSettingsEntity(
     @ColumnInfo(name = "daily_goal")
     val dailyGoal: Int,
 
-    @ColumnInfo(name = "selected_character")
-    val selectedCharacter: String,
+//    @ColumnInfo(name = "selected_character")
+//    val selectedCharacter: String,
 
     // Базовые настройки уведомлений
     @ColumnInfo(name = "notifications_enabled")

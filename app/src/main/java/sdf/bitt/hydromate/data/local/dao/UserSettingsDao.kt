@@ -16,8 +16,8 @@ interface UserSettingsDao {
     @Query("UPDATE user_settings SET daily_goal = :goal WHERE id = 1")
     suspend fun updateDailyGoal(goal: Int)
 
-    @Query("UPDATE user_settings SET selected_character = :character WHERE id = 1")
-    suspend fun updateSelectedCharacter(character: String)
+//    @Query("UPDATE user_settings SET selected_character = :character WHERE id = 1")
+//    suspend fun updateSelectedCharacter(character: String)
 
     @Query("UPDATE user_settings SET notifications_enabled = :enabled WHERE id = 1")
     suspend fun updateNotificationsEnabled(enabled: Boolean)

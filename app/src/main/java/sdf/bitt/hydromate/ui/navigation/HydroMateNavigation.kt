@@ -1,14 +1,20 @@
 package sdf.bitt.hydromate.ui.navigation
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -33,9 +39,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.History
@@ -93,6 +101,7 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import sdf.bitt.hydromate.ui.screens.history.HistoryScreen
 import sdf.bitt.hydromate.ui.screens.home.HomeScreen
+import sdf.bitt.hydromate.ui.screens.profile.ProfileScreen
 import sdf.bitt.hydromate.ui.screens.settings.SettingsScreen
 import sdf.bitt.hydromate.ui.screens.statistics.StatisticsScreen
 
@@ -104,6 +113,7 @@ sealed class Screen(
     object Home : Screen("home", "Home", Icons.Filled.Home)
     object Statistics : Screen("statistics", "Stats", Icons.Outlined.BarChart)
     object History : Screen("history", "History", Icons.Outlined.History)
+    object Profile : Screen("profile", "Profile", Icons.Filled.Person) // NEW
     object Settings : Screen("settings", "Settings", Icons.Filled.Settings)
 }
 
@@ -147,6 +157,8 @@ sealed class BottomBarTab(
 fun HydroMateNavigation() {
     val navController = rememberNavController()
     val hazeState = remember { HazeState() }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
         topBar = {
@@ -162,6 +174,50 @@ fun HydroMateNavigation() {
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onBackground
                     )
+                },
+                navigationIcon = {
+                    Box(modifier = Modifier.width(48.dp)) {
+                        AnimatedVisibility(
+                            visible = currentRoute == Screen.Profile.route,
+                            enter = fadeIn() + slideInHorizontally(initialOffsetX = { -it / 2 }),
+                            exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -it / 2 })
+                        ) {
+                            Icon(
+                                modifier = Modifier
+                                    .padding(horizontal = 12.dp)
+                                    .clickable {
+                                        navController.popBackStack()
+                                    },
+                                imageVector = Icons.Filled.ArrowBackIosNew,
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                contentDescription = "Back"
+                            )
+                        }
+                    }
+                },
+                actions = {
+                    AnimatedVisibility(
+                        visible = currentRoute != Screen.Profile.route,
+                        enter = fadeIn() + slideInHorizontally(initialOffsetX = { it / 2 }),
+                        exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it / 2 })
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                                .clickable {
+                                    navController.navigate(Screen.Profile.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
+                            imageVector = Icons.Filled.Person,
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            contentDescription = "Profile"
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
@@ -288,6 +344,9 @@ fun HydroMateNavigation() {
             }
             composable(Screen.History.route) {
                 HistoryScreen()
+            }
+            composable(Screen.Profile.route) {
+                ProfileScreen()
             }
             composable(Screen.Settings.route) {
                 SettingsScreen()

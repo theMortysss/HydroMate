@@ -12,7 +12,7 @@ interface UserSettingsRepository {
 
     suspend fun updateDailyGoal(goal: Int): Result<Unit>
 
-    suspend fun updateSelectedCharacter(character: CharacterType): Result<Unit>
+//    suspend fun updateSelectedCharacter(character: CharacterType): Result<Unit>
 
     suspend fun updateNotificationsEnabled(enabled: Boolean): Result<Unit>
 }

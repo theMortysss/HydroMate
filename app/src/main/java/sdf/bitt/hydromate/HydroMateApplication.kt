@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import sdf.bitt.hydromate.domain.usecases.InitializeDefaultDrinksUseCase
+import sdf.bitt.hydromate.domain.usecases.achievement.InitializeAchievementsUseCase
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -15,8 +16,8 @@ class HydroMateApplication : Application() {
     @Inject
     lateinit var initializeDefaultDrinksUseCase: InitializeDefaultDrinksUseCase
 
-    // Убрали notificationScheduler и getUserSettingsUseCase из Application
-    // Инициализация уведомлений теперь происходит только при необходимости
+    @Inject
+    lateinit var initializeAchievementsUseCase: InitializeAchievementsUseCase
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -34,10 +35,16 @@ class HydroMateApplication : Application() {
                 }
         }
 
-        // REMOVED: Инициализация уведомлений
-        // Теперь уведомления инициализируются только в двух случаях:
-        // 1. После перезагрузки устройства (BootCompletedReceiver)
-        // 2. При изменении настроек (через NotificationScheduler.scheduleNotifications)
+        // NEW: Инициализация достижений при первом запуске
+        applicationScope.launch {
+            initializeAchievementsUseCase()
+                .onSuccess {
+                    android.util.Log.d("HydroMate", "Achievements initialized successfully")
+                }
+                .onFailure { error ->
+                    android.util.Log.e("HydroMate", "Failed to initialize achievements", error)
+                }
+        }
 
         android.util.Log.d("HydroMate", "Application initialized")
     }

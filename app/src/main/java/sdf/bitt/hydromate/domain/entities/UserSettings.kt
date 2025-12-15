@@ -5,7 +5,7 @@ import java.time.LocalTime
 
 data class UserSettings(
     val dailyGoal: Int = 2000,
-    val selectedCharacter: CharacterType = CharacterType.PENGUIN,
+//    val selectedCharacter: CharacterType = CharacterType.PENGUIN,
 
     // Базовые настройки уведомлений
     val notificationsEnabled: Boolean = true,
@@ -81,12 +81,4 @@ data class UserSettings(
         val today = java.time.LocalDate.now().dayOfWeek
         return customReminders.filter { it.isEnabledForDay(today) }
     }
-}
-
-enum class CharacterType(val displayName: String, val emoji: String) {
-    PENGUIN("Penguin", "🐧"),
-    CAT("Cat", "🐱"),
-    FROG("Frog", "🐸"),
-    DUCK("Duck", "🦆"),
-    FISH("Fish", "🐠")
 }

@@ -23,6 +23,8 @@ import sdf.bitt.hydromate.domain.entities.StatisticItem
 import sdf.bitt.hydromate.domain.entities.WeeklyStatistics
 import sdf.bitt.hydromate.domain.usecases.TotalHydration
 import java.time.format.DateTimeFormatter
+import kotlin.math.max
+import kotlin.math.min
 
 @Composable
 fun WeeklyOverviewCardEnhanced(
@@ -241,35 +243,58 @@ private fun WaterChartEnhanced(
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
     val successColor = Color(0xFF4CAF50)
+    val negativeColor = Color.Red
 
     Canvas(modifier = modifier) {
         val width = size.width
         val height = size.height
-        val maxAmount = dailyProgress.maxOfOrNull {
-            if (showNetHydration) it.netHydration else it.totalAmount
-        } ?: 2000
         val padding = 40f
         val chartWidth = width - padding * 2
         val chartHeight = height - padding * 2
         val barWidth = chartWidth / dailyProgress.size.coerceAtLeast(1)
+
+        val minValue = dailyProgress.minOfOrNull {
+            (if (showNetHydration) it.netHydration else it.totalAmount).toFloat()
+        } ?: 0f
+        val maxValue = dailyProgress.maxOfOrNull {
+            (if (showNetHydration) it.netHydration else it.totalAmount).toFloat()
+        } ?: 0f
+        val maxGoal = dailyProgress.maxOfOrNull { it.goalAmount.toFloat() } ?: 2000f
+
+        val effectiveMin = minOf(minValue, 0f)
+        val effectiveMax = maxOf(maxValue, maxGoal, 0f)
+        var range = effectiveMax - effectiveMin
+        if (range == 0f) range = 2000f
+
+        val yBottom = height - padding
+        val yTop = padding
+
+        fun yForValue(v: Float): Float {
+            return yBottom - ((v - effectiveMin) / range) * chartHeight
+        }
 
         dailyProgress.forEachIndexed { index, progress ->
             val currentAmount = if (showNetHydration) {
                 progress.netHydration
             } else {
                 progress.totalAmount
-            }
+            }.toFloat()
 
-            val barHeight = (currentAmount.toFloat() / maxAmount) * chartHeight * animationProgress
-            val goalHeight = (progress.goalAmount.toFloat() / maxAmount) * chartHeight
+            val animatedV = currentAmount * animationProgress
+            val yZero = yForValue(0f)
+            val yValueAnimated = yForValue(animatedV)
+            val topY = min(yValueAnimated, yZero)
+            val barHeight = max(yValueAnimated, yZero) - topY
+
+            val goalY = yForValue(progress.goalAmount.toFloat())
             val x = padding + (index * barWidth) + barWidth * 0.1f
             val barActualWidth = barWidth * 0.8f
 
             // Goal line
             drawLine(
                 color = Color.Gray.copy(alpha = 0.5f),
-                start = Offset(x, height - padding - goalHeight),
-                end = Offset(x + barActualWidth, height - padding - goalHeight),
+                start = Offset(x, goalY),
+                end = Offset(x + barActualWidth, goalY),
                 strokeWidth = 2.dp.toPx(),
                 pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(
                     floatArrayOf(10f, 5f), 0f
@@ -277,27 +302,31 @@ private fun WaterChartEnhanced(
             )
 
             // Bar
-            val isGoalReached = currentAmount >= progress.goalAmount
-            val barColor = if (isGoalReached) successColor else primaryColor
+            val isGoalReached = currentAmount >= progress.goalAmount.toFloat()
+            val barColor = when {
+                isGoalReached -> successColor
+                currentAmount < 0 -> negativeColor
+                else -> primaryColor
+            }
 
             val gradient = Brush.verticalGradient(
                 colors = listOf(
                     barColor.copy(alpha = 0.8f),
                     barColor.copy(alpha = 0.4f)
                 ),
-                startY = height - padding - barHeight,
-                endY = height - padding
+                startY = topY,
+                endY = topY + barHeight
             )
 
             drawRect(
                 brush = gradient,
-                topLeft = Offset(x, height - padding - barHeight),
+                topLeft = Offset(x, topY),
                 size = Size(barActualWidth, barHeight)
             )
 
             drawRect(
                 color = barColor,
-                topLeft = Offset(x, height - padding - barHeight),
+                topLeft = Offset(x, topY),
                 size = Size(barActualWidth, barHeight),
                 style = Stroke(width = 2.dp.toPx())
             )

@@ -6,8 +6,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import sdf.bitt.hydromate.domain.entities.DailyProgress
 import sdf.bitt.hydromate.domain.entities.Drink
 import sdf.bitt.hydromate.domain.entities.QuickAddPreset
+import sdf.bitt.hydromate.domain.entities.UserProfile
+import sdf.bitt.hydromate.domain.entities.UserSettings
 import sdf.bitt.hydromate.domain.repositories.DrinkRepository
 import sdf.bitt.hydromate.domain.usecases.AddWaterEntryUseCase
 import sdf.bitt.hydromate.domain.usecases.CalculateCharacterStateUseCase
@@ -17,7 +20,13 @@ import sdf.bitt.hydromate.domain.usecases.DeleteWaterEntryUseCase
 import sdf.bitt.hydromate.domain.usecases.GetTodayProgressUseCase
 import sdf.bitt.hydromate.domain.usecases.GetUserSettingsUseCase
 import sdf.bitt.hydromate.domain.usecases.UpdateUserSettingsUseCase
+import sdf.bitt.hydromate.domain.usecases.achievement.CheckAchievementProgressUseCase
+import sdf.bitt.hydromate.domain.usecases.challenge.UpdateChallengeProgressUseCase
+import sdf.bitt.hydromate.domain.usecases.challenge.UpdateChallengeStreaksUseCase
+import sdf.bitt.hydromate.domain.usecases.profile.AddXPUseCase
+import sdf.bitt.hydromate.domain.usecases.profile.GetUserProfileUseCase
 import sdf.bitt.hydromate.ui.notification.NotificationScheduler
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,6 +41,11 @@ class HomeViewModel @Inject constructor(
     private val checkGoalReachedUseCase: CheckGoalReachedUseCase,
     private val notificationScheduler: NotificationScheduler,
     private val updateUserSettingsUseCase: UpdateUserSettingsUseCase,
+    private val updateChallengeProgressUseCase: UpdateChallengeProgressUseCase,
+    private val getUserProfileUseCase: GetUserProfileUseCase,
+    private val checkAchievementProgressUseCase: CheckAchievementProgressUseCase,
+    private val updateChallengeStreaksUseCase: UpdateChallengeStreaksUseCase,
+    private val addXPUseCase: AddXPUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -46,7 +60,7 @@ class HomeViewModel @Inject constructor(
 
     fun handleIntent(intent: HomeIntent) {
         when (intent) {
-            is HomeIntent.AddWater -> addWater(intent.amount, intent.drink)
+            is HomeIntent.AddWater -> addWater(intent.amount, intent.drink, intent.timestamp)
             is HomeIntent.DeleteEntry -> deleteEntry(intent.entryId)
             is HomeIntent.SelectDrink -> selectDrink(intent.drink)
             is HomeIntent.CreateCustomDrink -> createCustomDrink(intent.drink)
@@ -82,9 +96,10 @@ class HomeViewModel @Inject constructor(
             combine(
                 getTodayProgressUseCase(),
                 getUserSettingsUseCase(),
-                drinkRepository.getAllActiveDrinks()
-            ) { progress, settings, drinks ->
-                Triple(progress, settings, drinks)
+                drinkRepository.getAllActiveDrinks(),
+                getUserProfileUseCase()
+            ) { progress, settings, drinks, profile ->
+                CombinedData(progress, settings, drinks, profile)
             }.catch { exception ->
                 _uiState.update {
                     it.copy(
@@ -92,7 +107,7 @@ class HomeViewModel @Inject constructor(
                         error = exception.message ?: "Unknown error occurred"
                     )
                 }
-            }.collect { (progress, settings, drinks) ->
+            }.collect { (progress, settings, drinks, profile) ->
                 // Расчет гидратации
                 val drinksMap = drinks.associateBy { it.id }
                 val totalHydration = calculateHydrationUseCase.calculateTotal(
@@ -135,6 +150,7 @@ class HomeViewModel @Inject constructor(
                         selectedDrink = it.selectedDrink
                             ?: drinks.firstOrNull { drink -> drink.id == 1L }
                             ?: Drink.WATER,
+                        selectedCharacter = profile.selectedCharacter,
                         isLoading = false
                     )
                 }
@@ -152,16 +168,34 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun addWater(amount: Int, drink: Drink) {
+    private fun addWater(amount: Int, drink: Drink, timestamp: LocalDateTime) {
         viewModelScope.launch {
             _uiState.update { it.copy(isAddingWater = true) }
 
             val hydrationResult = calculateHydrationUseCase(amount, drink)
 
-            addWaterEntryUseCase(amount, drink)
+            addWaterEntryUseCase(amount, drink, timestamp)
                 .onSuccess {
                     _effects.trySend(HomeEffect.ShowAddWaterAnimation)
                     _effects.trySend(HomeEffect.HapticFeedback)
+
+                    // NEW: Check challenge violations
+                    updateChallengeProgressUseCase(drink)
+                        .onSuccess { violatedChallengeIds ->
+                            if (violatedChallengeIds.isNotEmpty()) {
+                                _effects.trySend(
+                                    HomeEffect.ShowError(
+                                        "⚠️ Challenge violated! ${drink.name} is not allowed in your active challenge."
+                                    )
+                                )
+                            }
+                        }
+
+                    // NEW: Track drink in profile
+                    addXPUseCase.incrementDrinkCount(drink.name)
+
+                    // Check achievements
+                    checkAchievements()
 
                     _effects.trySend(
                         HomeEffect.ShowHydrationInfo(
@@ -184,6 +218,9 @@ class HomeViewModel @Inject constructor(
 
                     // НОВАЯ ЛОГИКА: Проверяем достижение цели после добавления воды
                     checkAndHandleGoalAchievement()
+
+                    // NEW: Update challenge streaks
+                    updateChallengeStreaksUseCase()
                 }
                 .onFailure { exception ->
                     _effects.trySend(
@@ -212,6 +249,27 @@ class HomeViewModel @Inject constructor(
                     )
                 }
         }
+    }
+
+    private suspend fun checkAchievements() {
+        checkAchievementProgressUseCase()
+            .onSuccess { newlyUnlocked ->
+                newlyUnlocked.forEach { achievement ->
+                    _effects.trySend(
+                        HomeEffect.ShowSuccess(
+                            "🎉 Achievement unlocked: ${achievement.title}!"
+                        )
+                    )
+
+                    achievement.unlockableCharacter?.let { character ->
+                        _effects.trySend(
+                            HomeEffect.ShowSuccess(
+                                "🎭 New character unlocked: ${character.displayName}!"
+                            )
+                        )
+                    }
+                }
+            }
     }
 
     /**
@@ -266,3 +324,10 @@ class HomeViewModel @Inject constructor(
         _uiState.update { it.copy(error = null) }
     }
 }
+
+private data class CombinedData(
+    val progress: DailyProgress,
+    val settings: UserSettings,
+    val drinks: List<Drink>,
+    val profile: UserProfile
+)

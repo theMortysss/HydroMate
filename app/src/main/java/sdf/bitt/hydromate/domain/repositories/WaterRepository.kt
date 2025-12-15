@@ -14,7 +14,7 @@ interface WaterRepository {
     suspend fun addWaterEntry(
         amount: Int,
         drink: Drink = Drink.WATER,
-        timestamp: LocalDateTime = LocalDateTime.now() // ДОБАВИЛИ
+        timestamp: LocalDateTime
     ): Result<Long>
 
     suspend fun deleteWaterEntry(entryId: Long): Result<Unit>
@@ -22,6 +22,8 @@ interface WaterRepository {
     fun getTodayProgress(): Flow<DailyProgress>
 
     fun getProgressForDate(date: LocalDate): Flow<DailyProgress>
+
+    fun getProgressForDateRange(startDate: LocalDate, endDate: LocalDate): Flow<List<DailyProgress>>
 
     suspend fun getWeeklyStatistics(startDate: LocalDate): Result<WeeklyStatistics>
 

@@ -1,4 +1,4 @@
-package sdf.bitt.hydromate.data.repositories
+package sdf.bitt.hydromate.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -39,14 +39,14 @@ class UserSettingsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateSelectedCharacter(character: CharacterType): Result<Unit> {
-        return try {
-            userSettingsDao.updateSelectedCharacter(character.name)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+//    override suspend fun updateSelectedCharacter(character: CharacterType): Result<Unit> {
+//        return try {
+//            userSettingsDao.updateSelectedCharacter(character.name)
+//            Result.success(Unit)
+//        } catch (e: Exception) {
+//            Result.failure(e)
+//        }
+//    }
 
     override suspend fun updateNotificationsEnabled(enabled: Boolean): Result<Unit> {
         return try {

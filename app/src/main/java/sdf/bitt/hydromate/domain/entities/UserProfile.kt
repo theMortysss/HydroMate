@@ -4,23 +4,82 @@ package sdf.bitt.hydromate.domain.entities
  * Профиль пользователя для расчета рекомендуемой нормы гидратации
  */
 data class UserProfile(
+    // Базовая информация
     val gender: Gender = Gender.PREFER_NOT_TO_SAY,
     val weightKg: Int = 70,
     val activityLevel: ActivityLevel = ActivityLevel.MODERATE,
     val climate: Climate = Climate.MODERATE,
-    val isManualGoal: Boolean = false, // Если true, игнорируем расчет и используем ручную норму
-    val manualGoal: Int = 2000 // Ручная норма (если isManualGoal = true)
+    val isManualGoal: Boolean = false,
+    val manualGoal: Int = 2000,
+
+    // Прогрессия
+    val level: Int = 1,
+    val currentXP: Int = 0,
+    val totalXP: Int = 0,
+    val selectedCharacter: CharacterType = CharacterType.PENGUIN,
+    val unlockedCharacters: Set<CharacterType> = setOf(CharacterType.PENGUIN),
+
+    // Статистика
+    val totalDrinksDrank: Int = 0,
+    val uniqueDrinksTried: Set<String> = emptySet(),
+    val challengesCompleted: Int = 0,
+    val achievementsUnlocked: Int = 0
 ) {
     /**
-     * Валидация профиля
+     * XP необходимый для следующего уровня
      */
+    val xpForNextLevel: Int
+        get() = level * 200
+
+    /**
+     * Прогресс до следующего уровня (0-100%)
+     */
+    val levelProgress: Float
+        get() = (currentXP.toFloat() / xpForNextLevel * 100).coerceIn(0f, 100f)
+
+    /**
+     * Добавить XP
+     */
+    fun addXP(xp: Int): UserProfile {
+        val newCurrentXP = currentXP + xp
+        val newTotalXP = totalXP + xp
+
+        // Проверка на повышение уровня
+        return if (newCurrentXP >= xpForNextLevel) {
+            val remainingXP = newCurrentXP - xpForNextLevel
+            this.copy(
+                level = level + 1,
+                currentXP = remainingXP,
+                totalXP = newTotalXP
+            )
+        } else {
+            this.copy(
+                currentXP = newCurrentXP,
+                totalXP = newTotalXP
+            )
+        }
+    }
+
+    /**
+     * Разблокировать персонажа
+     */
+    fun unlockCharacter(character: CharacterType): UserProfile {
+        return this.copy(
+            unlockedCharacters = unlockedCharacters + character
+        )
+    }
+
+    /**
+     * Проверка разблокирован ли персонаж
+     */
+    fun isCharacterUnlocked(character: CharacterType): Boolean {
+        return character.isUnlockedByDefault || unlockedCharacters.contains(character)
+    }
+
     fun isValid(): Boolean {
         return weightKg in 30..200 && manualGoal in 500..5000
     }
 
-    /**
-     * Получить текущую цель (ручная или расчетная будет определена в UseCase)
-     */
     fun getCurrentGoal(calculatedGoal: Int): Int {
         return if (isManualGoal) manualGoal else calculatedGoal
     }

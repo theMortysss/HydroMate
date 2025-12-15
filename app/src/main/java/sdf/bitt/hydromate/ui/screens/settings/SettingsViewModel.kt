@@ -14,6 +14,7 @@ import sdf.bitt.hydromate.domain.usecases.CalculateRecommendedGoalUseCase
 import sdf.bitt.hydromate.domain.usecases.GetUserSettingsUseCase
 import sdf.bitt.hydromate.domain.usecases.UpdateDailyGoalUseCase
 import sdf.bitt.hydromate.domain.usecases.UpdateUserSettingsUseCase
+import sdf.bitt.hydromate.domain.usecases.profile.GetUserProfileUseCase
 import sdf.bitt.hydromate.ui.notification.NotificationScheduler
 import java.time.LocalTime
 import javax.inject.Inject
@@ -25,7 +26,8 @@ class SettingsViewModel @Inject constructor(
     private val updateDailyGoalUseCase: UpdateDailyGoalUseCase,
     private val notificationScheduler: NotificationScheduler,
     private val drinkRepository: DrinkRepository,
-    private val calculateRecommendedGoalUseCase: CalculateRecommendedGoalUseCase
+    private val calculateRecommendedGoalUseCase: CalculateRecommendedGoalUseCase,
+    private val getUserProfileUseCase: GetUserProfileUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -33,21 +35,12 @@ class SettingsViewModel @Inject constructor(
 
     init {
         observeSettings()
-        // Calculate initial recommended goal
-        viewModelScope.launch {
-            getUserSettingsUseCase().first().let { settings ->
-                if (!settings.profile.isManualGoal) {
-                    val result = calculateRecommendedGoalUseCase(settings.profile)
-                    _uiState.update { it.copy(recommendedGoal = result) }
-                }
-            }
-        }
     }
 
     fun handleIntent(intent: SettingsIntent) {
         when (intent) {
             is SettingsIntent.UpdateDailyGoal -> updateDailyGoal(intent.goal)
-            is SettingsIntent.UpdateCharacter -> updateCharacter(intent.character)
+//            is SettingsIntent.UpdateCharacter -> updateCharacter(intent.character)
 //            is SettingsIntent.UpdateNotifications -> updateNotifications(intent.enabled)
 //            is SettingsIntent.UpdateNotificationInterval -> updateNotificationInterval(intent.intervalMinutes)
             is SettingsIntent.UpdateWakeUpTime -> updateWakeUpTime(intent.time)
@@ -57,8 +50,8 @@ class SettingsViewModel @Inject constructor(
 
             SettingsIntent.ShowGoalDialog -> _uiState.update { it.copy(showGoalDialog = true) }
             SettingsIntent.HideGoalDialog -> _uiState.update { it.copy(showGoalDialog = false) }
-            SettingsIntent.ShowCharacterDialog -> _uiState.update { it.copy(showCharacterDialog = true) }
-            SettingsIntent.HideCharacterDialog -> _uiState.update { it.copy(showCharacterDialog = false) }
+//            SettingsIntent.ShowCharacterDialog -> _uiState.update { it.copy(showCharacterDialog = true) }
+//            SettingsIntent.HideCharacterDialog -> _uiState.update { it.copy(showCharacterDialog = false) }
             is SettingsIntent.ShowTimePickerDialog -> _uiState.update {
                 it.copy(showTimePickerDialog = true, timePickerType = intent.type)
             }
@@ -83,9 +76,10 @@ class SettingsViewModel @Inject constructor(
 
             combine(
                 getUserSettingsUseCase(),
-                drinkRepository.getAllActiveDrinks()
-            ) { settings, drinks ->
-                Pair(settings, drinks)
+                drinkRepository.getAllActiveDrinks(),
+                getUserProfileUseCase()
+            ) { settings, drinks, profile ->
+                Triple(settings, drinks, profile)
             }.catch { exception ->
                 _uiState.update {
                     it.copy(
@@ -93,11 +87,13 @@ class SettingsViewModel @Inject constructor(
                         error = exception.message ?: "Failed to load settings"
                     )
                 }
-            }.collect { (settings, drinks) ->
+            }.collect { (settings, drinks, profile) ->
                 _uiState.update {
                     it.copy(
                         drinks = drinks,
                         settings = settings,
+                        recommendedGoal = if (!settings.profile.isManualGoal) calculateRecommendedGoalUseCase(settings.profile) else null,
+                        selectedCharacter = profile.selectedCharacter,
                         isLoading = false
                     )
                 }
@@ -156,17 +152,17 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun updateCharacter(character: CharacterType) {
-        viewModelScope.launch {
-            val newSettings = _uiState.value.settings.copy(selectedCharacter = character)
-            updateUserSettingsUseCase(newSettings)
-                .onFailure { exception ->
-                    _uiState.update {
-                        it.copy(error = exception.message ?: "Failed to update character")
-                    }
-                }
-        }
-    }
+//    private fun updateCharacter(character: CharacterType) {
+//        viewModelScope.launch {
+//            val newSettings = _uiState.value.settings.copy(selectedCharacter = character)
+//            updateUserSettingsUseCase(newSettings)
+//                .onFailure { exception ->
+//                    _uiState.update {
+//                        it.copy(error = exception.message ?: "Failed to update character")
+//                    }
+//                }
+//        }
+//    }
 
     private fun updateNotifications(enabled: Boolean) {
         viewModelScope.launch {

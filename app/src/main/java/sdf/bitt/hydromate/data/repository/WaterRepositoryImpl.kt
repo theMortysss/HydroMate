@@ -1,4 +1,4 @@
-package sdf.bitt.hydromate.data.repositories
+package sdf.bitt.hydromate.data.repository
 
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
@@ -11,13 +11,14 @@ import sdf.bitt.hydromate.data.mappers.UserSettingsMapper
 import sdf.bitt.hydromate.data.mappers.WaterEntryMapper
 import sdf.bitt.hydromate.domain.entities.DailyProgress
 import sdf.bitt.hydromate.domain.entities.Drink
-import sdf.bitt.hydromate.domain.entities.DrinkType
 import sdf.bitt.hydromate.domain.entities.WaterEntry
 import sdf.bitt.hydromate.domain.entities.WeeklyStatistics
 import sdf.bitt.hydromate.domain.repositories.WaterRepository
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -78,6 +79,36 @@ class WaterRepositoryImpl @Inject constructor(
                 goalAmount = settings.dailyGoal,
                 entries = entries
             )
+        }
+    }
+
+    override fun getProgressForDateRange(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Flow<List<DailyProgress>> {
+        val startOfDay = startDate.atStartOfDay().atZone(ZoneId.systemDefault()).toEpochSecond()
+        val endOfDay = endDate.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toEpochSecond()
+
+        return combine(
+            waterEntryDao.getEntriesForDateRange(startOfDay, endOfDay),
+            userSettingsDao.getUserSettings()
+        ) { entries, settingsEntity ->
+            val settings = UserSettingsMapper.toDomain(settingsEntity)
+            val days = ChronoUnit.DAYS.between(startDate, endDate) + 1
+
+            (0 until days).map { i ->
+                val date = startDate.plusDays(i.toLong())
+                val dayEntries = entries.filter {
+                    LocalDateTime.ofInstant(Instant.ofEpochSecond(it.timestamp), ZoneId.systemDefault()).toLocalDate() == date
+                }.map { WaterEntryMapper.toDomain(it) }
+
+                DailyProgress(
+                    date = date,
+                    totalAmount = dayEntries.sumOf { it.amount },
+                    goalAmount = settings.dailyGoal,
+                    entries = dayEntries
+                )
+            }
         }
     }
 

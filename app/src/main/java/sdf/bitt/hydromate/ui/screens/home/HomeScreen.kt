@@ -100,9 +100,9 @@ fun HomeScreen(
                     .hazeEffect(
                         state = hazeState,
                         style = HazeStyle(
-                            backgroundColor = MaterialTheme.colorScheme.background,
+                            backgroundColor = MaterialTheme.colorScheme.primary,
                             tint = HazeTint(
-                                color = MaterialTheme.colorScheme.background.copy(alpha = .7f),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = .7f),
                                 blendMode = BlendMode.Src
                             ),
                             blurRadius = 30.dp,
@@ -120,7 +120,7 @@ fun HomeScreen(
                     )
                     .padding(16.dp),
                 text = it.visuals.message,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 18.sp,
                 textAlign = TextAlign.Center
             )
@@ -149,7 +149,7 @@ fun HomeScreen(
             // Character Display
             CharacterDisplay(
                 characterState = uiState.characterState,
-                selectedCharacter = uiState.userSettings?.selectedCharacter,
+                selectedCharacter = uiState.selectedCharacter, // CHANGED from uiState.userSettings?.selectedCharacter
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -297,8 +297,8 @@ fun HomeScreen(
         AddWaterForDateDialog(
             date = LocalDate.now(),
             drinks = uiState.drinks,
-            onAddEntry = { amount, drink, _ ->
-                viewModel.handleIntent(HomeIntent.AddWater(amount, drink))
+            onAddEntry = { amount, drink, timestamp ->
+                viewModel.handleIntent(HomeIntent.AddWater(amount, drink, timestamp))
             },
             onDrinkCreated = { drink ->
                 viewModel.handleIntent(HomeIntent.CreateCustomDrink(drink))

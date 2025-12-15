@@ -1,4 +1,4 @@
-package sdf.bitt.hydromate.data.repositories
+package sdf.bitt.hydromate.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

@@ -29,7 +29,7 @@ object UserSettingsMapper {
 
             UserSettings(
                 dailyGoal = it.dailyGoal,
-                selectedCharacter = CharacterType.valueOf(it.selectedCharacter),
+//                selectedCharacter = CharacterType.valueOf(it.selectedCharacter),
                 notificationsEnabled = it.notificationsEnabled,
                 wakeUpTime = LocalTime.parse(it.wakeUpTime, timeFormatter),
                 bedTime = LocalTime.parse(it.bedTime, timeFormatter),
@@ -53,7 +53,7 @@ object UserSettingsMapper {
         return UserSettingsEntity(
             id = 1,
             dailyGoal = domain.dailyGoal,
-            selectedCharacter = domain.selectedCharacter.name,
+//            selectedCharacter = domain.selectedCharacter.name,
             notificationsEnabled = domain.notificationsEnabled,
             wakeUpTime = domain.wakeUpTime.format(timeFormatter),
             bedTime = domain.bedTime.format(timeFormatter),
