@@ -23,7 +23,8 @@ data class HomeUiState(
     val hydrationProgress: HydrationProgress? = null,
     val drinks: List<Drink> = emptyList(),
     val selectedDrink: Drink? = null,
-    val selectedCharacter: CharacterType = CharacterType.PENGUIN
+    val selectedCharacter: CharacterType = CharacterType.PENGUIN,
+    val viewedTipIds: Set<String> = emptySet(),
 ) {
     val progressPercentage: Float
         get() = hydrationProgress?.percentage?.div(100f) ?: 0f
@@ -43,13 +44,17 @@ data class HomeUiState(
 }
 
 sealed class HomeIntent {
-    data class AddWater(val amount: Int, val drink: Drink, val timestamp: LocalDateTime = LocalDateTime.now()) : HomeIntent()
+    data class AddWater(
+        val amount: Int,
+        val drink: Drink,
+        val timestamp: LocalDateTime = LocalDateTime.now()
+    ) : HomeIntent()
+
     data class DeleteEntry(val entryId: Long) : HomeIntent()
     data class SelectDrink(val drink: Drink) : HomeIntent()
     data class CreateCustomDrink(val drink: Drink) : HomeIntent()
-
-    // NEW: Управление Quick Add Presets
     data class UpdateQuickPresets(val presets: List<QuickAddPreset>) : HomeIntent()
+    data class MarkTipAsViewed(val tipId: String) : HomeIntent()
 
     object RefreshData : HomeIntent()
     object ClearError : HomeIntent()

@@ -146,6 +146,14 @@ fun HomeScreen(
         ) {
             Spacer(modifier = Modifier.height(6.dp))
 
+            HydrationTipsStories(
+                viewedTipIds = uiState.viewedTipIds,
+                onTipViewed = { tipId ->
+                    viewModel.handleIntent(HomeIntent.MarkTipAsViewed(tipId))
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
             // Character Display
             CharacterDisplay(
                 characterState = uiState.characterState,

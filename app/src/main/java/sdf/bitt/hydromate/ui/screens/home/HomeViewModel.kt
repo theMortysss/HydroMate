@@ -12,6 +12,7 @@ import sdf.bitt.hydromate.domain.entities.QuickAddPreset
 import sdf.bitt.hydromate.domain.entities.UserProfile
 import sdf.bitt.hydromate.domain.entities.UserSettings
 import sdf.bitt.hydromate.domain.repositories.DrinkRepository
+import sdf.bitt.hydromate.domain.repositories.TipsRepository
 import sdf.bitt.hydromate.domain.usecases.AddWaterEntryUseCase
 import sdf.bitt.hydromate.domain.usecases.CalculateCharacterStateUseCase
 import sdf.bitt.hydromate.domain.usecases.CalculateHydrationUseCase
@@ -45,7 +46,8 @@ class HomeViewModel @Inject constructor(
     private val getUserProfileUseCase: GetUserProfileUseCase,
     private val checkAchievementProgressUseCase: CheckAchievementProgressUseCase,
     private val updateChallengeStreaksUseCase: UpdateChallengeStreaksUseCase,
-    private val addXPUseCase: AddXPUseCase
+    private val addXPUseCase: AddXPUseCase,
+    private val tipsRepository: TipsRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -65,8 +67,15 @@ class HomeViewModel @Inject constructor(
             is HomeIntent.SelectDrink -> selectDrink(intent.drink)
             is HomeIntent.CreateCustomDrink -> createCustomDrink(intent.drink)
             is HomeIntent.UpdateQuickPresets -> updateQuickPresets(intent.presets)
+            is HomeIntent.MarkTipAsViewed -> markTipAsViewed(intent.tipId)
             HomeIntent.RefreshData -> refreshData()
             HomeIntent.ClearError -> clearError()
+        }
+    }
+
+    private fun markTipAsViewed(tipId: String) {
+        viewModelScope.launch {
+            tipsRepository.markTipAsViewed(tipId)
         }
     }
 
@@ -97,9 +106,10 @@ class HomeViewModel @Inject constructor(
                 getTodayProgressUseCase(),
                 getUserSettingsUseCase(),
                 drinkRepository.getAllActiveDrinks(),
-                getUserProfileUseCase()
-            ) { progress, settings, drinks, profile ->
-                CombinedData(progress, settings, drinks, profile)
+                getUserProfileUseCase(),
+                tipsRepository.getViewedTipIds()
+            ) { progress, settings, drinks, profile, viewedTips ->
+                CombinedData(progress, settings, drinks, profile, viewedTips)
             }.catch { exception ->
                 _uiState.update {
                     it.copy(
@@ -107,7 +117,7 @@ class HomeViewModel @Inject constructor(
                         error = exception.message ?: "Unknown error occurred"
                     )
                 }
-            }.collect { (progress, settings, drinks, profile) ->
+            }.collect { (progress, settings, drinks, profile, viewedTips) ->
                 // Расчет гидратации
                 val drinksMap = drinks.associateBy { it.id }
                 val totalHydration = calculateHydrationUseCase.calculateTotal(
@@ -151,6 +161,7 @@ class HomeViewModel @Inject constructor(
                             ?: drinks.firstOrNull { drink -> drink.id == 1L }
                             ?: Drink.WATER,
                         selectedCharacter = profile.selectedCharacter,
+                        viewedTipIds = viewedTips,
                         isLoading = false
                     )
                 }
@@ -329,5 +340,6 @@ private data class CombinedData(
     val progress: DailyProgress,
     val settings: UserSettings,
     val drinks: List<Drink>,
-    val profile: UserProfile
+    val profile: UserProfile,
+    val viewedTips: Set<String>
 )
