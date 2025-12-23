@@ -5,15 +5,15 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.hilt)
-//    alias(libs.plugins.google.gms)
+    alias(libs.plugins.google.gms)
 }
 
 android {
-    namespace = "sdf.bitt.hydromate"
+    namespace = "dev.techm1nd.hydromate"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "sdf.bitt.hydromate"
+        applicationId = "dev.techm1nd.hydromate"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -49,13 +49,21 @@ dependencies {
     // Haze
     implementation(libs.haze.jetpack.compose)
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.hilt.common)
+    implementation(libs.androidx.hilt.work)
+    implementation(libs.googleid)
     // Date/Time API for older Android versions
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+
     // Firebase
-//    implementation(platform(libs.firebase.bom))
-//    implementation(libs.firebase.analytics)
-//    implementation(libs.firebase.messaging)
-//    implementation(libs.firebase.database)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.messaging)
+    implementation(libs.firebase.database)
+    implementation(libs.firebase.auth)
     // Splash
     implementation(libs.androidx.core.splashscreen)
     // Room
