@@ -1,9 +1,10 @@
-package dev.techm1nd.hydromate.domain.usecases
+package dev.techm1nd.hydromate.domain.usecases.stat
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import dev.techm1nd.hydromate.domain.entities.DailyProgress
 import dev.techm1nd.hydromate.domain.entities.WeeklyStatistics
 import dev.techm1nd.hydromate.domain.repositories.WaterRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -24,7 +25,8 @@ class GetWeeklyStatisticsUseCase @Inject constructor(
             val dailyProgressList = dailyProgressArray.toList()
 
             val totalAmount = dailyProgressList.sumOf { it.totalAmount }
-            val averageDaily = if (dailyProgressList.isNotEmpty()) totalAmount / dailyProgressList.size else 0
+            val averageDaily =
+                if (dailyProgressList.isNotEmpty()) totalAmount / dailyProgressList.size else 0
             val daysGoalReached = dailyProgressList.count { it.isGoalReached }
             val currentStreak = calculateStreak(dailyProgressList)
 
@@ -40,7 +42,7 @@ class GetWeeklyStatisticsUseCase @Inject constructor(
         }
     }
 
-    private fun calculateStreak(dailyProgress: List<dev.techm1nd.hydromate.domain.entities.DailyProgress>): Int {
+    private fun calculateStreak(dailyProgress: List<DailyProgress>): Int {
         var streak = 0
         for (progress in dailyProgress.reversed()) {
             if (progress.isGoalReached) {

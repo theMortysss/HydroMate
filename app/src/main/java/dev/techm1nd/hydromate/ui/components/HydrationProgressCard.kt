@@ -17,14 +17,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.techm1nd.hydromate.domain.usecases.HydrationProgress
-import dev.techm1nd.hydromate.domain.usecases.TotalHydration
+import dev.techm1nd.hydromate.domain.usecases.hydration.HydrationProgress
+import dev.techm1nd.hydromate.domain.usecases.hydration.TotalHydration
 
 @Composable
 fun HydrationProgressCard(
     hydrationProgress: HydrationProgress,
     totalHydration: TotalHydration,
-    showNetHydration: Boolean = true, // NEW: параметр для режима отображения
     modifier: Modifier = Modifier
 ) {
     val animatedProgress by animateFloatAsState(
@@ -33,12 +32,7 @@ fun HydrationProgressCard(
         label = "progress_animation"
     )
 
-    // FIXED: Выбираем что отображать в зависимости от режима
-    val displayAmount = if (showNetHydration) {
-        totalHydration.netHydration
-    } else {
-        totalHydration.totalActual
-    }
+    val displayAmount = totalHydration.netHydration
 
     Card(
         modifier = modifier,
@@ -71,7 +65,7 @@ fun HydrationProgressCard(
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                 ) {
                     Text(
-                        text = if (showNetHydration) "Net" else "Total",
+                        text = "Total",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Medium
@@ -133,29 +127,16 @@ fun HydrationProgressCard(
                     color = Color(0xFF2196F3)
                 )
 
-                if (showNetHydration) {
-                    HydrationMetricRow(
-                        icon = "✨",
-                        label = "Effective Hydration",
-                        value = "${totalHydration.totalEffective}ml",
-                        color = Color(0xFF4CAF50)
-                    )
-
-                    if (totalHydration.totalDehydration > 0) {
-                        HydrationMetricRow(
-                            icon = "⚠️",
-                            label = "Dehydration Effect",
-                            value = "-${totalHydration.totalDehydration}ml",
-                            color = Color(0xFFFF9800),
-                            isNegative = true
-                        )
-                    }
-
-                    Divider(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                    )
-                }
+                HydrationMetricRow(
+                    icon = "✨",
+                    label = "Effective Hydration",
+                    value = "${totalHydration.totalEffective}ml",
+                    color = Color(0xFF4CAF50)
+                )
+                Divider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                )
 
                 if (!hydrationProgress.isGoalReached) {
                     HydrationMetricRow(

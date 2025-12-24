@@ -43,7 +43,7 @@ object UserSettingsMapper {
                 snoozeDelay = SnoozeDelay.fromMinutes(it.snoozeDelayMinutes),
                 showProgressInNotification = it.showProgressInNotification,
                 quickAddPresets = parseQuickAddPresets(it.quickAddPresets),
-                showNetHydration = it.showNetHydration,
+//                showNetHydration = it.showNetHydration,
                 profile = profile
             )
         } ?: UserSettings()
@@ -68,7 +68,7 @@ object UserSettingsMapper {
             showProgressInNotification = domain.showProgressInNotification,
             quickAddPresets = json.encodeToString(domain.quickAddPresets),
             quickAmounts = json.encodeToString(domain.quickAddPresets.map { it.amount }),
-            showNetHydration = domain.showNetHydration,
+//            showNetHydration = domain.showNetHydration,
             profileGender = domain.profile.gender.name,
             profileWeightKg = domain.profile.weightKg,
             profileActivityLevel = domain.profile.activityLevel.name,
@@ -118,7 +118,7 @@ object UserSettingsMapper {
     private fun parseDaysOfWeek(value: String): Set<DayOfWeek> {
         return try {
             if (value.isBlank()) {
-                DayOfWeek.values().toSet()
+                DayOfWeek.entries.toSet()
             } else {
                 value.split(",")
                     .mapNotNull {
@@ -131,7 +131,7 @@ object UserSettingsMapper {
                     .toSet()
             }
         } catch (e: Exception) {
-            DayOfWeek.values().toSet()
+            DayOfWeek.entries.toSet()
         }
     }
 

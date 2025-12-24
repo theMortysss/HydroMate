@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import dev.techm1nd.hydromate.domain.usecases.GetUserSettingsUseCase
+import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
 import javax.inject.Inject
 
 @AndroidEntryPoint

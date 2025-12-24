@@ -1,4 +1,4 @@
-package dev.techm1nd.hydromate.domain.usecases
+package dev.techm1nd.hydromate.domain.usecases.hydration
 
 import dev.techm1nd.hydromate.domain.entities.Drink
 import dev.techm1nd.hydromate.domain.entities.WaterEntry
@@ -22,24 +22,22 @@ class CalculateHydrationUseCase @Inject constructor() {
         // 1. Базовая гидратация с учетом типа напитка
         val baseHydration = (amount * drink.hydrationMultiplier).toInt()
 
-        // 2. Расчет эффекта кофеина (основано на исследованиях)
-        val caffeineEffect = calculateCaffeineEffect(amount, drink.caffeineContent)
+//        // 2. Расчет эффекта кофеина (основано на исследованиях)
+//        val caffeineEffect = calculateCaffeineEffect(amount, drink.caffeineContent)
+//
+//        // 3. Расчет эффекта алкоголя (основано на исследованиях)
+//        val alcoholEffect = calculateAlcoholEffect(amount, drink.alcoholPercentage)
 
-        // 3. Расчет эффекта алкоголя (основано на исследованиях)
-        val alcoholEffect = calculateAlcoholEffect(amount, drink.alcoholPercentage)
+//        // 4. Общий дегидратирующий эффект
+//        val totalDehydration = caffeineEffect + alcoholEffect
 
-        // 4. Общий дегидратирующий эффект
-        val totalDehydration = caffeineEffect + alcoholEffect
-
-        // 5. Чистая гидратация
-        val netHydration = max(0, baseHydration - totalDehydration)
+//        // 5. Чистая гидратация
+//        val netHydration = max(0, baseHydration - totalDehydration)
+        val netHydration = max(0, baseHydration)
 
         return HydrationResult(
             actualAmount = amount,
             effectiveAmount = baseHydration,
-            caffeineDehydration = caffeineEffect,
-            alcoholDehydration = alcoholEffect,
-            totalDehydration = totalDehydration,
             netHydration = netHydration,
             drink = drink
         )
@@ -135,9 +133,9 @@ class CalculateHydrationUseCase @Inject constructor() {
     fun calculateTotal(entries: List<WaterEntry>, drinks: Map<Long, Drink>): TotalHydration {
         var totalActual = 0
         var totalEffective = 0
-        var totalCaffeineDehydration = 0
-        var totalAlcoholDehydration = 0
-        var totalDehydration = 0
+//        var totalCaffeineDehydration = 0
+//        var totalAlcoholDehydration = 0
+//        var totalDehydration = 0
 
         val drinkBreakdown = mutableMapOf<Drink, Int>()
 
@@ -147,9 +145,9 @@ class CalculateHydrationUseCase @Inject constructor() {
 
             totalActual += result.actualAmount
             totalEffective += result.effectiveAmount
-            totalCaffeineDehydration += result.caffeineDehydration
-            totalAlcoholDehydration += result.alcoholDehydration
-            totalDehydration += result.totalDehydration
+//            totalCaffeineDehydration += result.caffeineDehydration
+//            totalAlcoholDehydration += result.alcoholDehydration
+//            totalDehydration += result.totalDehydration
 
             drinkBreakdown[drink] = (drinkBreakdown[drink] ?: 0) + entry.amount
         }
@@ -157,10 +155,11 @@ class CalculateHydrationUseCase @Inject constructor() {
         return TotalHydration(
             totalActual = totalActual,
             totalEffective = totalEffective,
-            caffeineDehydration = totalCaffeineDehydration,
-            alcoholDehydration = totalAlcoholDehydration,
-            totalDehydration = totalDehydration,
-            netHydration = totalEffective - totalDehydration,
+//            caffeineDehydration = totalCaffeineDehydration,
+//            alcoholDehydration = totalAlcoholDehydration,
+//            totalDehydration = totalDehydration,
+//            netHydration = totalEffective - totalDehydration,
+            netHydration = totalEffective,
             drinkBreakdown = drinkBreakdown
         )
     }
@@ -191,9 +190,6 @@ class CalculateHydrationUseCase @Inject constructor() {
 data class HydrationResult(
     val actualAmount: Int,
     val effectiveAmount: Int,
-    val caffeineDehydration: Int,
-    val alcoholDehydration: Int,
-    val totalDehydration: Int,
     val netHydration: Int,
     val drink: Drink
 )
@@ -204,9 +200,6 @@ data class HydrationResult(
 data class TotalHydration(
     val totalActual: Int,
     val totalEffective: Int,
-    val caffeineDehydration: Int,
-    val alcoholDehydration: Int,
-    val totalDehydration: Int,
     val netHydration: Int,
     val drinkBreakdown: Map<Drink, Int>
 )

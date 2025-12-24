@@ -1,4 +1,4 @@
-package dev.techm1nd.hydromate.domain.usecases
+package dev.techm1nd.hydromate.domain.usecases.stat
 
 import dev.techm1nd.hydromate.domain.repositories.UserSettingsRepository
 import javax.inject.Inject

@@ -10,7 +10,6 @@ data class DailyProgress(
     val streak: Int = 0,
     val achievementUnlocked: Achievement? = null,
 
-    // NEW: Данные гидратации
     val effectiveHydration: Int = totalAmount, // Эффективная гидратация
     val netHydration: Int = totalAmount // Чистая гидратация (с учетом дегидратации)
 ) {

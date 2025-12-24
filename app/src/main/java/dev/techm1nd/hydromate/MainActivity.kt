@@ -13,6 +13,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -22,7 +25,7 @@ import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import dev.techm1nd.hydromate.domain.usecases.GetUserSettingsUseCase
+import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
 import dev.techm1nd.hydromate.ui.navigation.HydroMateNavigation
 import dev.techm1nd.hydromate.ui.notification.NotificationScheduler
 import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
@@ -62,7 +65,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             HydroMateTheme {
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding()
+                ) {
                     HydroMateNavigation()
 
                     // Диалог с объяснением необходимости разрешения

@@ -1,7 +1,7 @@
 package dev.techm1nd.hydromate.ui.screens.settings
 
 import dev.techm1nd.hydromate.domain.entities.*
-import dev.techm1nd.hydromate.domain.usecases.RecommendedGoalResult
+import dev.techm1nd.hydromate.domain.usecases.hydration.RecommendedGoalResult
 import java.time.LocalTime
 
 data class SettingsUiState(
@@ -26,7 +26,7 @@ sealed class SettingsIntent {
     data class UpdateWakeUpTime(val time: LocalTime) : SettingsIntent()
     data class UpdateBedTime(val time: LocalTime) : SettingsIntent()
     data class UpdateQuickAmounts(val amounts: List<QuickAddPreset>) : SettingsIntent()
-    data class UpdateShowNetHydration(val show: Boolean) : SettingsIntent()
+//    data class UpdateShowNetHydration(val show: Boolean) : SettingsIntent()
 
     data class UpdateProfile(val profile: UserProfile) : SettingsIntent()
     data class CalculateRecommendedGoal(val profile: UserProfile) : SettingsIntent()
@@ -37,8 +37,8 @@ sealed class SettingsIntent {
     object HideGoalDialog : SettingsIntent()
 //    object ShowCharacterDialog : SettingsIntent()
 //    object HideCharacterDialog : SettingsIntent()
-    object ShowProfileDialog : SettingsIntent() // NEW
-    object HideProfileDialog : SettingsIntent() // NEW
+    object ShowProfileDialog : SettingsIntent()
+    object HideProfileDialog : SettingsIntent()
     data class ShowTimePickerDialog(val type: TimePickerType) : SettingsIntent()
     object HideTimePickerDialog : SettingsIntent()
 

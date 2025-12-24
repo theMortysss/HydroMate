@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import dev.techm1nd.hydromate.domain.entities.*
-import dev.techm1nd.hydromate.domain.usecases.RecommendedGoalResult
+import dev.techm1nd.hydromate.domain.usecases.hydration.RecommendedGoalResult
 
 @Composable
 fun HydrationCalculatorCard(

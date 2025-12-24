@@ -9,7 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import dev.techm1nd.hydromate.data.worker.SyncWorker
-import dev.techm1nd.hydromate.domain.usecases.InitializeDefaultDrinksUseCase
+import dev.techm1nd.hydromate.domain.usecases.hydration.InitializeDefaultDrinksUseCase
 import dev.techm1nd.hydromate.domain.usecases.achievement.InitializeAchievementsUseCase
 import javax.inject.Inject
 

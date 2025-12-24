@@ -30,6 +30,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -48,10 +49,13 @@ android {
 dependencies {
     // Haze
     implementation(libs.haze.jetpack.compose)
+
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.hilt.common)
     implementation(libs.androidx.hilt.work)
     implementation(libs.googleid)
+    ksp(libs.androidx.hilt.compiler)
+
     // Date/Time API for older Android versions
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
@@ -78,7 +82,6 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.appcompat)
-    ksp(libs.dagger.compiler)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     // Navigation

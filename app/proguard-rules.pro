@@ -43,3 +43,31 @@
 -keepclassmembernames class kotlinx.** {
     volatile <fields>;
 }
+
+# Kotlin Serialization
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.SerializationKt
+-keep,includedescriptorclasses class dev.techm1nd.hydromate.**$$serializer { *; }
+-keepclassmembers class dev.techm1nd.hydromate.** {
+    *** Companion;
+}
+-keepclasseswithmembers class dev.techm1nd.hydromate.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Firebase
+-keepattributes Signature,Annotation
+
+-keepclassmembers class com.google.firebase.database.GenericTypeIndicator{*;}
+-keep class * extends com.google.firebase.database.GenericTypeIndicator{*;}
+-keep class com.google.firebase.database.GenericTypeIndicator{*;}
+
+-keep class com.firebase.** { *; }
+-keep class org.apache.** { *; }
+-keepnames class com.fasterxml.jackson.** { *; }
+-keepnames class javax.servlet.** { *; }
+-keepnames class org.ietf.jgss.** { *; }
+-dontwarn org.w3c.dom.**
+-dontwarn org.joda.time.**
+-dontwarn org.shaded.apache.**
+-dontwarn org.ietf.jgss.**

@@ -1,4 +1,4 @@
-package dev.techm1nd.hydromate.domain.usecases
+package dev.techm1nd.hydromate.domain.usecases.hydration
 
 import dev.techm1nd.hydromate.domain.entities.Drink
 import dev.techm1nd.hydromate.domain.repositories.WaterRepository

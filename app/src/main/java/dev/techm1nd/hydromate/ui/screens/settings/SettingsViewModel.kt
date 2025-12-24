@@ -9,10 +9,10 @@ import dev.techm1nd.hydromate.domain.entities.QuickAddPreset
 import dev.techm1nd.hydromate.domain.entities.UserProfile
 import dev.techm1nd.hydromate.domain.entities.UserSettings
 import dev.techm1nd.hydromate.domain.repositories.DrinkRepository
-import dev.techm1nd.hydromate.domain.usecases.CalculateRecommendedGoalUseCase
-import dev.techm1nd.hydromate.domain.usecases.GetUserSettingsUseCase
-import dev.techm1nd.hydromate.domain.usecases.UpdateDailyGoalUseCase
-import dev.techm1nd.hydromate.domain.usecases.UpdateUserSettingsUseCase
+import dev.techm1nd.hydromate.domain.usecases.hydration.CalculateRecommendedGoalUseCase
+import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
+import dev.techm1nd.hydromate.domain.usecases.stat.UpdateDailyGoalUseCase
+import dev.techm1nd.hydromate.domain.usecases.setting.UpdateUserSettingsUseCase
 import dev.techm1nd.hydromate.domain.usecases.profile.GetUserProfileUseCase
 import dev.techm1nd.hydromate.ui.notification.NotificationScheduler
 import java.time.LocalTime
@@ -61,7 +61,7 @@ class SettingsViewModel @Inject constructor(
             SettingsIntent.ClearError -> _uiState.update { it.copy(error = null) }
 
             // Обработка настроек гидратации
-            is SettingsIntent.UpdateShowNetHydration -> updateShowNetHydration(intent.show)
+//            is SettingsIntent.UpdateShowNetHydration -> updateShowNetHydration(intent.show)
             is SettingsIntent.CalculateRecommendedGoal -> calculateRecommendedGoalForProfile(intent.profile)
             SettingsIntent.HideProfileDialog -> _uiState.update { it.copy(showProfileDialog = false) }
             SettingsIntent.ShowProfileDialog -> _uiState.update { it.copy(showProfileDialog = true) }
@@ -258,15 +258,15 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun updateShowNetHydration(show: Boolean) {
-        viewModelScope.launch {
-            val newSettings = _uiState.value.settings.copy(showNetHydration = show)
-            updateUserSettingsUseCase(newSettings)
-                .onFailure { exception ->
-                    _uiState.update {
-                        it.copy(error = exception.message ?: "Failed to update display mode")
-                    }
-                }
-        }
-    }
+//    private fun updateShowNetHydration(show: Boolean) {
+//        viewModelScope.launch {
+//            val newSettings = _uiState.value.settings.copy(showNetHydration = show)
+//            updateUserSettingsUseCase(newSettings)
+//                .onFailure { exception ->
+//                    _uiState.update {
+//                        it.copy(error = exception.message ?: "Failed to update display mode")
+//                    }
+//                }
+//        }
+//    }
 }

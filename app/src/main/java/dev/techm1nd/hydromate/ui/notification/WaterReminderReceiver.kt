@@ -12,9 +12,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import dev.techm1nd.hydromate.domain.repositories.DrinkRepository
-import dev.techm1nd.hydromate.domain.usecases.CalculateHydrationUseCase
-import dev.techm1nd.hydromate.domain.usecases.GetTodayProgressUseCase
-import dev.techm1nd.hydromate.domain.usecases.GetUserSettingsUseCase
+import dev.techm1nd.hydromate.domain.usecases.hydration.CalculateHydrationUseCase
+import dev.techm1nd.hydromate.domain.usecases.stat.GetTodayProgressUseCase
+import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -88,11 +88,7 @@ class WaterReminderReceiver : BroadcastReceiver() {
             null
         }
 
-        val currentAmount = if (settings.showNetHydration) {
-            hydration?.netHydration ?: 0
-        } else {
-            progress.totalAmount
-        }
+        val currentAmount = hydration?.netHydration ?: 0
 
         val adjustedGoal = progress.goalAmount
         val isGoalReached = currentAmount >= adjustedGoal
@@ -265,11 +261,7 @@ class WaterReminderReceiver : BroadcastReceiver() {
             null
         }
 
-        val currentAmount = if (settings.showNetHydration) {
-            hydration?.netHydration ?: 0
-        } else {
-            progress.totalAmount
-        }
+        val currentAmount = hydration?.netHydration ?: 0
 
         val adjustedGoal = progress.goalAmount
         val isGoalReached = currentAmount >= adjustedGoal

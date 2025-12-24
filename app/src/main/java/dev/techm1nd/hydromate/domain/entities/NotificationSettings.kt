@@ -24,7 +24,7 @@ enum class ReminderInterval(val displayName: String, val minutes: Int) {
 
     companion object {
         fun fromMinutes(minutes: Int): ReminderInterval {
-            return values().find { it.minutes == minutes } ?: HOUR_1
+            return entries.find { it.minutes == minutes } ?: HOUR_1
         }
     }
 }
@@ -54,7 +54,7 @@ data class CustomReminder(
     val id: String = java.util.UUID.randomUUID().toString(),
     val time: String, // "HH:mm" format
     val label: String = "",
-    val enabledDays: Set<String> = DayOfWeek.values().map { it.name }.toSet(),
+    val enabledDays: Set<String> = DayOfWeek.entries.map { it.name }.toSet(),
     val isEnabled: Boolean = true
 ) {
     fun getTimeAsLocalTime(): LocalTime {

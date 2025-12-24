@@ -16,7 +16,7 @@ data class UserSettings(
     val smartRemindersEnabled: Boolean = true,
     val notificationInterval: Int = 60, // минут (для обратной совместимости)
     val reminderInterval: ReminderInterval = ReminderInterval.HOUR_1,
-    val smartReminderDays: Set<DayOfWeek> = DayOfWeek.values().toSet(),
+    val smartReminderDays: Set<DayOfWeek> = DayOfWeek.entries.toSet(),
 
     // Персональные напоминания (в конкретное время)
     val customRemindersEnabled: Boolean = false,
@@ -31,7 +31,7 @@ data class UserSettings(
 
     // Остальные настройки
     val quickAddPresets: List<QuickAddPreset> = QuickAddPreset.getDefaults(),
-    val showNetHydration: Boolean = true,
+//    val showNetHydration: Boolean = true,
     val profile: UserProfile = UserProfile()
 ) {
     @Deprecated("Use quickAddPresets instead")

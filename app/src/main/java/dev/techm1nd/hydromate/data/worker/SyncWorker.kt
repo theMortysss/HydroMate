@@ -13,8 +13,8 @@ import java.util.concurrent.TimeUnit
  */
 @HiltWorker
 class SyncWorker @AssistedInject constructor(
-    @Assisted context: Context,
-    @Assisted workerParams: WorkerParameters,
+    @Assisted private val context: Context,
+    @Assisted private val workerParams: WorkerParameters,
     private val syncRepository: SyncRepository
 ) : CoroutineWorker(context, workerParams) {
 

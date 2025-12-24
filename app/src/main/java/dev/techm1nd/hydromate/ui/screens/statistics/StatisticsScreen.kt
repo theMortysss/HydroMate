@@ -119,54 +119,11 @@ fun StatisticsScreen(
             )
 
             uiState.weeklyStats?.let { stats ->
-                val showNetHydration = uiState.showNetHydration
                 val hydrationData = uiState.hydrationData
 
-                // Info badge если показываем чистую гидратацию
-                if (showNetHydration && hydrationData != null && hydrationData.totalDehydration > 0) {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                alpha = 0.5f
-                            )
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Column {
-                                Text(
-                                    text = "Showing Net Hydration",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                                )
-                                Text(
-                                    text = "Statistics account for caffeine/alcohol dehydration effects",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(
-                                        alpha = 0.8f
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-
                 // Weekly overview card с учетом настройки
-                WeeklyOverviewCardEnhanced(
+                WeeklyOverviewCard(
                     weeklyStats = stats,
-                    showNetHydration = showNetHydration,
                     hydrationData = hydrationData,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -174,14 +131,12 @@ fun StatisticsScreen(
                 // Daily chart с учетом настройки
                 DailyWaterChartEnhanced(
                     dailyProgress = stats.dailyProgress,
-                    showNetHydration = showNetHydration,
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 // Statistics cards
-                StatisticsCardsEnhanced(
+                StatisticsCards(
                     weeklyStats = stats,
-                    showNetHydration = showNetHydration,
                     hydrationData = hydrationData,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -191,13 +146,7 @@ fun StatisticsScreen(
                     if (data.drinkBreakdown.isNotEmpty()) {
                         DrinkBreakdownCard(
                             drinkBreakdown = data.drinkBreakdown,
-                            totalAmount = if (showNetHydration) {
-                                data.netHydration
-                            } else {
-                                data.totalActual
-                            },
-                            showNetHydration = showNetHydration,
-                            totalDehydration = data.totalDehydration,
+                            totalAmount = data.netHydration,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }

@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import dev.techm1nd.hydromate.data.local.dao.*
+import dev.techm1nd.hydromate.data.local.entities.ChallengeEntity
+import dev.techm1nd.hydromate.data.local.entities.UserProfileEntity
+import dev.techm1nd.hydromate.data.local.entities.UserSettingsEntity
 import dev.techm1nd.hydromate.data.mappers.*
 import dev.techm1nd.hydromate.domain.entities.SyncStatus
 import dev.techm1nd.hydromate.domain.repositories.SyncRepository
@@ -161,7 +164,7 @@ class SyncRepositoryImpl @Inject constructor(
             if (remoteSettings.exists() && localSettings == null) {
                 // Первый вход - загрузить с сервера
                 val settings = remoteSettings.toObject(
-                    dev.techm1nd.hydromate.data.local.entities.UserSettingsEntity::class.java
+                    UserSettingsEntity::class.java
                 )
                 if (settings != null) {
                     userSettingsDao.insertOrUpdateSettings(settings)
@@ -198,7 +201,7 @@ class SyncRepositoryImpl @Inject constructor(
 
             if (remoteProfile.exists() && localProfile == null) {
                 val profile = remoteProfile.toObject(
-                    dev.techm1nd.hydromate.data.local.entities.UserProfileEntity::class.java
+                    UserProfileEntity::class.java
                 )
                 if (profile != null) {
                     userProfileDao.insertProfile(profile)
@@ -231,7 +234,7 @@ class SyncRepositoryImpl @Inject constructor(
                 .documents
                 .mapNotNull { doc ->
                     try {
-                        doc.toObject(dev.techm1nd.hydromate.data.local.entities.ChallengeEntity::class.java)
+                        doc.toObject(ChallengeEntity::class.java)
                     } catch (e: Exception) {
                         Log.e(TAG, "Failed to parse challenge: ${doc.id}", e)
                         null

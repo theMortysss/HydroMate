@@ -1,4 +1,4 @@
-package dev.techm1nd.hydromate.domain.usecases
+package dev.techm1nd.hydromate.domain.usecases.setting
 
 import kotlinx.coroutines.flow.Flow
 import dev.techm1nd.hydromate.domain.entities.UserSettings

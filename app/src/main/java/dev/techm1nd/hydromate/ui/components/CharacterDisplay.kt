@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.techm1nd.hydromate.domain.entities.CharacterType
-import dev.techm1nd.hydromate.domain.usecases.CalculateCharacterStateUseCase
+import dev.techm1nd.hydromate.domain.usecases.character.CalculateCharacterStateUseCase
 
 @Composable
 fun CharacterDisplay(

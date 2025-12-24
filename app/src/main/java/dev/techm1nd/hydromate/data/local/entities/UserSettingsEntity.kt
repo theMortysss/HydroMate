@@ -10,20 +10,20 @@ data class UserSettingsEntity(
     val id: Int = 1,
 
     @ColumnInfo(name = "daily_goal")
-    val dailyGoal: Int,
+    val dailyGoal: Int = 2000,
 
 //    @ColumnInfo(name = "selected_character")
 //    val selectedCharacter: String,
 
     // Базовые настройки уведомлений
     @ColumnInfo(name = "notifications_enabled")
-    val notificationsEnabled: Boolean,
+    val notificationsEnabled: Boolean = true,
 
     @ColumnInfo(name = "wake_up_time")
-    val wakeUpTime: String, // "HH:mm" format
+    val wakeUpTime: String = "07:00", // "HH:mm" format
 
     @ColumnInfo(name = "bed_time")
-    val bedTime: String, // "HH:mm" format
+    val bedTime: String = "23:00", // "HH:mm" format
 
     // Умные напоминания
     @ColumnInfo(name = "smart_reminders_enabled", defaultValue = "1")
@@ -58,13 +58,13 @@ data class UserSettingsEntity(
 
     // Quick add presets
     @ColumnInfo(name = "quick_add_presets", defaultValue = "[]")
-    val quickAddPresets: String,
+    val quickAddPresets: String = "[]",
 
     @ColumnInfo(name = "quick_amounts")
     val quickAmounts: String = "[]", // Deprecated
 
-    @ColumnInfo(name = "show_net_hydration", defaultValue = "1")
-    val showNetHydration: Boolean = true,
+//    @ColumnInfo(name = "show_net_hydration", defaultValue = "1")
+//    val showNetHydration: Boolean = true,
 
     // Hydration profile fields
     @ColumnInfo(name = "profile_gender", defaultValue = "PREFER_NOT_TO_SAY")

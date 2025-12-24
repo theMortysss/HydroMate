@@ -176,18 +176,3 @@ private fun DrawScope.drawProgressArc(
         style = Stroke(width = 12.dp.toPx(), cap = StrokeCap.Round)
     )
 }
-
-@Preview(
-    showBackground = true
-)
-@Composable
-private fun ProgressCard_Preview() {
-    HydroMateTheme {
-        ProgressCard(
-            currentAmount = 1000,
-            goalAmount = 2000,
-            progressPercentage = 0.5f,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}

@@ -1,7 +1,8 @@
-package dev.techm1nd.hydromate.domain.usecases
+package dev.techm1nd.hydromate.domain.usecases.hydration
 
 import kotlinx.coroutines.flow.first
 import dev.techm1nd.hydromate.domain.repositories.DrinkRepository
+import dev.techm1nd.hydromate.domain.usecases.stat.GetTodayProgressUseCase
 import javax.inject.Inject
 
 /**
@@ -9,7 +10,6 @@ import javax.inject.Inject
  */
 class CheckGoalReachedUseCase @Inject constructor(
     private val getTodayProgressUseCase: GetTodayProgressUseCase,
-    private val getUserSettingsUseCase: GetUserSettingsUseCase,
     private val drinkRepository: DrinkRepository,
     private val calculateHydrationUseCase: CalculateHydrationUseCase
 ) {
@@ -21,7 +21,6 @@ class CheckGoalReachedUseCase @Inject constructor(
     suspend operator fun invoke(): Result<Boolean> {
         return try {
             val progress = getTodayProgressUseCase().first()
-            val settings = getUserSettingsUseCase().first()
 
             // Получаем напитки для расчета гидратации
             val drinks = drinkRepository.getAllActiveDrinks().first()
@@ -35,11 +34,13 @@ class CheckGoalReachedUseCase @Inject constructor(
             }
 
             // Определяем текущее количество
-            val currentAmount = if (settings.showNetHydration) {
-                hydration?.netHydration ?: 0
-            } else {
-                progress.totalAmount
-            }
+//            val currentAmount = if (settings.showNetHydration) {
+//                hydration?.netHydration ?: 0
+//            } else {
+//                progress.totalAmount
+//            }
+
+            val currentAmount = hydration?.netHydration ?: 0
 
             // Учитываем порог гидратации
             val adjustedGoal = progress.goalAmount
@@ -58,7 +59,6 @@ class CheckGoalReachedUseCase @Inject constructor(
     suspend fun getDetailedProgress(): Result<GoalProgress> {
         return try {
             val progress = getTodayProgressUseCase().first()
-            val settings = getUserSettingsUseCase().first()
 
             val drinks = drinkRepository.getAllActiveDrinks().first()
             val drinksMap = drinks.associateBy { it.id }
@@ -69,11 +69,13 @@ class CheckGoalReachedUseCase @Inject constructor(
                 null
             }
 
-            val currentAmount = if (settings.showNetHydration) {
-                hydration?.netHydration ?: 0
-            } else {
-                progress.totalAmount
-            }
+//            val currentAmount = if (settings.showNetHydration) {
+//                hydration?.netHydration ?: 0
+//            } else {
+//                progress.totalAmount
+//            }
+
+            val currentAmount = hydration?.netHydration ?: 0
 
             val adjustedGoal = progress.goalAmount
             val percentage = ((currentAmount.toFloat() / adjustedGoal) * 100).toInt()

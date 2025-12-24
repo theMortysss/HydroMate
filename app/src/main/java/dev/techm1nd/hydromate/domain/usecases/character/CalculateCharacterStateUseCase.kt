@@ -1,4 +1,4 @@
-package dev.techm1nd.hydromate.domain.usecases
+package dev.techm1nd.hydromate.domain.usecases.character
 
 import dev.techm1nd.hydromate.domain.entities.DailyProgress
 import javax.inject.Inject

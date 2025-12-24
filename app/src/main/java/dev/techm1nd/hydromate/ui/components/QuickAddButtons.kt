@@ -11,11 +11,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.techm1nd.hydromate.domain.entities.Drink
+import dev.techm1nd.hydromate.domain.entities.QuickAddPreset
 
 @Composable
 fun QuickAddButtons(
-    amounts: List<Int>,
-    onAmountClick: (Int) -> Unit,
+    presets: List<QuickAddPreset>,
+    drinks: List<Drink>,
+    onPresetClick: (QuickAddPreset, Drink) -> Unit,
+    onEditPresets: () -> Unit,
     isLoading: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -25,58 +29,46 @@ fun QuickAddButtons(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Quick Add",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Quick Add",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium
+            )
+
+            TextButton(onClick = onEditPresets) {
+                Text("Edit")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp)
+            contentPadding = PaddingValues(horizontal = 4.dp)
         ) {
-            items(amounts) { amount ->
-                QuickAddButton(
-                    amount = amount,
-                    onClick = { onAmountClick(amount) },
+            items(presets.sortedBy { it.order }) { preset ->
+                val drink = drinks.firstOrNull { it.id == preset.drinkId } ?: Drink.WATER
+
+                QuickAddPresetButton(
+                    preset = preset,
+                    drink = drink,
+                    onClick = { onPresetClick(preset, drink) },
                     enabled = !isLoading
                 )
             }
-
-            item {
-                OutlinedButton(
-                    onClick = { showCustomDialog = true },
-                    enabled = !isLoading,
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .height(56.dp)
-                        .widthIn(min = 80.dp)
-                ) {
-                    Text(
-                        text = "Custom",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
         }
-    }
-
-    if (showCustomDialog) {
-        CustomAmountDialog(
-            onAmountSelected = { amount ->
-                onAmountClick(amount)
-                showCustomDialog = false
-            },
-            onDismiss = { showCustomDialog = false }
-        )
     }
 }
 
 @Composable
-private fun QuickAddButton(
-    amount: Int,
+private fun QuickAddPresetButton(
+    preset: QuickAddPreset,
+    drink: Drink,
     onClick: () -> Unit,
     enabled: Boolean
 ) {
@@ -89,65 +81,28 @@ private fun QuickAddButton(
             contentColor = MaterialTheme.colorScheme.onPrimary
         ),
         modifier = Modifier
-            .height(56.dp)
-            .widthIn(min = 80.dp)
+            .height(72.dp)
+            .widthIn(min = 90.dp)
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "${amount}ml",
-                fontSize = 14.sp,
+                text = drink.icon,
+                fontSize = 24.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "${preset.amount}ml",
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "💧",
-                fontSize = 16.sp
+                text = drink.name,
+                fontSize = 10.sp,
+                maxLines = 1
             )
         }
     }
-}
-
-@Composable
-private fun CustomAmountDialog(
-    onAmountSelected: (Int) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var amountText by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Custom Amount") },
-        text = {
-            OutlinedTextField(
-                value = amountText,
-                onValueChange = {
-                    if (it.all { char -> char.isDigit() } && it.length <= 4) {
-                        amountText = it
-                    }
-                },
-                label = { Text("Amount (ml)") },
-                singleLine = true
-            )
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    amountText.toIntOrNull()?.let { amount ->
-                        if (amount > 0) {
-                            onAmountSelected(amount)
-                        }
-                    }
-                },
-                enabled = amountText.toIntOrNull()?.let { it > 0 } == true
-            ) {
-                Text("Add")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
 }

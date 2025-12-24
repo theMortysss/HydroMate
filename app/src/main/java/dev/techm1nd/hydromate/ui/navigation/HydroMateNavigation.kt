@@ -166,6 +166,7 @@ fun HydroMateNavigation() {
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0,0,0,0),
         topBar = {
             if (authState is AuthState.Authenticated) {
                 TopAppBar(
@@ -342,9 +343,7 @@ fun HydroMateNavigation() {
                 .hazeSource(
                     state = hazeState,
                 )
-                .padding(
-                    top = innerPadding.calculateTopPadding(),
-                )
+                .padding(top = innerPadding.calculateTopPadding())
         ) {
             composable(Screen.Loading.route) {
                 Box(Modifier.fillMaxSize(), Alignment.Center) {

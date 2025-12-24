@@ -1,4 +1,4 @@
-package dev.techm1nd.hydromate.domain.usecases
+package dev.techm1nd.hydromate.domain.usecases.setting
 
 import dev.techm1nd.hydromate.domain.entities.UserSettings
 import dev.techm1nd.hydromate.domain.repositories.UserSettingsRepository

@@ -29,8 +29,8 @@ import dev.chrisbanes.haze.hazeSource
 import dev.techm1nd.hydromate.ui.components.AddWaterForDateDialog
 import dev.techm1nd.hydromate.ui.components.DateDetailsModal
 import dev.techm1nd.hydromate.ui.components.MonthSelector
-import dev.techm1nd.hydromate.ui.components.MonthlySummaryEnhanced
-import dev.techm1nd.hydromate.ui.components.WaterCalendarEnhanced
+import dev.techm1nd.hydromate.ui.components.MonthlySummary
+import dev.techm1nd.hydromate.ui.components.WaterCalendar
 
 @Composable
 fun HistoryScreen(
@@ -57,7 +57,6 @@ fun HistoryScreen(
         DateDetailsModal(
             date = uiState.selectedDate!!,
             progress = progress,
-            showNetHydration = uiState.userSettings?.showNetHydration ?: true,
             onDismiss = {
                 viewModel.handleIntent(HistoryIntent.ClearSelectedDate)
             },
@@ -141,42 +140,10 @@ fun HistoryScreen(
                 }
             )
 
-            // Info badge если показываем чистую гидратацию
-            if (uiState.userSettings?.showNetHydration ?: true) {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
-                            alpha = 0.5f
-                        )
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Text(
-                            text = "Calendar shows net hydration (accounting for caffeine/alcohol effects)",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                    }
-                }
-            }
-
             // Calendar с учетом настройки
-            WaterCalendarEnhanced(
+            WaterCalendar(
                 month = uiState.selectedMonth,
                 monthlyProgress = uiState.monthlyProgress,
-                showNetHydration = uiState.userSettings?.showNetHydration ?: true,
                 onDateSelected = { date ->
                     viewModel.handleIntent(HistoryIntent.SelectDate(date))
                 },
@@ -187,9 +154,8 @@ fun HistoryScreen(
             )
 
             // Monthly summary с учетом настройки
-            MonthlySummaryEnhanced(
+            MonthlySummary(
                 monthlyProgress = uiState.monthlyProgress.values.toList(),
-                showNetHydration = uiState.userSettings?.showNetHydration ?: true,
                 modifier = Modifier.fillMaxWidth()
             )
 

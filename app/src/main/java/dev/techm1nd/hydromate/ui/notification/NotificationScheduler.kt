@@ -37,9 +37,9 @@ class NotificationScheduler @Inject constructor(
         private const val CUSTOM_REMINDER_BASE = 20000
         private const val SNOOZE_REMINDER_CODE = 30000
 
-        const val ACTION_SMART_REMINDER = "sdf.bitt.hydromate.ACTION_SMART_REMINDER"
-        const val ACTION_CUSTOM_REMINDER = "sdf.bitt.hydromate.ACTION_CUSTOM_REMINDER"
-        const val ACTION_SNOOZE_REMINDER = "sdf.bitt.hydromate.ACTION_SNOOZE_REMINDER"
+        const val ACTION_SMART_REMINDER = "dev.techm1nd.hydromate.ACTION_SMART_REMINDER"
+        const val ACTION_CUSTOM_REMINDER = "dev.techm1nd.hydromate.ACTION_CUSTOM_REMINDER"
+        const val ACTION_SNOOZE_REMINDER = "dev.techm1nd.hydromate.ACTION_SNOOZE_REMINDER"
 
         const val EXTRA_REMINDER_ID = "reminder_id"
         const val EXTRA_REMINDER_LABEL = "reminder_label"

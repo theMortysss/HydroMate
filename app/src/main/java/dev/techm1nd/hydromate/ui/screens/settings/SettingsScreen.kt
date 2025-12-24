@@ -202,12 +202,12 @@ fun SettingsScreen(
 //            )
 
             // Hydration Settings
-            HydrationSettingsCard(
-                showNetHydration = uiState.settings.showNetHydration,
-                onShowNetHydrationToggle = { show ->
-                    viewModel.handleIntent(SettingsIntent.UpdateShowNetHydration(show))
-                }
-            )
+//            HydrationSettingsCard(
+//                showNetHydration = uiState.settings.showNetHydration,
+//                onShowNetHydrationToggle = { show ->
+//                    viewModel.handleIntent(SettingsIntent.UpdateShowNetHydration(show))
+//                }
+//            )
 
 //            // Character Settings
 //            CharacterSettingsCard(

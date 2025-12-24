@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import dev.techm1nd.hydromate.domain.entities.DailyProgress
 import dev.techm1nd.hydromate.domain.repositories.DrinkRepository
-import dev.techm1nd.hydromate.domain.usecases.CalculateHydrationUseCase
-import dev.techm1nd.hydromate.domain.usecases.GetUserSettingsUseCase
-import dev.techm1nd.hydromate.domain.usecases.GetWeeklyStatisticsUseCase
+import dev.techm1nd.hydromate.domain.usecases.hydration.CalculateHydrationUseCase
+import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
+import dev.techm1nd.hydromate.domain.usecases.stat.GetWeeklyStatisticsUseCase
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -26,7 +26,6 @@ class StatisticsViewModel @Inject constructor(
 
     init {
         loadWeeklyStatistics()
-        observeSettings()
     }
 
     fun handleIntent(intent: StatisticsIntent) {
@@ -39,30 +38,15 @@ class StatisticsViewModel @Inject constructor(
         }
     }
 
-    private fun observeSettings() {
-        viewModelScope.launch {
-            getUserSettingsUseCase()
-                .catch { }
-                .collect { settings ->
-                    _uiState.update {
-                        it.copy(showNetHydration = settings.showNetHydration)
-                    }
-                    // ВАЖНО: При изменении настройки перезагружаем данные
-                    loadWeeklyStatistics()
-                }
-        }
-    }
-
     private fun loadWeeklyStatistics() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
             combine(
                 getWeeklyStatisticsUseCase(_uiState.value.selectedWeekStart),
-                getUserSettingsUseCase(),
                 drinkRepository.getAllActiveDrinks()
-            ) { stats, settings, drinks ->
-                Triple(stats, settings, drinks)
+            ) { stats, drinks ->
+                Pair(stats, drinks)
             }.catch { exception ->
                 _uiState.update {
                     it.copy(
@@ -70,7 +54,7 @@ class StatisticsViewModel @Inject constructor(
                         error = exception.message ?: "Failed to load statistics"
                     )
                 }
-            }.collect { (stats, settings, drinks) ->
+            }.collect { (stats, drinks) ->
                 val drinksMap = drinks.associateBy { it.id }
 
                 // Рассчитываем гидратацию для всей недели
@@ -99,26 +83,16 @@ class StatisticsViewModel @Inject constructor(
                 }
 
                 // Пересчитываем статистику с учетом showNetHydration
-                val totalForStats = if (settings.showNetHydration) {
-                    enhancedDailyProgress.sumOf { it.netHydration }
-                } else {
-                    enhancedDailyProgress.sumOf { it.totalAmount }
-                }
+                val totalForStats = enhancedDailyProgress.sumOf { it.netHydration }
 
                 val averageDaily = totalForStats / 7
 
                 val daysGoalReached = enhancedDailyProgress.count { day ->
-                    val currentAmount = if (settings.showNetHydration) {
-                        day.netHydration
-                    } else {
-                        day.totalAmount
-                    }
-                    currentAmount >= day.goalAmount
+                    day.netHydration >= day.goalAmount
                 }
 
                 val currentStreak = calculateStreakWithMode(
                     enhancedDailyProgress,
-                    settings.showNetHydration
                 )
 
                 val enhancedStats = stats.copy(
@@ -133,7 +107,6 @@ class StatisticsViewModel @Inject constructor(
                     it.copy(
                         weeklyStats = enhancedStats,
                         hydrationData = hydrationData,
-                        showNetHydration = settings.showNetHydration,
                         isLoading = false
                     )
                 }
@@ -143,7 +116,6 @@ class StatisticsViewModel @Inject constructor(
 
     private suspend fun calculateStreakWithMode(
         dailyProgress: List<DailyProgress>,
-        showNetHydration: Boolean
     ): Int {
         if (dailyProgress.isEmpty()) return 0
 
@@ -155,11 +127,7 @@ class StatisticsViewModel @Inject constructor(
         val isCurrent = weekEnd >= today
 
         val refProgress = dailyProgress.find { it.date == refDate } ?: return 0
-        val currentAmount = if (showNetHydration) {
-            refProgress.netHydration
-        } else {
-            refProgress.totalAmount
-        }
+        val currentAmount = refProgress.netHydration
         val refMet = currentAmount >= refProgress.goalAmount
 
         // For current week, if today not met yet (ongoing day), count up to yesterday
@@ -172,7 +140,6 @@ class StatisticsViewModel @Inject constructor(
         val filteredInWeek = dailyProgress.filter { it.date <= countUpTo }.sortedByDescending { it.date }
 
         // Fetch drinks and settings once
-        val settings = getUserSettingsUseCase().first()
         val drinks = drinkRepository.getAllActiveDrinks().first()
         val drinksMap = drinks.associateBy { it.id }
 
@@ -181,8 +148,7 @@ class StatisticsViewModel @Inject constructor(
 
         // First, count within the week
         for (progress in filteredInWeek) {
-            val amt = if (showNetHydration) progress.netHydration else progress.totalAmount
-            if (amt >= progress.goalAmount) {
+            if (progress.netHydration >= progress.goalAmount) {
                 streak++
                 checkDate = progress.date.minusDays(1)
             } else {
@@ -215,8 +181,7 @@ class StatisticsViewModel @Inject constructor(
 
             var continued = true
             for (progress in sortedPrev) {
-                val amt = if (showNetHydration) progress.netHydration else progress.totalAmount
-                if (amt >= progress.goalAmount) {
+                if (progress.netHydration >= progress.goalAmount) {
                     streak++
                 } else {
                     continued = false

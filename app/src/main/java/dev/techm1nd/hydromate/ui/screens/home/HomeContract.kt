@@ -5,9 +5,9 @@ import dev.techm1nd.hydromate.domain.entities.DailyProgress
 import dev.techm1nd.hydromate.domain.entities.Drink
 import dev.techm1nd.hydromate.domain.entities.QuickAddPreset
 import dev.techm1nd.hydromate.domain.entities.UserSettings
-import dev.techm1nd.hydromate.domain.usecases.CalculateCharacterStateUseCase
-import dev.techm1nd.hydromate.domain.usecases.HydrationProgress
-import dev.techm1nd.hydromate.domain.usecases.TotalHydration
+import dev.techm1nd.hydromate.domain.usecases.character.CalculateCharacterStateUseCase
+import dev.techm1nd.hydromate.domain.usecases.hydration.HydrationProgress
+import dev.techm1nd.hydromate.domain.usecases.hydration.TotalHydration
 import java.time.LocalDateTime
 
 data class HomeUiState(
@@ -29,11 +29,7 @@ data class HomeUiState(
         get() = hydrationProgress?.percentage?.div(100f) ?: 0f
 
     val currentAmount: Int
-        get() = if (userSettings?.showNetHydration == true) {
-            totalHydration?.netHydration ?: 0
-        } else {
-            todayProgress?.totalAmount ?: 0
-        }
+        get() = totalHydration?.netHydration ?: 0
 
     val goalAmount: Int
         get() = hydrationProgress?.goal ?: todayProgress?.goalAmount ?: 2000

@@ -1,4 +1,4 @@
-package dev.techm1nd.hydromate.domain.usecases
+package dev.techm1nd.hydromate.domain.usecases.hydration
 
 import dev.techm1nd.hydromate.domain.entities.*
 import javax.inject.Inject

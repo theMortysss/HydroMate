@@ -22,7 +22,6 @@ import dev.techm1nd.hydromate.domain.entities.Drink
 fun DrinkBreakdownCard(
     drinkBreakdown: Map<Drink, Int>,
     totalAmount: Int,
-    showNetHydration: Boolean = false,
     totalDehydration: Int = 0,
     modifier: Modifier = Modifier
 ) {
@@ -30,20 +29,16 @@ fun DrinkBreakdownCard(
         return
     }
 
-    val breakdownDisplayed = remember(drinkBreakdown, showNetHydration, totalDehydration) {
-        if (showNetHydration) {
-            val dehydDrinks = drinkBreakdown.filter { it.key.containsCaffeine || it.key.containsAlcohol }
-            val sumRawDehyd = dehydDrinks.values.sum().toFloat()
-            drinkBreakdown.mapValues { (drink, raw) ->
-                val effective = raw * drink.hydrationMultiplier
-                if ((drink.containsCaffeine || drink.containsAlcohol) && sumRawDehyd > 0) {
-                    effective - (totalDehydration * (raw.toFloat() / sumRawDehyd))
-                } else {
-                    effective
-                }
+    val breakdownDisplayed = remember(drinkBreakdown, totalDehydration) {
+        val dehydDrinks = drinkBreakdown.filter { it.key.containsCaffeine || it.key.containsAlcohol }
+        val sumRawDehyd = dehydDrinks.values.sum().toFloat()
+        drinkBreakdown.mapValues { (drink, raw) ->
+            val effective = raw * drink.hydrationMultiplier
+            if ((drink.containsCaffeine || drink.containsAlcohol) && sumRawDehyd > 0) {
+                effective - (totalDehydration * (raw.toFloat() / sumRawDehyd))
+            } else {
+                effective
             }
-        } else {
-            drinkBreakdown.mapValues { (_, value) -> value.toFloat() }
         }
     }
 

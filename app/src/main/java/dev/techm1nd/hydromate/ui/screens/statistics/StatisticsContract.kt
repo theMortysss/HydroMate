@@ -1,7 +1,7 @@
 package dev.techm1nd.hydromate.ui.screens.statistics
 
 import dev.techm1nd.hydromate.domain.entities.WeeklyStatistics
-import dev.techm1nd.hydromate.domain.usecases.TotalHydration
+import dev.techm1nd.hydromate.domain.usecases.hydration.TotalHydration
 import java.time.LocalDate
 
 data class StatisticsUiState(
@@ -10,8 +10,6 @@ data class StatisticsUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
 
-    // NEW: Данные гидратации
-    val showNetHydration: Boolean = true,
     val hydrationData: TotalHydration? = null
 )
 

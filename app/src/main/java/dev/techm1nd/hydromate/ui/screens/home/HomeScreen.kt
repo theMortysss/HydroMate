@@ -154,7 +154,7 @@ fun HomeScreen(
             // Character Display
             CharacterDisplay(
                 characterState = uiState.characterState,
-                selectedCharacter = uiState.selectedCharacter, // CHANGED from uiState.userSettings?.selectedCharacter
+                selectedCharacter = uiState.selectedCharacter,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -162,45 +162,11 @@ fun HomeScreen(
             uiState.todayProgress?.let {
                 uiState.hydrationProgress?.let { hydrationProgress ->
                     uiState.totalHydration?.let { totalHydration ->
-                        val showNetHydration = uiState.userSettings?.showNetHydration ?: true
-
                         HydrationProgressCard(
                             hydrationProgress = hydrationProgress,
                             totalHydration = totalHydration,
-                            showNetHydration = showNetHydration,
                             modifier = Modifier.fillMaxWidth()
                         )
-
-                        if (showNetHydration) {
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                        alpha = 0.5f
-                                    )
-                                )
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(12.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Info,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Text(
-                                        text = "Showing net hydration (accounting for caffeine/alcohol effects)",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onTertiaryContainer
-                                    )
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -270,7 +236,7 @@ fun HomeScreen(
 
             // Quick Add Buttons (Enhanced with presets)
             uiState.userSettings?.let { settings ->
-                QuickAddButtonsEnhanced(
+                QuickAddButtons(
                     presets = settings.quickAddPresets,
                     drinks = uiState.drinks,
                     onPresetClick = { preset, drink ->

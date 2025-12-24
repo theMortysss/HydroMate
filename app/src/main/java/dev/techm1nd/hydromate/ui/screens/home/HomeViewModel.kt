@@ -13,14 +13,14 @@ import dev.techm1nd.hydromate.domain.entities.UserProfile
 import dev.techm1nd.hydromate.domain.entities.UserSettings
 import dev.techm1nd.hydromate.domain.repositories.DrinkRepository
 import dev.techm1nd.hydromate.domain.repositories.TipsRepository
-import dev.techm1nd.hydromate.domain.usecases.AddWaterEntryUseCase
-import dev.techm1nd.hydromate.domain.usecases.CalculateCharacterStateUseCase
-import dev.techm1nd.hydromate.domain.usecases.CalculateHydrationUseCase
-import dev.techm1nd.hydromate.domain.usecases.CheckGoalReachedUseCase
-import dev.techm1nd.hydromate.domain.usecases.DeleteWaterEntryUseCase
-import dev.techm1nd.hydromate.domain.usecases.GetTodayProgressUseCase
-import dev.techm1nd.hydromate.domain.usecases.GetUserSettingsUseCase
-import dev.techm1nd.hydromate.domain.usecases.UpdateUserSettingsUseCase
+import dev.techm1nd.hydromate.domain.usecases.hydration.AddWaterEntryUseCase
+import dev.techm1nd.hydromate.domain.usecases.character.CalculateCharacterStateUseCase
+import dev.techm1nd.hydromate.domain.usecases.hydration.CalculateHydrationUseCase
+import dev.techm1nd.hydromate.domain.usecases.hydration.CheckGoalReachedUseCase
+import dev.techm1nd.hydromate.domain.usecases.hydration.DeleteWaterEntryUseCase
+import dev.techm1nd.hydromate.domain.usecases.stat.GetTodayProgressUseCase
+import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
+import dev.techm1nd.hydromate.domain.usecases.setting.UpdateUserSettingsUseCase
 import dev.techm1nd.hydromate.domain.usecases.achievement.CheckAchievementProgressUseCase
 import dev.techm1nd.hydromate.domain.usecases.challenge.UpdateChallengeProgressUseCase
 import dev.techm1nd.hydromate.domain.usecases.challenge.UpdateChallengeStreaksUseCase
@@ -125,11 +125,7 @@ class HomeViewModel @Inject constructor(
                     drinksMap
                 )
 
-                val currentHydration = if (settings.showNetHydration) {
-                    totalHydration.netHydration
-                } else {
-                    totalHydration.totalActual
-                }
+                val currentHydration = totalHydration.netHydration
 
                 val hydrationProgress = calculateHydrationUseCase.calculateProgress(
                     netHydration = currentHydration,
@@ -217,17 +213,6 @@ class HomeViewModel @Inject constructor(
                         )
                     )
 
-                    if (hydrationResult.totalDehydration > 0) {
-                        _effects.trySend(
-                            HomeEffect.ShowSuccess(
-                                "Added ${amount}ml of ${drink.icon} ${drink.name}\n" +
-                                        "Net hydration: ${hydrationResult.netHydration}ml " +
-                                        "(${hydrationResult.totalDehydration}ml dehydration effect)"
-                            )
-                        )
-                    }
-
-                    // НОВАЯ ЛОГИКА: Проверяем достижение цели после добавления воды
                     checkAndHandleGoalAchievement()
 
                     // NEW: Update challenge streaks
