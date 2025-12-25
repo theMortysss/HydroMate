@@ -3,10 +3,10 @@ package dev.techm1nd.hydromate.domain.entities
 import java.time.LocalDate
 
 data class DailyProgress(
-    val date: LocalDate,
-    val totalAmount: Int, // Общий объем выпитого
-    val goalAmount: Int,
-    val entries: List<WaterEntry>,
+    val date: LocalDate = LocalDate.now(),
+    val totalAmount: Int = 0, // Общий объем выпитого
+    val goalAmount: Int = 0,
+    val entries: List<WaterEntry> = emptyList(),
     val streak: Int = 0,
     val achievementUnlocked: Achievement? = null,
 

@@ -10,11 +10,14 @@ import dev.techm1nd.hydromate.domain.entities.UserProfile
 import dev.techm1nd.hydromate.domain.entities.UserSettings
 import dev.techm1nd.hydromate.domain.repositories.DrinkRepository
 import dev.techm1nd.hydromate.domain.usecases.hydration.CalculateRecommendedGoalUseCase
+import dev.techm1nd.hydromate.domain.usecases.hydration.RecommendedGoalResult
 import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
 import dev.techm1nd.hydromate.domain.usecases.stat.UpdateDailyGoalUseCase
 import dev.techm1nd.hydromate.domain.usecases.setting.UpdateUserSettingsUseCase
 import dev.techm1nd.hydromate.domain.usecases.profile.GetUserProfileUseCase
 import dev.techm1nd.hydromate.ui.notification.NotificationScheduler
+import dev.techm1nd.hydromate.ui.screens.settings.model.SettingsIntent
+import dev.techm1nd.hydromate.ui.screens.settings.model.SettingsState
 import java.time.LocalTime
 import javax.inject.Inject
 
@@ -29,8 +32,8 @@ class SettingsViewModel @Inject constructor(
     private val getUserProfileUseCase: GetUserProfileUseCase,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SettingsUiState())
-    val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+    private val _state = MutableStateFlow(SettingsState())
+    val state: StateFlow<SettingsState> = _state.asStateFlow()
 
     init {
         observeSettings()
@@ -39,39 +42,33 @@ class SettingsViewModel @Inject constructor(
     fun handleIntent(intent: SettingsIntent) {
         when (intent) {
             is SettingsIntent.UpdateDailyGoal -> updateDailyGoal(intent.goal)
-//            is SettingsIntent.UpdateCharacter -> updateCharacter(intent.character)
-//            is SettingsIntent.UpdateNotifications -> updateNotifications(intent.enabled)
-//            is SettingsIntent.UpdateNotificationInterval -> updateNotificationInterval(intent.intervalMinutes)
             is SettingsIntent.UpdateWakeUpTime -> updateWakeUpTime(intent.time)
             is SettingsIntent.UpdateBedTime -> updateBedTime(intent.time)
             is SettingsIntent.UpdateQuickAmounts -> updateQuickAmounts(intent.amounts)
             is SettingsIntent.UpdateSettings -> updateSettings(intent.settings)
 
-            SettingsIntent.ShowGoalDialog -> _uiState.update { it.copy(showGoalDialog = true) }
-            SettingsIntent.HideGoalDialog -> _uiState.update { it.copy(showGoalDialog = false) }
-//            SettingsIntent.ShowCharacterDialog -> _uiState.update { it.copy(showCharacterDialog = true) }
-//            SettingsIntent.HideCharacterDialog -> _uiState.update { it.copy(showCharacterDialog = false) }
-            is SettingsIntent.ShowTimePickerDialog -> _uiState.update {
+            SettingsIntent.ShowGoalDialog -> _state.update { it.copy(showGoalDialog = true) }
+            SettingsIntent.HideGoalDialog -> _state.update { it.copy(showGoalDialog = false) }
+            is SettingsIntent.ShowTimePickerDialog -> _state.update {
                 it.copy(showTimePickerDialog = true, timePickerType = intent.type)
             }
 
-            SettingsIntent.HideTimePickerDialog -> _uiState.update { it.copy(showTimePickerDialog = false) }
+            SettingsIntent.HideTimePickerDialog -> _state.update { it.copy(showTimePickerDialog = false) }
 
             SettingsIntent.RefreshSettings -> observeSettings()
-            SettingsIntent.ClearError -> _uiState.update { it.copy(error = null) }
+            SettingsIntent.ClearError -> _state.update { it.copy(error = null) }
 
             // Обработка настроек гидратации
-//            is SettingsIntent.UpdateShowNetHydration -> updateShowNetHydration(intent.show)
             is SettingsIntent.CalculateRecommendedGoal -> calculateRecommendedGoalForProfile(intent.profile)
-            SettingsIntent.HideProfileDialog -> _uiState.update { it.copy(showProfileDialog = false) }
-            SettingsIntent.ShowProfileDialog -> _uiState.update { it.copy(showProfileDialog = true) }
+            SettingsIntent.HideProfileDialog -> _state.update { it.copy(showProfileDialog = false) }
+            SettingsIntent.ShowProfileDialog -> _state.update { it.copy(showProfileDialog = true) }
             is SettingsIntent.UpdateProfile -> updateProfile(intent.profile)
         }
     }
 
     private fun observeSettings() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true) }
 
             combine(
                 getUserSettingsUseCase(),
@@ -80,18 +77,20 @@ class SettingsViewModel @Inject constructor(
             ) { settings, drinks, profile ->
                 Triple(settings, drinks, profile)
             }.catch { exception ->
-                _uiState.update {
+                _state.update {
                     it.copy(
                         isLoading = false,
                         error = exception.message ?: "Failed to load settings"
                     )
                 }
             }.collect { (settings, drinks, profile) ->
-                _uiState.update {
+                _state.update {
                     it.copy(
                         drinks = drinks,
                         settings = settings,
-                        recommendedGoal = if (!settings.profile.isManualGoal) calculateRecommendedGoalUseCase(settings.profile) else null,
+                        recommendedGoal = if (!settings.profile.isManualGoal) calculateRecommendedGoalUseCase(
+                            settings.profile
+                        ) else RecommendedGoalResult(),
                         selectedCharacter = profile.selectedCharacter,
                         isLoading = false
                     )
@@ -106,25 +105,25 @@ class SettingsViewModel @Inject constructor(
             val recommendedResult = calculateRecommendedGoalUseCase(profile)
 
             // 2. Обновляем settings с новым профилем
-            val newSettings = _uiState.value.settings.copy(
+            val newSettings = _state.value.settings.copy(
                 profile = profile,
                 // Если не ручной режим - обновляем dailyGoal расчетным значением
                 dailyGoal = if (!profile.isManualGoal) {
                     recommendedResult.recommendedGoal
                 } else {
-                    _uiState.value.settings.dailyGoal
+                    _state.value.settings.dailyGoal
                 }
             )
 
             // 3. Сохраняем
             updateUserSettingsUseCase(newSettings)
                 .onSuccess {
-                    _uiState.update {
+                    _state.update {
                         it.copy(recommendedGoal = recommendedResult)
                     }
                 }
                 .onFailure { exception ->
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = exception.message ?: "Failed to update profile")
                     }
                 }
@@ -134,7 +133,7 @@ class SettingsViewModel @Inject constructor(
     private fun calculateRecommendedGoalForProfile(profile: UserProfile) {
         viewModelScope.launch {
             val result = calculateRecommendedGoalUseCase(profile)
-            _uiState.update {
+            _state.update {
                 it.copy(recommendedGoal = result)
             }
         }
@@ -144,7 +143,7 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             updateDailyGoalUseCase(goal)
                 .onFailure { exception ->
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = exception.message ?: "Failed to update daily goal")
                     }
                 }
@@ -165,14 +164,14 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateNotifications(enabled: Boolean) {
         viewModelScope.launch {
-            val newSettings = _uiState.value.settings.copy(notificationsEnabled = enabled)
+            val newSettings = _state.value.settings.copy(notificationsEnabled = enabled)
             updateUserSettingsUseCase(newSettings)
                 .onSuccess {
                     // Обновляем расписание уведомлений
                     notificationScheduler.scheduleNotifications(newSettings)
                 }
                 .onFailure { exception ->
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = exception.message ?: "Failed to update notifications")
                     }
                 }
@@ -182,14 +181,14 @@ class SettingsViewModel @Inject constructor(
     private fun updateNotificationInterval(intervalMinutes: Int) {
         viewModelScope.launch {
             val newSettings =
-                _uiState.value.settings.copy(notificationInterval = intervalMinutes)
+                _state.value.settings.copy(notificationInterval = intervalMinutes)
             updateUserSettingsUseCase(newSettings)
                 .onSuccess {
                     // Обновляем расписание уведомлений
                     notificationScheduler.scheduleNotifications(newSettings)
                 }
                 .onFailure { exception ->
-                    _uiState.update {
+                    _state.update {
                         it.copy(
                             error = exception.message
                                 ?: "Failed to update notification interval"
@@ -207,7 +206,7 @@ class SettingsViewModel @Inject constructor(
                     notificationScheduler.scheduleNotifications(settings)
                 }
                 .onFailure { exception ->
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = exception.message ?: "Failed to update settings")
                     }
                 }
@@ -216,14 +215,14 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateWakeUpTime(time: LocalTime) {
         viewModelScope.launch {
-            val newSettings = _uiState.value.settings.copy(wakeUpTime = time)
+            val newSettings = _state.value.settings.copy(wakeUpTime = time)
             updateUserSettingsUseCase(newSettings)
                 .onSuccess {
                     // Обновляем расписание уведомлений
                     notificationScheduler.scheduleNotifications(newSettings)
                 }
                 .onFailure { exception ->
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = exception.message ?: "Failed to update wake up time")
                     }
                 }
@@ -232,14 +231,14 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateBedTime(time: LocalTime) {
         viewModelScope.launch {
-            val newSettings = _uiState.value.settings.copy(bedTime = time)
+            val newSettings = _state.value.settings.copy(bedTime = time)
             updateUserSettingsUseCase(newSettings)
                 .onSuccess {
                     // Обновляем расписание уведомлений
                     notificationScheduler.scheduleNotifications(newSettings)
                 }
                 .onFailure { exception ->
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = exception.message ?: "Failed to update bed time")
                     }
                 }
@@ -248,10 +247,10 @@ class SettingsViewModel @Inject constructor(
 
     private fun updateQuickAmounts(amounts: List<QuickAddPreset>) {
         viewModelScope.launch {
-            val newSettings = _uiState.value.settings.copy(quickAddPresets = amounts)
+            val newSettings = _state.value.settings.copy(quickAddPresets = amounts)
             updateUserSettingsUseCase(newSettings)
                 .onFailure { exception ->
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = exception.message ?: "Failed to update quick amounts")
                     }
                 }

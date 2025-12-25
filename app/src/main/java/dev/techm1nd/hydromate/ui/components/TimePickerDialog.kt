@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.unit.dp
-import dev.techm1nd.hydromate.ui.screens.settings.TimePickerType
+import dev.techm1nd.hydromate.ui.screens.settings.model.TimePickerType
 import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)

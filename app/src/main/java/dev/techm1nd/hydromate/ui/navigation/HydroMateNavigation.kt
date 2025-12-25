@@ -22,7 +22,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -74,15 +77,14 @@ import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.techm1nd.hydromate.domain.entities.AuthState
-import dev.techm1nd.hydromate.domain.usecases.auth.ObserveAuthStateUseCase
 import dev.techm1nd.hydromate.ui.screens.auth.AuthScreen
 import dev.techm1nd.hydromate.ui.screens.auth.AuthViewModel
-import dev.techm1nd.hydromate.ui.screens.history.HistoryScreen
-import dev.techm1nd.hydromate.ui.screens.home.HomeScreen
-import dev.techm1nd.hydromate.ui.screens.profile.ProfileScreen
-import dev.techm1nd.hydromate.ui.screens.settings.SettingsScreen
-import dev.techm1nd.hydromate.ui.screens.statistics.StatisticsScreen
-import javax.inject.Inject
+import dev.techm1nd.hydromate.ui.screens.auth.navigation.authScreen
+import dev.techm1nd.hydromate.ui.screens.history.navigation.historyScreen
+import dev.techm1nd.hydromate.ui.screens.home.navigation.homeScreen
+import dev.techm1nd.hydromate.ui.screens.profile.navigation.profileScreen
+import dev.techm1nd.hydromate.ui.screens.settings.navigation.settingsScreen
+import dev.techm1nd.hydromate.ui.screens.statistics.navigation.statisticsScreen
 
 sealed class Screen(
     val route: String,
@@ -146,7 +148,7 @@ fun HydroMateNavigation() {
     var authState by remember { mutableStateOf<AuthState>(AuthState.Loading) }
 
     LaunchedEffect(Unit) {
-        authViewModel.uiState.collect { uiState ->
+        authViewModel.state.collect { uiState ->
             authState = when {
                 uiState.isLoading -> AuthState.Loading
                 uiState.currentUser != null -> AuthState.Authenticated(uiState.currentUser)
@@ -166,7 +168,6 @@ fun HydroMateNavigation() {
     }
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0,0,0,0),
         topBar = {
             if (authState is AuthState.Authenticated) {
                 TopAppBar(
@@ -228,8 +229,7 @@ fun HydroMateNavigation() {
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color.Transparent,
-                    ),
-                    windowInsets = WindowInsets(0, 0, 0, 0)
+                    )
                 )
             }
         },
@@ -245,6 +245,7 @@ fun HydroMateNavigation() {
 
                 Box(
                     modifier = Modifier
+                        .navigationBarsPadding()
                         .padding(vertical = 24.dp, horizontal = 64.dp)
                         .fillMaxWidth()
                         .height(64.dp)
@@ -350,34 +351,27 @@ fun HydroMateNavigation() {
                     CircularProgressIndicator()
                 }
             }
-            composable(Screen.Auth.route) {
-                AuthScreen(
-                    onNavigateToHome = {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Auth.route) { inclusive = true }
-                        }
+            authScreen(
+                modifier = Modifier,
+                navController = navController,
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Auth.route) { inclusive = true }
                     }
-                )
-            }
-            composable(Screen.Home.route) {
-                HomeScreen()
-            }
-            composable(Screen.Statistics.route) {
-                StatisticsScreen()
-            }
-            composable(Screen.History.route) {
-                HistoryScreen()
-            }
-            composable(Screen.Profile.route) {
-                ProfileScreen(onNavigateToAuth = {
+                })
+            homeScreen(modifier = Modifier, navController = navController)
+            statisticsScreen(modifier = Modifier, navController = navController)
+            historyScreen(modifier = Modifier, navController = navController)
+            profileScreen(
+                modifier = Modifier,
+                navController = navController,
+                onNavigateToAuth = {
                     navController.navigate(Screen.Auth.route) {
                         popUpTo(0) { inclusive = true }
                     }
-                })
-            }
-            composable(Screen.Settings.route) {
-                SettingsScreen()
-            }
+                },
+            )
+            settingsScreen(modifier = Modifier, navController = navController)
         }
     }
 }

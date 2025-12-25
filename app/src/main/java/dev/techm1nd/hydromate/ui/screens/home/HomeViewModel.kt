@@ -27,6 +27,9 @@ import dev.techm1nd.hydromate.domain.usecases.challenge.UpdateChallengeStreaksUs
 import dev.techm1nd.hydromate.domain.usecases.profile.AddXPUseCase
 import dev.techm1nd.hydromate.domain.usecases.profile.GetUserProfileUseCase
 import dev.techm1nd.hydromate.ui.notification.NotificationScheduler
+import dev.techm1nd.hydromate.ui.screens.home.model.HomeEffect
+import dev.techm1nd.hydromate.ui.screens.home.model.HomeIntent
+import dev.techm1nd.hydromate.ui.screens.home.model.HomeState
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -50,8 +53,8 @@ class HomeViewModel @Inject constructor(
     private val tipsRepository: TipsRepository,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HomeUiState())
-    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
+    private val _state = MutableStateFlow(HomeState())
+    val state: StateFlow<HomeState> = _state.asStateFlow()
 
     private val _effects = Channel<HomeEffect>(Channel.BUFFERED)
     val effects: Flow<HomeEffect> = _effects.receiveAsFlow()
@@ -81,7 +84,7 @@ class HomeViewModel @Inject constructor(
 
     private fun updateQuickPresets(presets: List<QuickAddPreset>) {
         viewModelScope.launch {
-            val currentSettings = _uiState.value.userSettings ?: return@launch
+            val currentSettings = _state.value.userSettings ?: return@launch
             val newSettings = currentSettings.copy(quickAddPresets = presets)
 
             updateUserSettingsUseCase(newSettings)
@@ -100,7 +103,7 @@ class HomeViewModel @Inject constructor(
 
     private fun observeData() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true) }
 
             combine(
                 getTodayProgressUseCase(),
@@ -111,7 +114,7 @@ class HomeViewModel @Inject constructor(
             ) { progress, settings, drinks, profile, viewedTips ->
                 CombinedData(progress, settings, drinks, profile, viewedTips)
             }.catch { exception ->
-                _uiState.update {
+                _state.update {
                     it.copy(
                         isLoading = false,
                         error = exception.message ?: "Unknown error occurred"
@@ -142,10 +145,10 @@ class HomeViewModel @Inject constructor(
                 )
                 val characterState = calculateCharacterStateUseCase(progressForCharacter)
 
-                val previousGoalReached = _uiState.value.hydrationProgress?.isGoalReached ?: false
+                val previousGoalReached = _state.value.hydrationProgress?.isGoalReached ?: false
                 val currentGoalReached = hydrationProgress.isGoalReached
 
-                _uiState.update {
+                _state.update {
                     it.copy(
                         todayProgress = enhancedProgress,
                         userSettings = settings,
@@ -177,7 +180,7 @@ class HomeViewModel @Inject constructor(
 
     private fun addWater(amount: Int, drink: Drink, timestamp: LocalDateTime) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isAddingWater = true) }
+            _state.update { it.copy(isAddingWater = true) }
 
             val hydrationResult = calculateHydrationUseCase(amount, drink)
 
@@ -226,7 +229,7 @@ class HomeViewModel @Inject constructor(
                     )
                 }
 
-            _uiState.update { it.copy(isAddingWater = false) }
+            _state.update { it.copy(isAddingWater = false) }
         }
     }
 
@@ -272,7 +275,7 @@ class HomeViewModel @Inject constructor(
      * Проверяет достижение цели и обновляет расписание уведомлений
      */
     private suspend fun checkAndHandleGoalAchievement() {
-        val settings = _uiState.value.userSettings ?: return
+        val settings = _state.value.userSettings ?: return
         if (!settings.notificationsEnabled) return
 
         checkGoalReachedUseCase()
@@ -288,7 +291,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun selectDrink(drink: Drink) {
-        _uiState.update { it.copy(selectedDrink = drink) }
+        _state.update { it.copy(selectedDrink = drink) }
     }
 
     private fun createCustomDrink(drink: Drink) {
@@ -300,7 +303,7 @@ class HomeViewModel @Inject constructor(
                     )
 
                     val createdDrink = drink.copy(id = drinkId)
-                    _uiState.update { it.copy(selectedDrink = createdDrink) }
+                    _state.update { it.copy(selectedDrink = createdDrink) }
                 }
                 .onFailure { exception ->
                     _effects.trySend(
@@ -317,7 +320,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun clearError() {
-        _uiState.update { it.copy(error = null) }
+        _state.update { it.copy(error = null) }
     }
 }
 

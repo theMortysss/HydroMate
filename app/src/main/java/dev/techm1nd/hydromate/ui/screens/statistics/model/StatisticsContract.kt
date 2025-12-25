@@ -1,16 +1,16 @@
-package dev.techm1nd.hydromate.ui.screens.statistics
+package dev.techm1nd.hydromate.ui.screens.statistics.model
 
 import dev.techm1nd.hydromate.domain.entities.WeeklyStatistics
 import dev.techm1nd.hydromate.domain.usecases.hydration.TotalHydration
 import java.time.LocalDate
 
-data class StatisticsUiState(
-    val weeklyStats: WeeklyStatistics? = null,
+data class StatisticsState(
+    val weeklyStats: WeeklyStatistics = WeeklyStatistics(),
     val selectedWeekStart: LocalDate = getCurrentWeekStart(),
     val isLoading: Boolean = false,
     val error: String? = null,
 
-    val hydrationData: TotalHydration? = null
+    val hydrationData: TotalHydration = TotalHydration()
 )
 
 sealed class StatisticsIntent {

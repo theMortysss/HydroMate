@@ -2,6 +2,8 @@ package dev.techm1nd.hydromate.ui.components
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -15,15 +17,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.techm1nd.hydromate.domain.entities.CharacterType
+import dev.techm1nd.hydromate.domain.usecases.character.CalculateCharacterStateUseCase
 import dev.techm1nd.hydromate.domain.usecases.hydration.HydrationProgress
 import dev.techm1nd.hydromate.domain.usecases.hydration.TotalHydration
+import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.sin
 
 @Composable
 fun HydrationProgressCard(
     hydrationProgress: HydrationProgress,
     totalHydration: TotalHydration,
+    characterState: CalculateCharacterStateUseCase.CharacterState,
+    selectedCharacter: CharacterType?,
     modifier: Modifier = Modifier
 ) {
     val animatedProgress by animateFloatAsState(
@@ -31,8 +42,9 @@ fun HydrationProgressCard(
         animationSpec = tween(1000, easing = EaseOutCubic),
         label = "progress_animation"
     )
-
     val displayAmount = totalHydration.netHydration
+    var showCharacter by remember { mutableStateOf(false) }  // Persistent state for visibility
+    val coroutineScope = rememberCoroutineScope()
 
     Card(
         modifier = modifier,
@@ -78,37 +90,58 @@ fun HydrationProgressCard(
             // Circular Progress with detailed info
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.size(200.dp)
+                modifier = Modifier
+                    .size(200.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        coroutineScope.launch {
+                            showCharacter = !showCharacter
+                            delay(2000)
+                            showCharacter = !showCharacter
+                        }
+                    }
             ) {
-                HydrationCircularProgress(
-                    progress = animatedProgress,
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // FIXED: Используем displayAmount
-                    Text(
-                        text = "${displayAmount}ml",
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                if (!showCharacter) {
+                    HydrationCircularProgress(
+                        progress = animatedProgress,
+                        modifier = Modifier.fillMaxSize()
                     )
 
-                    Text(
-                        text = "of ${hydrationProgress.goal}ml",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "${displayAmount}ml",
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "of ${hydrationProgress.goal}ml",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
 
-                    Text(
-                        text = "${hydrationProgress.percentage.toInt()}%",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.secondary
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = "${hydrationProgress.percentage.toInt()}%",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
+                }
+
+                // Show CharacterDisplay as overlay when toggled
+                if (showCharacter) {
+                    CharacterDisplay(
+                        characterState = characterState,
+                        selectedCharacter = selectedCharacter,
+                        modifier = Modifier
                     )
                 }
             }
@@ -218,7 +251,7 @@ private fun HydrationCircularProgress(
 
             drawArc(
                 brush = gradient,
-                startAngle = -90f + kotlin.math.sin(Math.toRadians(waveOffset.toDouble())).toFloat() * 5f,
+                startAngle = -90f + sin(Math.toRadians(waveOffset.toDouble())).toFloat() * 5f,
                 sweepAngle = sweepAngle,
                 useCenter = false,
                 topLeft = Offset(centerX - radius, centerY - radius),
@@ -283,5 +316,19 @@ private fun HydrationMetricRow(
                 }
             )
         }
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun HydrationProgressCard_Preview() {
+    HydroMateTheme {
+        HydrationProgressCard(
+            hydrationProgress = HydrationProgress(),
+            totalHydration = TotalHydration(),
+            characterState = CalculateCharacterStateUseCase.CharacterState.HAPPY,
+            selectedCharacter = CharacterType.PENGUIN,
+            modifier = Modifier
+        )
     }
 }

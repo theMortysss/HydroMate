@@ -52,7 +52,7 @@ enum class SnoozeDelay(val displayName: String, val minutes: Int) {
 @Serializable
 data class CustomReminder(
     val id: String = java.util.UUID.randomUUID().toString(),
-    val time: String, // "HH:mm" format
+    val time: String = "12:00", // "HH:mm" format
     val label: String = "",
     val enabledDays: Set<String> = DayOfWeek.entries.map { it.name }.toSet(),
     val isEnabled: Boolean = true

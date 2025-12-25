@@ -151,9 +151,9 @@ class CalculateRecommendedGoalUseCase @Inject constructor() {
  * Результат расчета рекомендуемой нормы
  */
 data class RecommendedGoalResult(
-    val recommendedGoal: Int,
-    val breakdown: GoalBreakdown,
-    val explanation: String,
+    val recommendedGoal: Int = 0,
+    val breakdown: GoalBreakdown = GoalBreakdown(),
+    val explanation: String = "",
     val isDefault: Boolean = false
 ) {
     /**
@@ -173,9 +173,9 @@ data class RecommendedGoalResult(
  * Детальная разбивка расчета нормы
  */
 data class GoalBreakdown(
-    val baseAmount: Int,
-    val genderAdjustment: Int,
-    val activityAdjustment: Int,
-    val climateAdjustment: Int,
-    val totalRecommended: Int
+    val baseAmount: Int = 0,
+    val genderAdjustment: Int = 0,
+    val activityAdjustment: Int = 0,
+    val climateAdjustment: Int = 0,
+    val totalRecommended: Int = 0
 )

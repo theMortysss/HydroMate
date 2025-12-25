@@ -9,6 +9,8 @@ import kotlinx.coroutines.launch
 import dev.techm1nd.hydromate.domain.entities.AuthResult
 import dev.techm1nd.hydromate.domain.entities.AuthState
 import dev.techm1nd.hydromate.domain.usecases.auth.*
+import dev.techm1nd.hydromate.ui.screens.auth.model.AuthEffect
+import dev.techm1nd.hydromate.ui.screens.auth.model.AuthIntent
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,8 +26,8 @@ class AuthViewModel @Inject constructor(
     private val signOutUseCase: SignOutUseCase,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(AuthUiState())
-    val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+    private val _state = MutableStateFlow(dev.techm1nd.hydromate.ui.screens.auth.model.AuthState())
+    val state: StateFlow<dev.techm1nd.hydromate.ui.screens.auth.model.AuthState> = _state.asStateFlow()
 
     private val _effects = Channel<AuthEffect>(Channel.BUFFERED)
     val effects: Flow<AuthEffect> = _effects.receiveAsFlow()
@@ -49,23 +51,23 @@ class AuthViewModel @Inject constructor(
             is AuthIntent.ResetPassword -> resetPassword(intent.email)
             AuthIntent.SignOut -> signOut()
 
-            AuthIntent.ShowEmailSignIn -> _uiState.update {
+            AuthIntent.ShowEmailSignIn -> _state.update {
                 it.copy(showEmailSignIn = true, showEmailSignUp = false, showLinkAccount = false)
             }
-            AuthIntent.ShowEmailSignUp -> _uiState.update {
+            AuthIntent.ShowEmailSignUp -> _state.update {
                 it.copy(showEmailSignUp = true, showEmailSignIn = false, showLinkAccount = false)
             }
-            AuthIntent.ShowLinkAccount -> _uiState.update {
+            AuthIntent.ShowLinkAccount -> _state.update {
                 it.copy(showLinkAccount = true, showEmailSignIn = false, showEmailSignUp = false)
             }
-            AuthIntent.HideDialogs -> _uiState.update {
+            AuthIntent.HideDialogs -> _state.update {
                 it.copy(
                     showEmailSignIn = false,
                     showEmailSignUp = false,
                     showLinkAccount = false
                 )
             }
-            AuthIntent.ClearError -> _uiState.update { it.copy(error = null) }
+            AuthIntent.ClearError -> _state.update { it.copy(error = null) }
         }
     }
 
@@ -75,7 +77,7 @@ class AuthViewModel @Inject constructor(
                 .collect { authState ->
                     when (authState) {
                         is AuthState.Authenticated -> {
-                            _uiState.update {
+                            _state.update {
                                 it.copy(
                                     currentUser = authState.user,
                                     isAnonymous = authState.user.isAnonymous,
@@ -85,7 +87,7 @@ class AuthViewModel @Inject constructor(
                             _effects.trySend(AuthEffect.NavigateToHome)
                         }
                         AuthState.Unauthenticated -> {
-                            _uiState.update {
+                            _state.update {
                                 it.copy(
                                     currentUser = null,
                                     isAnonymous = false,
@@ -94,7 +96,7 @@ class AuthViewModel @Inject constructor(
                             }
                         }
                         AuthState.Loading -> {
-                            _uiState.update { it.copy(isLoading = true) }
+                            _state.update { it.copy(isLoading = true) }
                         }
                     }
                 }
@@ -103,15 +105,15 @@ class AuthViewModel @Inject constructor(
 
     private fun signInWithEmail(email: String, password: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isLoading = true, error = null) }
 
             when (val result = signInWithEmailUseCase(email, password)) {
                 is AuthResult.Success -> {
                     _effects.trySend(AuthEffect.ShowSuccess("Welcome back!"))
-                    _uiState.update { it.copy(showEmailSignIn = false) }
+                    _state.update { it.copy(showEmailSignIn = false) }
                 }
                 is AuthResult.Error -> {
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = result.message, isLoading = false)
                     }
                     _effects.trySend(AuthEffect.ShowError(result.message))
@@ -122,15 +124,15 @@ class AuthViewModel @Inject constructor(
 
     private fun signUpWithEmail(email: String, password: String, displayName: String?) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isLoading = true, error = null) }
 
             when (val result = signUpWithEmailUseCase(email, password, displayName)) {
                 is AuthResult.Success -> {
                     _effects.trySend(AuthEffect.ShowSuccess("Account created successfully!"))
-                    _uiState.update { it.copy(showEmailSignUp = false) }
+                    _state.update { it.copy(showEmailSignUp = false) }
                 }
                 is AuthResult.Error -> {
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = result.message, isLoading = false)
                     }
                     _effects.trySend(AuthEffect.ShowError(result.message))
@@ -141,14 +143,14 @@ class AuthViewModel @Inject constructor(
 
     private fun signInWithGoogle(idToken: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isLoading = true, error = null) }
 
             when (val result = signInWithGoogleUseCase(idToken)) {
                 is AuthResult.Success -> {
                     _effects.trySend(AuthEffect.ShowSuccess("Welcome!"))
                 }
                 is AuthResult.Error -> {
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = result.message, isLoading = false)
                     }
                     _effects.trySend(AuthEffect.ShowError(result.message))
@@ -159,7 +161,7 @@ class AuthViewModel @Inject constructor(
 
     private fun signInAnonymously() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isLoading = true, error = null) }
 
             when (val result = signInAnonymouslyUseCase()) {
                 is AuthResult.Success -> {
@@ -170,7 +172,7 @@ class AuthViewModel @Inject constructor(
                     )
                 }
                 is AuthResult.Error -> {
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = result.message, isLoading = false)
                     }
                     _effects.trySend(AuthEffect.ShowError(result.message))
@@ -181,17 +183,17 @@ class AuthViewModel @Inject constructor(
 
     private fun linkWithEmail(email: String, password: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isLoading = true, error = null) }
 
             when (val result = linkAnonymousWithEmailUseCase(email, password)) {
                 is AuthResult.Success -> {
                     _effects.trySend(
                         AuthEffect.ShowSuccess("Account linked! Your progress is now saved.")
                     )
-                    _uiState.update { it.copy(showLinkAccount = false, isAnonymous = false) }
+                    _state.update { it.copy(showLinkAccount = false, isAnonymous = false) }
                 }
                 is AuthResult.Error -> {
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = result.message, isLoading = false)
                     }
                     _effects.trySend(AuthEffect.ShowError(result.message))
@@ -202,17 +204,17 @@ class AuthViewModel @Inject constructor(
 
     private fun linkWithGoogle(idToken: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isLoading = true, error = null) }
 
             when (val result = linkAnonymousWithGoogleUseCase(idToken)) {
                 is AuthResult.Success -> {
                     _effects.trySend(
                         AuthEffect.ShowSuccess("Account linked! Your progress is now saved.")
                     )
-                    _uiState.update { it.copy(showLinkAccount = false, isAnonymous = false) }
+                    _state.update { it.copy(showLinkAccount = false, isAnonymous = false) }
                 }
                 is AuthResult.Error -> {
-                    _uiState.update {
+                    _state.update {
                         it.copy(error = result.message, isLoading = false)
                     }
                     _effects.trySend(AuthEffect.ShowError(result.message))
@@ -223,17 +225,17 @@ class AuthViewModel @Inject constructor(
 
     private fun resetPassword(email: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isLoading = true, error = null) }
 
             resetPasswordUseCase(email)
                 .onSuccess {
                     _effects.trySend(
                         AuthEffect.ShowSuccess("Password reset email sent! Check your inbox.")
                     )
-                    _uiState.update { it.copy(isLoading = false) }
+                    _state.update { it.copy(isLoading = false) }
                 }
                 .onFailure { exception ->
-                    _uiState.update {
+                    _state.update {
                         it.copy(
                             error = exception.message,
                             isLoading = false
@@ -248,7 +250,7 @@ class AuthViewModel @Inject constructor(
 
     private fun signOut() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true) }
 
             signOutUseCase()
                 .onSuccess {
@@ -260,7 +262,7 @@ class AuthViewModel @Inject constructor(
                     )
                 }
 
-            _uiState.update { it.copy(isLoading = false) }
+            _state.update { it.copy(isLoading = false) }
         }
     }
 }

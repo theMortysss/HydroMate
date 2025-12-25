@@ -1,8 +1,5 @@
 package dev.techm1nd.hydromate.ui.screens.auth
 
-import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -30,6 +27,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,58 +40,39 @@ import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
-import com.google.firebase.auth.R
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.techm1nd.hydromate.ui.screens.auth.model.AuthEffect
+import dev.techm1nd.hydromate.ui.screens.auth.model.AuthIntent
+import dev.techm1nd.hydromate.ui.screens.auth.model.AuthState
+import dev.techm1nd.hydromate.ui.screens.history.model.HistoryIntent
+import dev.techm1nd.hydromate.ui.screens.history.model.HistoryState
+import dev.techm1nd.hydromate.ui.screens.home.HomeScreen
+import dev.techm1nd.hydromate.ui.screens.home.model.HomeState
+import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
 fun AuthScreen(
-    onNavigateToHome: () -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = hiltViewModel()
+    modifier: Modifier,
+    state: AuthState,
+    snackbarHostState: SnackbarHostState,
+    handleIntent: (AuthIntent) -> Unit,
+    navController: NavHostController,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
     val hazeState = remember { HazeState() }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val credentialManager = remember { CredentialManager.create(context) }
-
-    // Handle effects
-    LaunchedEffect(viewModel.effects) {
-        viewModel.effects.collectLatest { effect ->
-            when (effect) {
-                is AuthEffect.ShowSuccess -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Short
-                    )
-                }
-                is AuthEffect.ShowError -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Long
-                    )
-                }
-                AuthEffect.NavigateToHome -> {
-                    onNavigateToHome()
-                }
-                is AuthEffect.NavigateToGoogleSignIn -> {
-                    // Launch Google Sign-In
-                }
-            }
-        }
-    }
 
     SnackbarHost(
         modifier = Modifier
@@ -167,7 +146,7 @@ fun AuthScreen(
             modifier = Modifier.padding(top = 8.dp, bottom = 48.dp)
         )
 
-        if (uiState.isLoading) {
+        if (state.isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.padding(32.dp)
             )
@@ -192,7 +171,7 @@ fun AuthScreen(
                                 context = context
                             )
 
-                            handleSignInResult(result, viewModel)
+                            handleSignInResult(result, handleIntent)
                         } catch (e: GetCredentialCancellationException) {
                             // User cancelled
                         } catch (e: NoCredentialException) {
@@ -210,7 +189,7 @@ fun AuthScreen(
 
             // Email Sign-In Button
             OutlinedButton(
-                onClick = { viewModel.handleIntent(AuthIntent.ShowEmailSignIn) },
+                onClick = { handleIntent(AuthIntent.ShowEmailSignIn) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
@@ -253,7 +232,7 @@ fun AuthScreen(
 
             // Continue Anonymously
             TextButton(
-                onClick = { viewModel.handleIntent(AuthIntent.SignInAnonymously) },
+                onClick = { handleIntent(AuthIntent.SignInAnonymously) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -280,7 +259,7 @@ fun AuthScreen(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable {
-                        viewModel.handleIntent(AuthIntent.ShowEmailSignUp)
+                        handleIntent(AuthIntent.ShowEmailSignUp)
                     }
                 )
             }
@@ -290,30 +269,33 @@ fun AuthScreen(
     }
 
     // Email Sign-In Dialog
-    if (uiState.showEmailSignIn) {
+    if (state.showEmailSignIn) {
         EmailSignInDialog(
-            onDismiss = { viewModel.handleIntent(AuthIntent.HideDialogs) },
+            onDismiss = { handleIntent(AuthIntent.HideDialogs) },
             onSignIn = { email, password ->
-                viewModel.handleIntent(AuthIntent.SignInWithEmail(email, password))
+                handleIntent(AuthIntent.SignInWithEmail(email, password))
             },
             onForgotPassword = { email ->
-                viewModel.handleIntent(AuthIntent.ResetPassword(email))
+                handleIntent(AuthIntent.ResetPassword(email))
             }
         )
     }
 
     // Email Sign-Up Dialog
-    if (uiState.showEmailSignUp) {
+    if (state.showEmailSignUp) {
         EmailSignUpDialog(
-            onDismiss = { viewModel.handleIntent(AuthIntent.HideDialogs) },
+            onDismiss = { handleIntent(AuthIntent.HideDialogs) },
             onSignUp = { email, password, displayName ->
-                viewModel.handleIntent(AuthIntent.SignUpWithEmail(email, password, displayName))
+                handleIntent(AuthIntent.SignUpWithEmail(email, password, displayName))
             }
         )
     }
 }
 
-private fun handleSignInResult(result: GetCredentialResponse, viewModel: AuthViewModel) {
+private fun handleSignInResult(
+    result: GetCredentialResponse,
+    handleIntent: (AuthIntent) -> Unit,
+) {
     val credential = result.credential
     if (credential is CustomCredential &&
         credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
@@ -321,7 +303,7 @@ private fun handleSignInResult(result: GetCredentialResponse, viewModel: AuthVie
         try {
             val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
             val idToken = googleIdTokenCredential.idToken
-            viewModel.handleIntent(AuthIntent.SignInWithGoogle(idToken))
+            handleIntent(AuthIntent.SignInWithGoogle(idToken))
         } catch (e: GoogleIdTokenParsingException) {
             // Invalid token
         }
@@ -617,4 +599,18 @@ fun EmailSignUpDialog(
             }
         }
     )
+}
+
+@Composable
+@Preview(showBackground = true,)
+private fun AuthScreen_Preview() {
+    HydroMateTheme {
+        AuthScreen(
+            modifier = Modifier,
+            state = AuthState(),
+            snackbarHostState = remember { SnackbarHostState() },
+            handleIntent = {},
+            navController = rememberNavController()
+        )
+    }
 }

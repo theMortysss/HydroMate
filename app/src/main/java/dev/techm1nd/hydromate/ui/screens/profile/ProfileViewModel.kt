@@ -18,7 +18,9 @@ import dev.techm1nd.hydromate.domain.usecases.auth.ObserveAuthStateUseCase
 import dev.techm1nd.hydromate.domain.usecases.auth.SignOutUseCase
 import dev.techm1nd.hydromate.domain.usecases.auth.UpdateAuthProfileUseCase
 import dev.techm1nd.hydromate.domain.usecases.challenge.*
-import dev.techm1nd.hydromate.domain.usecases.profile.UpdateUserProfileUseCase
+import dev.techm1nd.hydromate.ui.screens.profile.model.ProfileEffect
+import dev.techm1nd.hydromate.ui.screens.profile.model.ProfileIntent
+import dev.techm1nd.hydromate.ui.screens.profile.model.ProfileState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,8 +42,8 @@ class ProfileViewModel @Inject constructor(
     private val linkAnonymousWithGoogleUseCase: LinkAnonymousWithGoogleUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ProfileUiState())
-    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+    private val _state = MutableStateFlow(ProfileState())
+    val state: StateFlow<ProfileState> = _state.asStateFlow()
 
     private val _effects = Channel<ProfileEffect>(Channel.BUFFERED)
     val effects: Flow<ProfileEffect> = _effects.receiveAsFlow()
@@ -59,42 +61,42 @@ class ProfileViewModel @Inject constructor(
             is ProfileIntent.StartChallenge -> startChallenge(intent.type)
             is ProfileIntent.AbandonChallenge -> abandonChallenge(intent.challengeId)
 
-            ProfileIntent.ShowCharacterSelection -> _uiState.update {
+            ProfileIntent.ShowCharacterSelection -> _state.update {
                 it.copy(showCharacterSelection = true)
             }
 
-            ProfileIntent.HideCharacterSelection -> _uiState.update {
+            ProfileIntent.HideCharacterSelection -> _state.update {
                 it.copy(showCharacterSelection = false)
             }
 
-            ProfileIntent.ShowStartChallengeDialog -> _uiState.update {
+            ProfileIntent.ShowStartChallengeDialog -> _state.update {
                 it.copy(showStartChallengeDialog = true)
             }
 
-            ProfileIntent.HideStartChallengeDialog -> _uiState.update {
+            ProfileIntent.HideStartChallengeDialog -> _state.update {
                 it.copy(showStartChallengeDialog = false)
             }
 
-            is ProfileIntent.ShowAchievementDetails -> _uiState.update {
+            is ProfileIntent.ShowAchievementDetails -> _state.update {
                 it.copy(showAchievementDetails = intent.achievement)
             }
 
-            ProfileIntent.HideAchievementDetails -> _uiState.update {
+            ProfileIntent.HideAchievementDetails -> _state.update {
                 it.copy(showAchievementDetails = null)
             }
 
-            ProfileIntent.HideChallengeCompletion -> _uiState.update {
+            ProfileIntent.HideChallengeCompletion -> _state.update {
                 it.copy(showChallengeCompletion = null)
             }
 
-            ProfileIntent.ClearError -> _uiState.update { it.copy(error = null) }
+            ProfileIntent.ClearError -> _state.update { it.copy(error = null) }
             is ProfileIntent.EditProfile -> editProfile(intent.newDisplayName)
-            ProfileIntent.ShowEditProfileDialog -> _uiState.update { it.copy(showEditProfileDialog = true) }
-            ProfileIntent.HideEditProfileDialog -> _uiState.update { it.copy(showEditProfileDialog = false) }
+            ProfileIntent.ShowEditProfileDialog -> _state.update { it.copy(showEditProfileDialog = true) }
+            ProfileIntent.HideEditProfileDialog -> _state.update { it.copy(showEditProfileDialog = false) }
             ProfileIntent.SyncNow -> syncNow()
             ProfileIntent.SignOut -> signOut()
-            ProfileIntent.ShowLinkAccount -> _uiState.update { it.copy(showLinkAccountDialog = true) }
-            ProfileIntent.HideLinkAccount -> _uiState.update { it.copy(showLinkAccountDialog = false) }
+            ProfileIntent.ShowLinkAccount -> _state.update { it.copy(showLinkAccountDialog = true) }
+            ProfileIntent.HideLinkAccount -> _state.update { it.copy(showLinkAccountDialog = false) }
             is ProfileIntent.LinkWithEmail -> linkWithEmail(intent.email, intent.password)
             is ProfileIntent.LinkWithGoogle -> linkWithGoogle(intent.idToken)
         }
@@ -104,8 +106,8 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             observeAuthStateUseCase().collect { state ->
                 when (state) {
-                    is AuthState.Authenticated -> _uiState.update { it.copy(currentUser = state.user) }
-                    else -> _uiState.update { it.copy(currentUser = null) }
+                    is AuthState.Authenticated -> _state.update { it.copy(currentUser = state.user) }
+                    else -> _state.update { it.copy(currentUser = null) }
                 }
             }
         }
@@ -121,14 +123,14 @@ class ProfileViewModel @Inject constructor(
             ) { profile, activeChallenges, achievements, completedChallenges ->
                 ProfileData(profile, activeChallenges, achievements, completedChallenges)
             }.catch { exception ->
-                _uiState.update {
+                _state.update {
                     it.copy(
                         isLoading = false,
                         error = exception.message ?: "Failed to load profile data"
                     )
                 }
             }.collect { data ->
-                _uiState.update {
+                _state.update {
                     it.copy(
                         profile = data.profile,
                         activeChallenges = data.activeChallenges,
@@ -146,7 +148,7 @@ class ProfileViewModel @Inject constructor(
 
     private fun loadData() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true) }
 
             // Проверяем прогресс достижений
             checkAchievementProgressUseCase()
@@ -176,7 +178,7 @@ class ProfileViewModel @Inject constructor(
 
     private fun selectCharacter(character: CharacterType) {
         viewModelScope.launch {
-            val currentProfile = _uiState.value.profile
+            val currentProfile = _state.value.profile
 
             if (!currentProfile.isCharacterUnlocked(character)) {
                 _effects.trySend(
@@ -250,7 +252,7 @@ class ProfileViewModel @Inject constructor(
                 // Челлендж завершен!
                 completeChallengeUseCase(challenge.id)
                     .onSuccess { result ->
-                        _uiState.update { it.copy(showChallengeCompletion = result) }
+                        _state.update { it.copy(showChallengeCompletion = result) }
 
                         _effects.trySend(
                             ProfileEffect.ShowSuccess(
@@ -271,7 +273,7 @@ class ProfileViewModel @Inject constructor(
                         }
 
                         // Проверяем, повысился ли уровень
-                        val currentProfile = _uiState.value.profile
+                        val currentProfile = _state.value.profile
                         if (result.challenge.xpReward > 0) {
                             _effects.trySend(ProfileEffect.LevelUp)
                         }
@@ -282,7 +284,7 @@ class ProfileViewModel @Inject constructor(
 
     private fun syncNow() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true) }
             syncRepository.syncAll()
                 .onSuccess {
                     _effects.trySend(ProfileEffect.ShowSuccess("Sync completed"))
@@ -290,13 +292,13 @@ class ProfileViewModel @Inject constructor(
                 .onFailure { e ->
                     _effects.trySend(ProfileEffect.ShowError(e.message ?: "Sync failed"))
                 }
-            _uiState.update { it.copy(isLoading = false) }
+            _state.update { it.copy(isLoading = false) }
         }
     }
 
     private fun signOut() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true) }
             signOutUseCase()
                 .onSuccess {
                     _effects.trySend(ProfileEffect.ShowSuccess("Signed out"))
@@ -305,41 +307,41 @@ class ProfileViewModel @Inject constructor(
                 .onFailure { e ->
                     _effects.trySend(ProfileEffect.ShowError(e.message ?: "Sign out failed"))
                 }
-            _uiState.update { it.copy(isLoading = false) }
+            _state.update { it.copy(isLoading = false) }
         }
     }
 
     private fun linkWithEmail(email: String, password: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true) }
             when (val result = linkAnonymousWithEmailUseCase(email, password)) {
                 is AuthResult.Success -> {
                     _effects.trySend(ProfileEffect.ShowSuccess("Account linked"))
-                    _uiState.update { it.copy(showLinkAccountDialog = false) }
+                    _state.update { it.copy(showLinkAccountDialog = false) }
                 }
 
                 is AuthResult.Error -> {
                     _effects.trySend(ProfileEffect.ShowError(result.message))
                 }
             }
-            _uiState.update { it.copy(isLoading = false) }
+            _state.update { it.copy(isLoading = false) }
         }
     }
 
     private fun linkWithGoogle(idToken: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true) }
             when (val result = linkAnonymousWithGoogleUseCase(idToken)) {
                 is AuthResult.Success -> {
                     _effects.trySend(ProfileEffect.ShowSuccess("Account linked"))
-                    _uiState.update { it.copy(showLinkAccountDialog = false) }
+                    _state.update { it.copy(showLinkAccountDialog = false) }
                 }
 
                 is AuthResult.Error -> {
                     _effects.trySend(ProfileEffect.ShowError(result.message))
                 }
             }
-            _uiState.update { it.copy(isLoading = false) }
+            _state.update { it.copy(isLoading = false) }
         }
     }
 

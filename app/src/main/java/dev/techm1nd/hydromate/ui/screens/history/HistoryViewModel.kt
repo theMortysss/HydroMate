@@ -16,6 +16,9 @@ import dev.techm1nd.hydromate.domain.usecases.hydration.DeleteWaterEntryUseCase
 import dev.techm1nd.hydromate.domain.usecases.stat.GetProgressForDateUseCase
 import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
 import dev.techm1nd.hydromate.ui.notification.NotificationScheduler
+import dev.techm1nd.hydromate.ui.screens.history.model.HistoryEffect
+import dev.techm1nd.hydromate.ui.screens.history.model.HistoryIntent
+import dev.techm1nd.hydromate.ui.screens.history.model.HistoryState
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -34,8 +37,8 @@ class HistoryViewModel @Inject constructor(
     private val addWaterEntryForDateUseCase: AddWaterEntryForDateUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(HistoryUiState())
-    val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
+    private val _state = MutableStateFlow(HistoryState())
+    val state: StateFlow<HistoryState> = _state.asStateFlow()
 
     private val _effects = Channel<HistoryEffect>(Channel.BUFFERED)
     val effects: Flow<HistoryEffect> = _effects.receiveAsFlow()
@@ -70,7 +73,7 @@ class HistoryViewModel @Inject constructor(
             drinkRepository.getAllActiveDrinks()
                 .catch { }
                 .collect { drinks ->
-                    _uiState.update { it.copy(drinks = drinks) }
+                    _state.update { it.copy(drinks = drinks) }
                 }
         }
     }
@@ -80,7 +83,7 @@ class HistoryViewModel @Inject constructor(
             getUserSettingsUseCase()
                 .catch { }
                 .collect { settings ->
-                    _uiState.update {
+                    _state.update {
                         it.copy(userSettings = settings)
                     }
                     // При изменении настроек перезагружаем данные
@@ -91,10 +94,10 @@ class HistoryViewModel @Inject constructor(
 
     private fun loadMonthlyData() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _state.update { it.copy(isLoading = true, error = null) }
 
             try {
-                val currentState = _uiState.value
+                val currentState = _state.value
                 val month = currentState.selectedMonth
                 val startDate = month.atDay(1)
                 val endDate = month.atEndOfMonth()
@@ -151,7 +154,7 @@ class HistoryViewModel @Inject constructor(
                         .filter { (_, progress) -> progress.totalAmount > 0 }
                         .toMap()
 
-                    _uiState.update {
+                    _state.update {
                         it.copy(
                             monthlyProgress = monthlyProgress,
                             isLoading = false
@@ -159,16 +162,16 @@ class HistoryViewModel @Inject constructor(
                     }
 
                     // Обновляем selectedDateProgress если дата выбрана
-                    val selectedDate = _uiState.value.selectedDate
+                    val selectedDate = _state.value.selectedDate
                     if (selectedDate != null) {
-                        _uiState.update {
+                        _state.update {
                             it.copy(selectedDateProgress = monthlyProgress[selectedDate])
                         }
                     }
                 }
 
             } catch (exception: Exception) {
-                _uiState.update {
+                _state.update {
                     it.copy(
                         isLoading = false,
                         error = exception.message ?: "Failed to load history"
@@ -179,7 +182,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun showAddWaterDialog(date: LocalDate) {
-        _uiState.update {
+        _state.update {
             it.copy(
                 showAddWaterDialog = true,
                 dateForNewEntry = date
@@ -188,7 +191,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun hideAddWaterDialog() {
-        _uiState.update {
+        _state.update {
             it.copy(
                 showAddWaterDialog = false,
                 dateForNewEntry = null
@@ -197,7 +200,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun selectMonth(month: YearMonth) {
-        _uiState.update {
+        _state.update {
             it.copy(
                 selectedMonth = month,
                 selectedDate = null,
@@ -209,8 +212,8 @@ class HistoryViewModel @Inject constructor(
 
     private fun selectDate(date: LocalDate) {
         viewModelScope.launch {
-            val progress = _uiState.value.monthlyProgress[date]
-            _uiState.update {
+            val progress = _state.value.monthlyProgress[date]
+            _state.update {
                 it.copy(
                     selectedDate = date,
                     selectedDateProgress = progress
@@ -220,7 +223,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun navigateMonth(monthOffset: Int) {
-        val newMonth = _uiState.value.selectedMonth.plusMonths(monthOffset.toLong())
+        val newMonth = _state.value.selectedMonth.plusMonths(monthOffset.toLong())
         selectMonth(newMonth)
     }
 
@@ -272,7 +275,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     private suspend fun checkAndHandleGoalAchievement() {
-        val settings = _uiState.value.userSettings ?: return
+        val settings = _state.value.userSettings ?: return
         if (!settings.notificationsEnabled) return
 
         checkGoalReachedUseCase()
@@ -306,7 +309,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun clearSelectedDate() {
-        _uiState.update {
+        _state.update {
             it.copy(
                 selectedDate = null,
                 selectedDateProgress = null
@@ -315,6 +318,6 @@ class HistoryViewModel @Inject constructor(
     }
 
     private fun clearError() {
-        _uiState.update { it.copy(error = null) }
+        _state.update { it.copy(error = null) }
     }
 }

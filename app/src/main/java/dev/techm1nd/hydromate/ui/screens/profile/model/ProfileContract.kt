@@ -1,9 +1,9 @@
-package dev.techm1nd.hydromate.ui.screens.profile
+package dev.techm1nd.hydromate.ui.screens.profile.model
 
 import dev.techm1nd.hydromate.domain.entities.*
 import dev.techm1nd.hydromate.domain.usecases.challenge.CompleteChallengeUseCase
 
-data class ProfileUiState(
+data class ProfileState(
     val profile: UserProfile = UserProfile(),
     val achievements: List<Achievement> = emptyList(),
     val activeChallenges: List<Challenge> = emptyList(),

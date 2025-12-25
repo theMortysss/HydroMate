@@ -1,4 +1,4 @@
-package dev.techm1nd.hydromate.ui.screens.history
+package dev.techm1nd.hydromate.ui.screens.history.model
 
 import dev.techm1nd.hydromate.domain.entities.DailyProgress
 import dev.techm1nd.hydromate.domain.entities.Drink
@@ -7,9 +7,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 
-data class HistoryUiState(
+data class HistoryState(
     val drinks: List<Drink> = emptyList(),
-    val userSettings: UserSettings? = null,
+    val userSettings: UserSettings = UserSettings(),
     val selectedMonth: YearMonth = YearMonth.now(),
     val monthlyProgress: Map<LocalDate, DailyProgress> = emptyMap(),
     val selectedDate: LocalDate? = null,

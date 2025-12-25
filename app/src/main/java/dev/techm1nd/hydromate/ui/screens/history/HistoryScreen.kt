@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,11 +14,14 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
@@ -31,41 +32,38 @@ import dev.techm1nd.hydromate.ui.components.DateDetailsModal
 import dev.techm1nd.hydromate.ui.components.MonthSelector
 import dev.techm1nd.hydromate.ui.components.MonthlySummary
 import dev.techm1nd.hydromate.ui.components.WaterCalendar
+import dev.techm1nd.hydromate.ui.screens.auth.AuthScreen
+import dev.techm1nd.hydromate.ui.screens.auth.model.AuthState
+import dev.techm1nd.hydromate.ui.screens.history.model.HistoryIntent
+import dev.techm1nd.hydromate.ui.screens.history.model.HistoryState
+import dev.techm1nd.hydromate.ui.screens.statistics.model.StatisticsIntent
+import dev.techm1nd.hydromate.ui.screens.statistics.model.StatisticsState
+import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
 
 @Composable
 fun HistoryScreen(
-    modifier: Modifier = Modifier,
-    viewModel: HistoryViewModel = hiltViewModel()
+    modifier: Modifier,
+    state: HistoryState,
+    snackbarHostState: SnackbarHostState,
+    handleIntent: (HistoryIntent) -> Unit,
+    navController: NavHostController
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
     val hazeState = remember { HazeState() }
 
-    // Handle errors
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let { error ->
-            snackbarHostState.showSnackbar(
-                message = error,
-                duration = SnackbarDuration.Short
-            )
-            viewModel.handleIntent(HistoryIntent.ClearError)
-        }
-    }
-
     // Handle date selection modal
-    uiState.selectedDateProgress?.let { progress ->
+    state.selectedDateProgress?.let { progress ->
         DateDetailsModal(
-            date = uiState.selectedDate!!,
+            date = state.selectedDate!!,
             progress = progress,
             onDismiss = {
-                viewModel.handleIntent(HistoryIntent.ClearSelectedDate)
+                handleIntent(HistoryIntent.ClearSelectedDate)
             },
             onDeleteEntry = { entryId ->
-                viewModel.handleIntent(HistoryIntent.DeleteEntry(entryId))
+                handleIntent(HistoryIntent.DeleteEntry(entryId))
             },
             onAddMore = { date ->
-                viewModel.handleIntent(HistoryIntent.ShowAddWaterDialog(date))
-                viewModel.handleIntent(HistoryIntent.ClearSelectedDate)
+                handleIntent(HistoryIntent.ShowAddWaterDialog(date))
+                handleIntent(HistoryIntent.ClearSelectedDate)
             }
         )
     }
@@ -111,7 +109,7 @@ fun HistoryScreen(
         }
     }
 
-    if (uiState.isLoading && uiState.monthlyProgress.isEmpty()) {
+    if (state.isLoading && state.monthlyProgress.isEmpty()) {
         Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -131,44 +129,44 @@ fun HistoryScreen(
 
             // Month selector
             MonthSelector(
-                selectedMonth = uiState.selectedMonth,
+                selectedMonth = state.selectedMonth,
                 onPreviousMonth = {
-                    viewModel.handleIntent(HistoryIntent.PreviousMonth)
+                    handleIntent(HistoryIntent.PreviousMonth)
                 },
                 onNextMonth = {
-                    viewModel.handleIntent(HistoryIntent.NextMonth)
+                    handleIntent(HistoryIntent.NextMonth)
                 }
             )
 
             // Calendar с учетом настройки
             WaterCalendar(
-                month = uiState.selectedMonth,
-                monthlyProgress = uiState.monthlyProgress,
+                month = state.selectedMonth,
+                monthlyProgress = state.monthlyProgress,
                 onDateSelected = { date ->
-                    viewModel.handleIntent(HistoryIntent.SelectDate(date))
+                    handleIntent(HistoryIntent.SelectDate(date))
                 },
                 onAddWaterClick = { date -> // Для пустых дат открываем диалог добавления
-                    viewModel.handleIntent(HistoryIntent.ShowAddWaterDialog(date))
+                    handleIntent(HistoryIntent.ShowAddWaterDialog(date))
                 },
                 modifier = Modifier.fillMaxWidth()
             )
 
             // Monthly summary с учетом настройки
             MonthlySummary(
-                monthlyProgress = uiState.monthlyProgress.values.toList(),
+                monthlyProgress = state.monthlyProgress.values.toList(),
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(96.dp))
         }
-        if (uiState.showAddWaterDialog && uiState.dateForNewEntry != null) {
+        if (state.showAddWaterDialog && state.dateForNewEntry != null) {
             AddWaterForDateDialog(
-                date = uiState.dateForNewEntry!!,
-                drinks = uiState.drinks,
+                date = state.dateForNewEntry!!,
+                drinks = state.drinks,
                 onAddEntry = { amount, drink, time ->
-                    viewModel.handleIntent(
+                    handleIntent(
                         HistoryIntent.AddWaterForDate(
-                            date = uiState.dateForNewEntry!!,
+                            date = state.dateForNewEntry!!,
                             amount = amount,
                             drink = drink,
                             time = time
@@ -176,12 +174,26 @@ fun HistoryScreen(
                     )
                 },
                 onDrinkCreated = { drink ->
-                    viewModel.handleIntent(HistoryIntent.CreateCustomDrink(drink))
+                    handleIntent(HistoryIntent.CreateCustomDrink(drink))
                 },
                 onDismiss = {
-                    viewModel.handleIntent(HistoryIntent.HideAddWaterDialog)
+                    handleIntent(HistoryIntent.HideAddWaterDialog)
                 }
             )
         }
+    }
+}
+
+@Composable
+@Preview(showBackground = true,)
+private fun HistoryScreen_Preview() {
+    HydroMateTheme {
+        HistoryScreen(
+            modifier = Modifier,
+            state = HistoryState(),
+            snackbarHostState = remember { SnackbarHostState() },
+            handleIntent = {},
+            navController = rememberNavController()
+        )
     }
 }

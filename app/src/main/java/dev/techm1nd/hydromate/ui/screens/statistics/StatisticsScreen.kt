@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,37 +14,35 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.techm1nd.hydromate.ui.components.*
+import dev.techm1nd.hydromate.ui.screens.auth.AuthScreen
+import dev.techm1nd.hydromate.ui.screens.auth.model.AuthState
+import dev.techm1nd.hydromate.ui.screens.home.model.HomeIntent
+import dev.techm1nd.hydromate.ui.screens.statistics.model.StatisticsIntent
+import dev.techm1nd.hydromate.ui.screens.statistics.model.StatisticsState
+import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
 
 @Composable
 fun StatisticsScreen(
-    modifier: Modifier = Modifier,
-    viewModel: StatisticsViewModel = hiltViewModel()
+    modifier: Modifier,
+    state: StatisticsState,
+    snackbarHostState: SnackbarHostState,
+    handleIntent: (StatisticsIntent) -> Unit,
+    navController: NavHostController
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
     val hazeState = remember { HazeState() }
-
-    // Handle errors
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let { error ->
-            snackbarHostState.showSnackbar(
-                message = error,
-                duration = SnackbarDuration.Short
-            )
-            viewModel.handleIntent(StatisticsIntent.ClearError)
-        }
-    }
 
     SnackbarHost(
         modifier = Modifier
@@ -89,7 +85,7 @@ fun StatisticsScreen(
         }
     }
 
-    if (uiState.isLoading && uiState.weeklyStats == null) {
+    if (state.isLoading) {
         Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -109,57 +105,65 @@ fun StatisticsScreen(
 
             // Week selector
             WeekSelector(
-                selectedWeekStart = uiState.selectedWeekStart,
+                selectedWeekStart = state.selectedWeekStart,
                 onPreviousWeek = {
-                    viewModel.handleIntent(StatisticsIntent.PreviousWeek)
+                    handleIntent(StatisticsIntent.PreviousWeek)
                 },
                 onNextWeek = {
-                    viewModel.handleIntent(StatisticsIntent.NextWeek)
+                    handleIntent(StatisticsIntent.NextWeek)
                 }
             )
 
-            uiState.weeklyStats?.let { stats ->
-                val hydrationData = uiState.hydrationData
+            // Weekly overview card с учетом настройки
+            WeeklyOverviewCard(
+                weeklyStats = state.weeklyStats,
+                hydrationData = state.hydrationData,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-                // Weekly overview card с учетом настройки
-                WeeklyOverviewCard(
-                    weeklyStats = stats,
-                    hydrationData = hydrationData,
-                    modifier = Modifier.fillMaxWidth()
-                )
+            // Daily chart с учетом настройки
+            DailyWaterChartEnhanced(
+                dailyProgress = state.weeklyStats.dailyProgress,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-                // Daily chart с учетом настройки
-                DailyWaterChartEnhanced(
-                    dailyProgress = stats.dailyProgress,
-                    modifier = Modifier.fillMaxWidth()
-                )
+            // Statistics cards
+            StatisticsCards(
+                weeklyStats = state.weeklyStats,
+                hydrationData = state.hydrationData,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-                // Statistics cards
-                StatisticsCards(
-                    weeklyStats = stats,
-                    hydrationData = hydrationData,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                // Drink breakdown если есть данные
-                hydrationData?.let { data ->
-                    if (data.drinkBreakdown.isNotEmpty()) {
-                        DrinkBreakdownCard(
-                            drinkBreakdown = data.drinkBreakdown,
-                            totalAmount = data.netHydration,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-
-                // Achievement summary
-                AchievementSummary(
-                    weeklyStats = stats,
+            // Drink breakdown если есть данные
+            if (state.hydrationData.drinkBreakdown.isNotEmpty()) {
+                DrinkBreakdownCard(
+                    drinkBreakdown = state.hydrationData.drinkBreakdown,
+                    totalAmount = state.hydrationData.netHydration,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
 
+            // Achievement summary
+            AchievementSummary(
+                weeklyStats = state.weeklyStats,
+                modifier = Modifier.fillMaxWidth()
+            )
+
             Spacer(modifier = Modifier.height(96.dp))
         }
+    }
+}
+
+@Composable
+@Preview(showBackground = true,)
+private fun StatisticsScreen_Preview() {
+    HydroMateTheme {
+        StatisticsScreen(
+            modifier = Modifier,
+            state = StatisticsState(),
+            snackbarHostState = remember { SnackbarHostState() },
+            handleIntent = {},
+            navController = rememberNavController()
+        )
     }
 }

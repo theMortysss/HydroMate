@@ -21,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
@@ -67,7 +68,6 @@ class MainActivity : ComponentActivity() {
             HydroMateTheme {
                 Box(modifier = Modifier
                     .fillMaxSize()
-                    .systemBarsPadding()
                 ) {
                     HydroMateNavigation()
 

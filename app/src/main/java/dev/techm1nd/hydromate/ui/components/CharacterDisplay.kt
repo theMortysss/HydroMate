@@ -54,7 +54,6 @@ fun CharacterDisplay(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-            .padding(8.dp)
     ) {
         Surface(
             shape = CircleShape,
@@ -81,15 +80,6 @@ fun CharacterDisplay(
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = getCharacterMessage(characterState),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
     }
 }
 

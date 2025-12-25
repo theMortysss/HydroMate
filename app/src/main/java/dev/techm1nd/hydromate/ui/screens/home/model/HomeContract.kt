@@ -1,4 +1,4 @@
-package dev.techm1nd.hydromate.ui.screens.home
+package dev.techm1nd.hydromate.ui.screens.home.model
 
 import dev.techm1nd.hydromate.domain.entities.CharacterType
 import dev.techm1nd.hydromate.domain.entities.DailyProgress
@@ -10,32 +10,35 @@ import dev.techm1nd.hydromate.domain.usecases.hydration.HydrationProgress
 import dev.techm1nd.hydromate.domain.usecases.hydration.TotalHydration
 import java.time.LocalDateTime
 
-data class HomeUiState(
-    val todayProgress: DailyProgress? = null,
-    val userSettings: UserSettings? = null,
+data class HomeState(
+    val todayProgress: DailyProgress = DailyProgress(),
+    val userSettings: UserSettings = UserSettings(),
     val characterState: CalculateCharacterStateUseCase.CharacterState =
         CalculateCharacterStateUseCase.CharacterState.CONTENT,
     val isLoading: Boolean = false,
     val error: String? = null,
     val isAddingWater: Boolean = false,
-    val totalHydration: TotalHydration? = null,
-    val hydrationProgress: HydrationProgress? = null,
+    val totalHydration: TotalHydration = TotalHydration(),
+    val hydrationProgress: HydrationProgress = HydrationProgress(),
     val drinks: List<Drink> = emptyList(),
     val selectedDrink: Drink? = null,
     val selectedCharacter: CharacterType = CharacterType.PENGUIN,
     val viewedTipIds: Set<String> = emptySet(),
 ) {
     val progressPercentage: Float
-        get() = hydrationProgress?.percentage?.div(100f) ?: 0f
+        get() = hydrationProgress.percentage.div(100f)
 
     val currentAmount: Int
-        get() = totalHydration?.netHydration ?: 0
+        get() = totalHydration.netHydration
 
     val goalAmount: Int
-        get() = hydrationProgress?.goal ?: todayProgress?.goalAmount ?: 2000
+        get() =
+            if (hydrationProgress.goal != 0) hydrationProgress.goal
+            else if (todayProgress.goalAmount != 0) todayProgress.goalAmount
+            else 2000
 
     val remainingAmount: Int
-        get() = hydrationProgress?.remaining ?: 0
+        get() = hydrationProgress.remaining
 }
 
 sealed class HomeIntent {

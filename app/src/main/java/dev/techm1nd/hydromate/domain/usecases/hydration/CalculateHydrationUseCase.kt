@@ -198,16 +198,16 @@ data class HydrationResult(
  * Суммарная гидратация за период
  */
 data class TotalHydration(
-    val totalActual: Int,
-    val totalEffective: Int,
-    val netHydration: Int,
-    val drinkBreakdown: Map<Drink, Int>
+    val totalActual: Int = 0,
+    val totalEffective: Int = 0,
+    val netHydration: Int = 0,
+    val drinkBreakdown: Map<Drink, Int> = emptyMap()
 )
 
 data class HydrationProgress(
-    val current: Int,
-    val goal: Int,
-    val percentage: Float,
-    val remaining: Int,
-    val isGoalReached: Boolean
+    val current: Int = 0,
+    val goal: Int = 0,
+    val percentage: Float = 0f,
+    val remaining: Int = 0,
+    val isGoalReached: Boolean = false
 )

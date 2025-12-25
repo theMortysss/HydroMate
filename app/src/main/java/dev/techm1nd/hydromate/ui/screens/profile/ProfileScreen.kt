@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,6 +29,8 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
@@ -39,61 +42,25 @@ import dev.chrisbanes.haze.hazeSource
 import dev.techm1nd.hydromate.R
 import kotlinx.coroutines.flow.collectLatest
 import dev.techm1nd.hydromate.ui.components.*
+import dev.techm1nd.hydromate.ui.screens.auth.AuthScreen
+import dev.techm1nd.hydromate.ui.screens.auth.model.AuthState
+import dev.techm1nd.hydromate.ui.screens.history.model.HistoryIntent
+import dev.techm1nd.hydromate.ui.screens.history.model.HistoryState
+import dev.techm1nd.hydromate.ui.screens.profile.model.ProfileEffect
+import dev.techm1nd.hydromate.ui.screens.profile.model.ProfileIntent
+import dev.techm1nd.hydromate.ui.screens.profile.model.ProfileState
+import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
 import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileScreen(
-    modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel = hiltViewModel(),
-    onNavigateToAuth: () -> Unit
+    modifier: Modifier,
+    state: ProfileState,
+    snackbarHostState: SnackbarHostState,
+    handleIntent: (ProfileIntent) -> Unit,
+    navController: NavHostController
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
     val hazeState = remember { HazeState() }
-
-    // Handle effects
-    LaunchedEffect(viewModel.effects) {
-        viewModel.effects.collectLatest { effect ->
-            when (effect) {
-                is ProfileEffect.ShowSuccess -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Short
-                    )
-                }
-                is ProfileEffect.ShowError -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Long
-                    )
-                }
-                is ProfileEffect.CharacterUnlocked -> {
-                    snackbarHostState.showSnackbar(
-                        message = "🎉 New character unlocked: ${effect.character.displayName}!",
-                        duration = SnackbarDuration.Long
-                    )
-                }
-                ProfileEffect.LevelUp -> {
-                    snackbarHostState.showSnackbar(
-                        message = "🎊 Level Up! You reached level ${uiState.profile.level}!",
-                        duration = SnackbarDuration.Long
-                    )
-                }
-                ProfileEffect.NavigateToAuth -> onNavigateToAuth()
-            }
-        }
-    }
-
-    // Handle errors
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let { error ->
-            snackbarHostState.showSnackbar(
-                message = error,
-                duration = SnackbarDuration.Short
-            )
-            viewModel.handleIntent(ProfileIntent.ClearError)
-        }
-    }
 
     SnackbarHost(
         modifier = Modifier
@@ -137,7 +104,7 @@ fun ProfileScreen(
     }
 
     Box(modifier = modifier.fillMaxSize()) {
-        if (uiState.isLoading && uiState.profile.level == 1) {
+        if (state.isLoading && state.profile.level == 1) {
             // Initial loading
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
@@ -153,51 +120,51 @@ fun ProfileScreen(
 
                 // Account Settings
                 AccountSettingsCard(
-                    currentUser = uiState.currentUser,
-                    syncStatus = uiState.syncStatus,
+                    currentUser = state.currentUser,
+                    syncStatus = state.syncStatus,
                     onSyncNow = {
-                        viewModel.handleIntent(ProfileIntent.SyncNow)
+                        handleIntent(ProfileIntent.SyncNow)
                     },
                     onSignOut = {
-                        viewModel.handleIntent(ProfileIntent.SignOut)
+                        handleIntent(ProfileIntent.SignOut)
                     },
                     onLinkAccount = {
-                        viewModel.handleIntent(ProfileIntent.ShowLinkAccount)
+                        handleIntent(ProfileIntent.ShowLinkAccount)
                     },
-                    onEditProfile = { viewModel.handleIntent(ProfileIntent.ShowEditProfileDialog) }
+                    onEditProfile = { handleIntent(ProfileIntent.ShowEditProfileDialog) }
                 )
 
                 // Profile Header
                 ProfileHeaderCard(
-                    profile = uiState.profile,
+                    profile = state.profile,
                     onCharacterClick = {
-                        viewModel.handleIntent(ProfileIntent.ShowCharacterSelection)
+                        handleIntent(ProfileIntent.ShowCharacterSelection)
                     }
                 )
 
                 // Active Challenges
                 ActiveChallengesSection(
-                    challenges = uiState.activeChallenges,
+                    challenges = state.activeChallenges,
                     onStartChallenge = {
-                        viewModel.handleIntent(ProfileIntent.ShowStartChallengeDialog)
+                        handleIntent(ProfileIntent.ShowStartChallengeDialog)
                     },
                     onAbandonChallenge = { challengeId ->
-                        viewModel.handleIntent(ProfileIntent.AbandonChallenge(challengeId))
+                        handleIntent(ProfileIntent.AbandonChallenge(challengeId))
                     }
                 )
 
                 // Achievements
                 AchievementsSection(
-                    achievements = uiState.achievements,
+                    achievements = state.achievements,
                     onAchievementClick = { achievement ->
-                        viewModel.handleIntent(ProfileIntent.ShowAchievementDetails(achievement))
+                        handleIntent(ProfileIntent.ShowAchievementDetails(achievement))
                     }
                 )
 
                 // Completed Challenges History
-                if (uiState.completedChallenges.isNotEmpty()) {
+                if (state.completedChallenges.isNotEmpty()) {
                     CompletedChallengesSection(
-                        challenges = uiState.completedChallenges
+                        challenges = state.completedChallenges
                     )
                 }
 
@@ -207,10 +174,10 @@ fun ProfileScreen(
     }
 
     // Dialogs
-    if (uiState.showEditProfileDialog) {
-        var newName by remember { mutableStateOf(uiState.currentUser?.displayName ?: "") }
+    if (state.showEditProfileDialog) {
+        var newName by remember { mutableStateOf(state.currentUser?.displayName ?: "") }
         AlertDialog(
-            onDismissRequest = { viewModel.handleIntent(ProfileIntent.HideEditProfileDialog) },
+            onDismissRequest = { handleIntent(ProfileIntent.HideEditProfileDialog) },
             title = { Text("Edit Profile") },
             text = {
                 OutlinedTextField(
@@ -221,66 +188,66 @@ fun ProfileScreen(
             },
             confirmButton = {
                 Button(onClick = {
-                    viewModel.handleIntent(ProfileIntent.EditProfile(newName))
-                    viewModel.handleIntent(ProfileIntent.HideEditProfileDialog)
+                    handleIntent(ProfileIntent.EditProfile(newName))
+                    handleIntent(ProfileIntent.HideEditProfileDialog)
                 }) { Text("Save") }
             }
         )
     }
 
-    if (uiState.showLinkAccountDialog) {
+    if (state.showLinkAccountDialog) {
         LinkAccountDialog(
             onLinkWithEmail = { email, password ->
-                viewModel.handleIntent(ProfileIntent.LinkWithEmail(email, password))
+                handleIntent(ProfileIntent.LinkWithEmail(email, password))
             },
             onLinkWithGoogle = { idToken ->
-                viewModel.handleIntent(ProfileIntent.LinkWithGoogle(idToken))
+                handleIntent(ProfileIntent.LinkWithGoogle(idToken))
             },
             onDismiss = {
-                viewModel.handleIntent(ProfileIntent.HideLinkAccount)
+                handleIntent(ProfileIntent.HideLinkAccount)
             }
         )
     }
 
-    if (uiState.showCharacterSelection) {
+    if (state.showCharacterSelection) {
         CharacterSelectionDialogEnhanced(
-            profile = uiState.profile,
+            profile = state.profile,
             onCharacterSelected = { character ->
-                viewModel.handleIntent(ProfileIntent.SelectCharacter(character))
-                viewModel.handleIntent(ProfileIntent.HideCharacterSelection)
+                handleIntent(ProfileIntent.SelectCharacter(character))
+                handleIntent(ProfileIntent.HideCharacterSelection)
             },
             onDismiss = {
-                viewModel.handleIntent(ProfileIntent.HideCharacterSelection)
+                handleIntent(ProfileIntent.HideCharacterSelection)
             }
         )
     }
 
-    if (uiState.showStartChallengeDialog) {
+    if (state.showStartChallengeDialog) {
         StartChallengeDialog(
             onStartChallenge = { type ->
-                viewModel.handleIntent(ProfileIntent.StartChallenge(type))
-                viewModel.handleIntent(ProfileIntent.HideStartChallengeDialog)
+                handleIntent(ProfileIntent.StartChallenge(type))
+                handleIntent(ProfileIntent.HideStartChallengeDialog)
             },
             onDismiss = {
-                viewModel.handleIntent(ProfileIntent.HideStartChallengeDialog)
+                handleIntent(ProfileIntent.HideStartChallengeDialog)
             }
         )
     }
 
-    uiState.showAchievementDetails?.let { achievement ->
+    state.showAchievementDetails?.let { achievement ->
         AchievementDetailsDialog(
             achievement = achievement,
             onDismiss = {
-                viewModel.handleIntent(ProfileIntent.HideAchievementDetails)
+                handleIntent(ProfileIntent.HideAchievementDetails)
             }
         )
     }
 
-    uiState.showChallengeCompletion?.let { result ->
+    state.showChallengeCompletion?.let { result ->
         ChallengeCompletionDialog(
             result = result,
             onDismiss = {
-                viewModel.handleIntent(ProfileIntent.HideChallengeCompletion)
+                handleIntent(ProfileIntent.HideChallengeCompletion)
             }
         )
     }
@@ -380,4 +347,18 @@ private fun LinkAccountDialog(
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )
+}
+
+@Composable
+@Preview(showBackground = true,)
+private fun ProfileScreen_Preview() {
+    HydroMateTheme {
+        ProfileScreen(
+            modifier = Modifier,
+            state = ProfileState(),
+            snackbarHostState = remember { SnackbarHostState() },
+            handleIntent = {},
+            navController = rememberNavController()
+        )
+    }
 }

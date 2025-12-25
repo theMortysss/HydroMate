@@ -8,8 +8,11 @@ import kotlinx.coroutines.launch
 import dev.techm1nd.hydromate.domain.entities.DailyProgress
 import dev.techm1nd.hydromate.domain.repositories.DrinkRepository
 import dev.techm1nd.hydromate.domain.usecases.hydration.CalculateHydrationUseCase
+import dev.techm1nd.hydromate.domain.usecases.hydration.TotalHydration
 import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
 import dev.techm1nd.hydromate.domain.usecases.stat.GetWeeklyStatisticsUseCase
+import dev.techm1nd.hydromate.ui.screens.statistics.model.StatisticsIntent
+import dev.techm1nd.hydromate.ui.screens.statistics.model.StatisticsState
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -21,8 +24,8 @@ class StatisticsViewModel @Inject constructor(
     private val calculateHydrationUseCase: CalculateHydrationUseCase,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(StatisticsUiState())
-    val uiState: StateFlow<StatisticsUiState> = _uiState.asStateFlow()
+    private val _state = MutableStateFlow(StatisticsState())
+    val state: StateFlow<StatisticsState> = _state.asStateFlow()
 
     init {
         loadWeeklyStatistics()
@@ -40,15 +43,15 @@ class StatisticsViewModel @Inject constructor(
 
     private fun loadWeeklyStatistics() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true) }
 
             combine(
-                getWeeklyStatisticsUseCase(_uiState.value.selectedWeekStart),
+                getWeeklyStatisticsUseCase(_state.value.selectedWeekStart),
                 drinkRepository.getAllActiveDrinks()
             ) { stats, drinks ->
                 Pair(stats, drinks)
             }.catch { exception ->
-                _uiState.update {
+                _state.update {
                     it.copy(
                         isLoading = false,
                         error = exception.message ?: "Failed to load statistics"
@@ -62,7 +65,7 @@ class StatisticsViewModel @Inject constructor(
                 val hydrationData = if (allEntries.isNotEmpty()) {
                     calculateHydrationUseCase.calculateTotal(allEntries, drinksMap)
                 } else {
-                    null
+                    TotalHydration()
                 }
 
                 // Обновляем каждый DailyProgress с учетом гидратации
@@ -103,7 +106,7 @@ class StatisticsViewModel @Inject constructor(
                     currentStreak = currentStreak
                 )
 
-                _uiState.update {
+                _state.update {
                     it.copy(
                         weeklyStats = enhancedStats,
                         hydrationData = hydrationData,
@@ -198,16 +201,16 @@ class StatisticsViewModel @Inject constructor(
     }
 
     private fun selectWeek(weekStart: LocalDate) {
-        _uiState.update { it.copy(selectedWeekStart = weekStart) }
+        _state.update { it.copy(selectedWeekStart = weekStart) }
         loadWeeklyStatistics()
     }
 
     private fun navigateWeek(days: Long) {
-        val newWeekStart = _uiState.value.selectedWeekStart.plusDays(days)
+        val newWeekStart = _state.value.selectedWeekStart.plusDays(days)
         selectWeek(newWeekStart)
     }
 
     private fun clearError() {
-        _uiState.update { it.copy(error = null) }
+        _state.update { it.copy(error = null) }
     }
 }

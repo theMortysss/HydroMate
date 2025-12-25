@@ -1,8 +1,9 @@
-package dev.techm1nd.hydromate.ui.screens.auth
+package dev.techm1nd.hydromate.ui.screens.auth.model
 
+import android.content.Intent
 import dev.techm1nd.hydromate.domain.entities.User
 
-data class AuthUiState(
+data class AuthState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val currentUser: User? = null,
@@ -37,5 +38,5 @@ sealed class AuthEffect {
     data class ShowSuccess(val message: String) : AuthEffect()
     data class ShowError(val message: String) : AuthEffect()
     object NavigateToHome : AuthEffect()
-    data class NavigateToGoogleSignIn(val signInIntent: android.content.Intent) : AuthEffect()
+    data class NavigateToGoogleSignIn(val signInIntent: Intent) : AuthEffect()
 }

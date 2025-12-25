@@ -14,103 +14,91 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.techm1nd.hydromate.ui.components.*
+import dev.techm1nd.hydromate.ui.screens.auth.AuthScreen
+import dev.techm1nd.hydromate.ui.screens.auth.model.AuthState
+import dev.techm1nd.hydromate.ui.screens.history.model.HistoryIntent
+import dev.techm1nd.hydromate.ui.screens.history.model.HistoryState
+import dev.techm1nd.hydromate.ui.screens.settings.model.SettingsIntent
+import dev.techm1nd.hydromate.ui.screens.settings.model.SettingsState
+import dev.techm1nd.hydromate.ui.screens.settings.model.TimePickerType
+import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
 
 @Composable
 fun SettingsScreen(
-    modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = hiltViewModel()
+    modifier: Modifier,
+    state: SettingsState,
+    snackbarHostState: SnackbarHostState,
+    handleIntent: (SettingsIntent) -> Unit,
+    navController: NavHostController
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
     val hazeState = remember { HazeState() }
 
-    // Handle errors
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let { error ->
-            snackbarHostState.showSnackbar(
-                message = error,
-                duration = SnackbarDuration.Short
-            )
-            viewModel.handleIntent(SettingsIntent.ClearError)
-        }
-    }
-
     // Handle dialogs
-    if (uiState.showGoalDialog) {
+    if (state.showGoalDialog) {
         GoalSettingDialog(
-            currentGoal = uiState.settings.dailyGoal,
+            currentGoal = state.settings.dailyGoal,
             onGoalSet = { goal ->
-                viewModel.handleIntent(SettingsIntent.UpdateDailyGoal(goal))
-                viewModel.handleIntent(SettingsIntent.HideGoalDialog)
+                handleIntent(SettingsIntent.UpdateDailyGoal(goal))
+                handleIntent(SettingsIntent.HideGoalDialog)
             },
             onDismiss = {
-                viewModel.handleIntent(SettingsIntent.HideGoalDialog)
+                handleIntent(SettingsIntent.HideGoalDialog)
             }
         )
     }
 
-//    if (uiState.showCharacterDialog) {
-//        CharacterSelectionDialog(
-//            currentCharacter = uiState.settings.selectedCharacter,
-//            onCharacterSelected = { character ->
-//                viewModel.handleIntent(SettingsIntent.UpdateCharacter(character))
-//                viewModel.handleIntent(SettingsIntent.HideCharacterDialog)
-//            },
-//            onDismiss = {
-//                viewModel.handleIntent(SettingsIntent.HideCharacterDialog)
-//            }
-//        )
-//    }
-
-    if (uiState.showTimePickerDialog) {
+    if (state.showTimePickerDialog) {
         TimePickerDialog(
-            type = uiState.timePickerType,
-            currentTime = when (uiState.timePickerType) {
-                TimePickerType.WAKE_UP -> uiState.settings.wakeUpTime
-                TimePickerType.BED_TIME -> uiState.settings.bedTime
+            type = state.timePickerType,
+            currentTime = when (state.timePickerType) {
+                TimePickerType.WAKE_UP -> state.settings.wakeUpTime
+                TimePickerType.BED_TIME -> state.settings.bedTime
             },
             onTimeSelected = { time ->
-                when (uiState.timePickerType) {
-                    TimePickerType.WAKE_UP -> viewModel.handleIntent(
+                when (state.timePickerType) {
+                    TimePickerType.WAKE_UP -> handleIntent(
                         SettingsIntent.UpdateWakeUpTime(time)
                     )
-                    TimePickerType.BED_TIME -> viewModel.handleIntent(
+                    TimePickerType.BED_TIME -> handleIntent(
                         SettingsIntent.UpdateBedTime(time)
                     )
                 }
-                viewModel.handleIntent(SettingsIntent.HideTimePickerDialog)
+                handleIntent(SettingsIntent.HideTimePickerDialog)
             },
             onDismiss = {
-                viewModel.handleIntent(SettingsIntent.HideTimePickerDialog)
+                handleIntent(SettingsIntent.HideTimePickerDialog)
             }
         )
     }
 
     // Profile dialog
-    if (uiState.showProfileDialog) {
+    if (state.showProfileDialog) {
         HydrationProfileDialog(
-            currentProfile = uiState.settings.profile,
-            currentRecommendedGoal = uiState.recommendedGoal,
+            currentProfile = state.settings.profile,
+            currentRecommendedGoal = state.recommendedGoal,
             onProfileUpdated = { newProfile ->
-                viewModel.handleIntent(SettingsIntent.UpdateProfile(newProfile))
-                viewModel.handleIntent(SettingsIntent.HideProfileDialog)
+                handleIntent(SettingsIntent.UpdateProfile(newProfile))
+                handleIntent(SettingsIntent.HideProfileDialog)
             },
             onCalculateGoal = { profile ->
-                viewModel.handleIntent(SettingsIntent.CalculateRecommendedGoal(profile))
+                handleIntent(SettingsIntent.CalculateRecommendedGoal(profile))
             },
             onDismiss = {
-                viewModel.handleIntent(SettingsIntent.HideProfileDialog)
+                handleIntent(SettingsIntent.HideProfileDialog)
             }
         )
     }
@@ -156,7 +144,7 @@ fun SettingsScreen(
         }
     }
 
-    if (uiState.isLoading) {
+    if (state.isLoading) {
         Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -176,84 +164,51 @@ fun SettingsScreen(
 
             // Header
             SettingsHeader(
-                selectedCharacter = uiState.selectedCharacter
+                selectedCharacter = state.selectedCharacter
             )
 
-            // Hydration Calculator Card (вместо обычной Goal Settings Card)
+            // Hydration Calculator Section
             HydrationCalculatorCard(
-                profile = uiState.settings.profile,
-                recommendedGoal = uiState.recommendedGoal,
+                profile = state.settings.profile,
+                recommendedGoal = state.recommendedGoal,
                 onProfileClick = {
-                    viewModel.handleIntent(SettingsIntent.ShowProfileDialog)
+                    handleIntent(SettingsIntent.ShowProfileDialog)
                 }
             )
 
-//            // Goal Settings
-//            GoalSettingsCard(
-//                dailyGoal = uiState.settings.dailyGoal,
-//                quickAmounts = uiState.settings.quickAddPresets,
-//                drinks = uiState.drinks,
-//                onGoalClick = {
-//                    viewModel.handleIntent(SettingsIntent.ShowGoalDialog)
-//                },
-//                onQuickAmountsEdit = { amounts ->
-//                    viewModel.handleIntent(SettingsIntent.UpdateQuickAmounts(amounts))
-//                }
-//            )
-
-            // Hydration Settings
-//            HydrationSettingsCard(
-//                showNetHydration = uiState.settings.showNetHydration,
-//                onShowNetHydrationToggle = { show ->
-//                    viewModel.handleIntent(SettingsIntent.UpdateShowNetHydration(show))
-//                }
-//            )
-
-//            // Character Settings
-//            CharacterSettingsCard(
-//                selectedCharacter = uiState.settings.selectedCharacter,
-//                onCharacterClick = {
-//                    viewModel.handleIntent(SettingsIntent.ShowCharacterDialog)
-//                }
-//            )
-
+            // Notification Section
+            // The preview doesn't work because of the timer
             NotificationSettingsCard(
-                settings = uiState.settings,
+                settings = state.settings,
                 onSettingsUpdate = { updatedSettings ->
-                    viewModel.handleIntent(SettingsIntent.UpdateSettings(settings = updatedSettings))
+                    handleIntent(SettingsIntent.UpdateSettings(settings = updatedSettings))
                 },
                 onWakeUpTimeClick ={
-                    viewModel.handleIntent(SettingsIntent.ShowTimePickerDialog(TimePickerType.WAKE_UP))
+                    handleIntent(SettingsIntent.ShowTimePickerDialog(TimePickerType.WAKE_UP))
                 },
                 onBedTimeClick = {
-                    viewModel.handleIntent(SettingsIntent.ShowTimePickerDialog(TimePickerType.BED_TIME))
+                    handleIntent(SettingsIntent.ShowTimePickerDialog(TimePickerType.BED_TIME))
                 },
             )
-
-//            // Notification Settings (Enhanced version)
-//            NotificationSettingsCard(
-//                notificationsEnabled = uiState.settings.notificationsEnabled,
-//                notificationInterval = uiState.settings.notificationInterval,
-//                wakeUpTime = uiState.settings.wakeUpTime,
-//                bedTime = uiState.settings.bedTime,
-//                onNotificationsToggle = { enabled ->
-//                    viewModel.handleIntent(SettingsIntent.UpdateNotifications(enabled))
-//                },
-//                onIntervalChange = { interval ->
-//                    viewModel.handleIntent(SettingsIntent.UpdateNotificationInterval(interval))
-//                },
-//                onWakeUpTimeClick = {
-//                    viewModel.handleIntent(SettingsIntent.ShowTimePickerDialog(TimePickerType.WAKE_UP))
-//                },
-//                onBedTimeClick = {
-//                    viewModel.handleIntent(SettingsIntent.ShowTimePickerDialog(TimePickerType.BED_TIME))
-//                }
-//            )
 
             // About Section
             AboutCard()
 
             Spacer(modifier.height(96.dp))
         }
+    }
+}
+
+@Composable
+@Preview(showBackground = true,)
+private fun SettingsScreen_Preview() {
+    HydroMateTheme {
+        SettingsScreen(
+            modifier = Modifier,
+            state = SettingsState(),
+            snackbarHostState = remember { SnackbarHostState() },
+            handleIntent = {},
+            navController = rememberNavController()
+        )
     }
 }

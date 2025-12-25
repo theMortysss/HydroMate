@@ -55,10 +55,7 @@ fun HydroMateTheme(
             val window = (view.context as Activity).window
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) { // Android 15+
                 window.decorView.setOnApplyWindowInsetsListener { view, insets ->
-                    val statusBarInsets = insets.getInsets(WindowInsets.Type.statusBars())
                     view.setBackgroundColor(colorScheme.background.toArgb())
-
-                    view.setPadding(0, statusBarInsets.top, 0, 0)
                     insets
                 }
             } else {
@@ -66,8 +63,8 @@ fun HydroMateTheme(
                 window.navigationBarColor = colorScheme.background.toArgb()
 
                 WindowCompat.getInsetsController(window, view).apply {
-                    isAppearanceLightStatusBars = darkTheme
-                    isAppearanceLightNavigationBars = darkTheme
+                    isAppearanceLightStatusBars = !darkTheme
+                    isAppearanceLightNavigationBars = !darkTheme
                 }
             }
         }

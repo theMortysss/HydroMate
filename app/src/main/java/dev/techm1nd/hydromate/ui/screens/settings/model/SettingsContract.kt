@@ -1,17 +1,16 @@
-package dev.techm1nd.hydromate.ui.screens.settings
+package dev.techm1nd.hydromate.ui.screens.settings.model
 
 import dev.techm1nd.hydromate.domain.entities.*
 import dev.techm1nd.hydromate.domain.usecases.hydration.RecommendedGoalResult
 import java.time.LocalTime
 
-data class SettingsUiState(
+data class SettingsState(
     val drinks: List<Drink> = emptyList(),
     val settings: UserSettings = UserSettings(),
-    val recommendedGoal: RecommendedGoalResult? = null,
+    val recommendedGoal: RecommendedGoalResult = RecommendedGoalResult(),
     val isLoading: Boolean = false,
-    val error: String? = null,
+    val error: String? = "",
     val showGoalDialog: Boolean = false,
-//    val showCharacterDialog: Boolean = false,
     val showTimePickerDialog: Boolean = false,
     val showProfileDialog: Boolean = false,
     val timePickerType: TimePickerType = TimePickerType.WAKE_UP,
@@ -20,13 +19,9 @@ data class SettingsUiState(
 
 sealed class SettingsIntent {
     data class UpdateDailyGoal(val goal: Int) : SettingsIntent()
-//    data class UpdateCharacter(val character: CharacterType) : SettingsIntent()
-//    data class UpdateNotifications(val enabled: Boolean) : SettingsIntent()
-//    data class UpdateNotificationInterval(val intervalMinutes: Int) : SettingsIntent()
     data class UpdateWakeUpTime(val time: LocalTime) : SettingsIntent()
     data class UpdateBedTime(val time: LocalTime) : SettingsIntent()
     data class UpdateQuickAmounts(val amounts: List<QuickAddPreset>) : SettingsIntent()
-//    data class UpdateShowNetHydration(val show: Boolean) : SettingsIntent()
 
     data class UpdateProfile(val profile: UserProfile) : SettingsIntent()
     data class CalculateRecommendedGoal(val profile: UserProfile) : SettingsIntent()
@@ -35,8 +30,6 @@ sealed class SettingsIntent {
 
     object ShowGoalDialog : SettingsIntent()
     object HideGoalDialog : SettingsIntent()
-//    object ShowCharacterDialog : SettingsIntent()
-//    object HideCharacterDialog : SettingsIntent()
     object ShowProfileDialog : SettingsIntent()
     object HideProfileDialog : SettingsIntent()
     data class ShowTimePickerDialog(val type: TimePickerType) : SettingsIntent()

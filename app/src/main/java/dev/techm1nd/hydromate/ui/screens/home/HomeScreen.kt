@@ -10,7 +10,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,67 +20,37 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
-import kotlinx.coroutines.flow.collectLatest
 import dev.techm1nd.hydromate.ui.components.*
+import dev.techm1nd.hydromate.ui.screens.home.model.HomeIntent
+import dev.techm1nd.hydromate.ui.screens.home.model.HomeState
+import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
 import java.time.LocalDate
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel()
+    modifier: Modifier,
+    state: HomeState,
+    snackbarHostState: SnackbarHostState,
+    handleIntent: (HomeIntent) -> Unit,
+    navController: NavHostController
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
     val hazeState = remember { HazeState() }
 
     // Состояния диалогов
     var showAddWaterDialog by remember { mutableStateOf(false) }
     var showEditPresets by remember { mutableStateOf(false) }
-
-    // Handle side effects
-    LaunchedEffect(viewModel.effects) {
-        viewModel.effects.collectLatest { effect ->
-            when (effect) {
-                HomeEffect.ShowAddWaterAnimation -> {
-                    // Trigger animation
-                }
-                HomeEffect.ShowGoalReachedCelebration -> {
-                    snackbarHostState.showSnackbar(
-                        message = "🎉 Daily goal reached! Great job!",
-                        duration = SnackbarDuration.Short
-                    )
-                }
-                is HomeEffect.ShowError -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Short
-                    )
-                }
-                is HomeEffect.ShowSuccess -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Short
-                    )
-                }
-                HomeEffect.HapticFeedback -> {
-                    // Trigger haptic feedback
-                }
-                is HomeEffect.ShowHydrationInfo -> {
-                    // Show hydration info
-                }
-            }
-        }
-    }
 
     SnackbarHost(
         modifier = Modifier
@@ -124,7 +93,7 @@ fun HomeScreen(
         }
     }
 
-    if (uiState.isLoading) {
+    if (state.isLoading) {
         Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -143,33 +112,14 @@ fun HomeScreen(
         ) {
             Spacer(modifier = Modifier.height(6.dp))
 
-            HydrationTipsStories(
-                viewedTipIds = uiState.viewedTipIds,
-                onTipViewed = { tipId ->
-                    viewModel.handleIntent(HomeIntent.MarkTipAsViewed(tipId))
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // Character Display
-            CharacterDisplay(
-                characterState = uiState.characterState,
-                selectedCharacter = uiState.selectedCharacter,
-                modifier = Modifier.fillMaxWidth()
-            )
-
             // Hydration Progress Card
-            uiState.todayProgress?.let {
-                uiState.hydrationProgress?.let { hydrationProgress ->
-                    uiState.totalHydration?.let { totalHydration ->
-                        HydrationProgressCard(
-                            hydrationProgress = hydrationProgress,
-                            totalHydration = totalHydration,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-            }
+            HydrationProgressCard(
+                hydrationProgress = state.hydrationProgress,
+                totalHydration = state.totalHydration,
+                characterState = state.characterState,
+                selectedCharacter = state.selectedCharacter,
+                modifier = Modifier.fillMaxWidth()
+            )
 
             // Custom Add Water Button
             Card(
@@ -235,29 +185,34 @@ fun HomeScreen(
             }
 
             // Quick Add Buttons (Enhanced with presets)
-            uiState.userSettings?.let { settings ->
-                QuickAddButtons(
-                    presets = settings.quickAddPresets,
-                    drinks = uiState.drinks,
-                    onPresetClick = { preset, drink ->
-                        viewModel.handleIntent(HomeIntent.AddWater(preset.amount, drink))
-                    },
-                    onEditPresets = { showEditPresets = true },
-                    isLoading = uiState.isAddingWater,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            QuickAddButtons(
+                presets = state.userSettings.quickAddPresets,
+                drinks = state.drinks,
+                onPresetClick = { preset, drink ->
+                    handleIntent(HomeIntent.AddWater(preset.amount, drink))
+                },
+                onEditPresets = { showEditPresets = true },
+                isLoading = state.isAddingWater,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Hydration Tips
+            HydrationTipsStories(
+                viewedTipIds = state.viewedTipIds,
+                onTipViewed = { tipId ->
+                    handleIntent(HomeIntent.MarkTipAsViewed(tipId))
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
 
             // Today's Entries
-            uiState.todayProgress?.let { progress ->
-                TodayEntriesList(
-                    entries = progress.entries,
-                    onDeleteEntry = { entryId ->
-                        viewModel.handleIntent(HomeIntent.DeleteEntry(entryId))
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+            TodayEntriesList(
+                entries = state.todayProgress.entries,
+                onDeleteEntry = { entryId ->
+                    handleIntent(HomeIntent.DeleteEntry(entryId))
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
 
             Spacer(modifier = Modifier.height(96.dp))
         }
@@ -267,27 +222,39 @@ fun HomeScreen(
     if (showAddWaterDialog) {
         AddWaterForDateDialog(
             date = LocalDate.now(),
-            drinks = uiState.drinks,
+            drinks = state.drinks,
             onAddEntry = { amount, drink, timestamp ->
-                viewModel.handleIntent(HomeIntent.AddWater(amount, drink, timestamp))
+                handleIntent(HomeIntent.AddWater(amount, drink, timestamp))
             },
             onDrinkCreated = { drink ->
-                viewModel.handleIntent(HomeIntent.CreateCustomDrink(drink))
+                handleIntent(HomeIntent.CreateCustomDrink(drink))
             },
             onDismiss = { showAddWaterDialog = false }
         )
     }
 
     if (showEditPresets) {
-        uiState.userSettings?.let { settings ->
-            EditQuickPresetsDialog(
-                currentPresets = settings.quickAddPresets,
-                drinks = uiState.drinks,
-                onPresetsChanged = { newPresets ->
-                    viewModel.handleIntent(HomeIntent.UpdateQuickPresets(newPresets))
-                },
-                onDismiss = { showEditPresets = false }
-            )
-        }
+        EditQuickPresetsDialog(
+            currentPresets = state.userSettings.quickAddPresets,
+            drinks = state.drinks,
+            onPresetsChanged = { newPresets ->
+                handleIntent(HomeIntent.UpdateQuickPresets(newPresets))
+            },
+            onDismiss = { showEditPresets = false }
+        )
+    }
+}
+
+@Composable
+@Preview(showBackground = true,)
+private fun MainScreen_Preview() {
+    HydroMateTheme {
+        HomeScreen(
+            modifier = Modifier,
+            state = HomeState(),
+            snackbarHostState = remember { SnackbarHostState() },
+            handleIntent = {},
+            navController = rememberNavController()
+        )
     }
 }
