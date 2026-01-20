@@ -13,22 +13,22 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import dev.techm1nd.hydromate.domain.entities.AuthState
 import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
 import dev.techm1nd.hydromate.ui.navigation.HydroMateNavigation
 import dev.techm1nd.hydromate.ui.notification.NotificationScheduler
+import dev.techm1nd.hydromate.ui.screens.auth.AuthViewModel
 import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
 import javax.inject.Inject
 
@@ -44,34 +44,49 @@ class MainActivity : ComponentActivity() {
     private var showPermissionRationale by mutableStateOf(false)
     private var showExactAlarmInfo by mutableStateOf(false)
 
-    // Launcher для запроса разрешения на уведомления
+    // Track if we should keep showing splash
+    private var keepSplashScreen = true
+
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            // Разрешение получено, проверяем exact alarm
             checkExactAlarmPermission()
-            // Инициализируем уведомления после получения разрешения
             initializeNotifications()
         } else {
-            // Разрешение отклонено
             showPermissionRationale = true
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Install splash screen BEFORE super.onCreate()
         val splashScreen = installSplashScreen()
+
+        // Keep splash screen visible while checking auth state
+        splashScreen.setKeepOnScreenCondition { keepSplashScreen }
+
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         setContent {
             HydroMateTheme {
-                Box(modifier = Modifier
-                    .fillMaxSize()
-                ) {
+                // Get AuthViewModel to check initial auth state
+                val authViewModel: AuthViewModel = hiltViewModel()
+                val authUiState by authViewModel.state.collectAsStateWithLifecycle()
+
+                // Hide splash screen once we have determined auth state
+                // Wait a tiny bit longer to ensure navigation is ready
+                LaunchedEffect(authUiState.isLoading) {
+                    if (!authUiState.isLoading) {
+                        // Small delay to ensure UI is ready
+                        kotlinx.coroutines.delay(50)
+                        keepSplashScreen = false
+                    }
+                }
+
+                Box(modifier = Modifier.fillMaxSize()) {
                     HydroMateNavigation()
 
-                    // Диалог с объяснением необходимости разрешения
                     if (showPermissionRationale) {
                         PermissionRationaleDialog(
                             onDismiss = { showPermissionRationale = false },
@@ -82,7 +97,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    // Диалог с информацией о exact alarm
                     if (showExactAlarmInfo) {
                         ExactAlarmInfoDialog(
                             onDismiss = { showExactAlarmInfo = false },
@@ -96,21 +110,14 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Запрашиваем разрешения при первом запуске
+        // Check permissions AFTER UI is set
         checkAndRequestPermissions()
     }
 
-    /**
-     * FIXED: Проверка разрешений только при первом запуске
-     * Не инициализирует уведомления автоматически
-     */
     private fun checkAndRequestPermissions() {
         lifecycleScope.launch {
             try {
                 val settings = getUserSettingsUseCase().first()
-
-                // Запрашиваем разрешения только если уведомления включены
-                // и это первый запуск (разрешения еще не были запрошены)
                 if (settings.notificationsEnabled && !hasRequestedPermissions()) {
                     checkNotificationPermission()
                     markPermissionsRequested()
@@ -121,16 +128,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * Инициализирует уведомления
-     * Вызывается только после получения всех необходимых разрешений
-     */
     private fun initializeNotifications() {
         lifecycleScope.launch {
             try {
                 val settings = getUserSettingsUseCase().first()
                 if (settings.notificationsEnabled) {
-                    // scheduleNotifications сам проверит, нужно ли перепланировать
                     notificationScheduler.scheduleNotifications(settings)
                     android.util.Log.d("MainActivity", "Notifications initialized")
                 }
@@ -147,20 +149,16 @@ class MainActivity : ComponentActivity() {
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED -> {
-                    // Разрешение уже есть, проверяем exact alarm
                     checkExactAlarmPermission()
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
-                    // Показываем объяснение, почему нужно разрешение
                     showPermissionRationale = true
                 }
                 else -> {
-                    // Запрашиваем разрешение
                     notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
         } else {
-            // Для Android 12 и ниже уведомления работают по умолчанию
             checkExactAlarmPermission()
         }
     }
@@ -169,7 +167,6 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = getSystemService(ALARM_SERVICE) as android.app.AlarmManager
             if (!alarmManager.canScheduleExactAlarms()) {
-                // Показываем информацию о необходимости включить exact alarms
                 showExactAlarmInfo = true
             }
         }
@@ -191,17 +188,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * Проверяет, были ли уже запрошены разрешения
-     */
     private fun hasRequestedPermissions(): Boolean {
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         return prefs.getBoolean("permissions_requested", false)
     }
 
-    /**
-     * Отмечает, что разрешения были запрошены
-     */
     private fun markPermissionsRequested() {
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         prefs.edit().putBoolean("permissions_requested", true).apply()

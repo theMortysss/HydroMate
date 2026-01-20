@@ -89,7 +89,7 @@ class HydroMateNotificationManager @Inject constructor(
         val (title, message) = getReminderContent(progressPercentage, remainingAmount)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID_REMINDERS)
-            .setSmallIcon(R.drawable.ic_water_drop)
+            .setSmallIcon(R.drawable.ic_splash_logo)
             .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -117,7 +117,7 @@ class HydroMateNotificationManager @Inject constructor(
             )
 
             builder.addAction(
-                R.drawable.ic_water_drop,
+                R.drawable.ic_splash_logo,
                 "Snooze $snoozeMinutes min",
                 snoozePendingIntent
             )
@@ -160,7 +160,7 @@ class HydroMateNotificationManager @Inject constructor(
         }
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID_REMINDERS)
-            .setSmallIcon(R.drawable.ic_water_drop)
+            .setSmallIcon(R.drawable.ic_splash_logo)
             .setContentTitle("💧 $reminderLabel")
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -186,7 +186,7 @@ class HydroMateNotificationManager @Inject constructor(
             )
 
             builder.addAction(
-                R.drawable.ic_water_drop,
+                R.drawable.ic_splash_logo,
                 "Snooze $snoozeMinutes min",
                 snoozePendingIntent
             )
@@ -223,7 +223,7 @@ class HydroMateNotificationManager @Inject constructor(
         }
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID_ACHIEVEMENTS)
-            .setSmallIcon(R.drawable.ic_water_drop)
+            .setSmallIcon(R.drawable.ic_splash_logo)
             .setContentTitle("🎉 Daily Goal Achieved!")
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Background circle -->
+    <path
+        android:fillColor="@color/md_theme_primary"
+        android:pathData="M54,54m-54,0a54,54 0,1 1,108 0a54,54 0,1 1,-108 0" />
+
+    <!-- Water drop icon -->
+    <path
+        android:fillColor="@color/md_theme_onPrimary"
+        android:pathData="M54,28C54,28 38,48 38,60C38,68.84 45.16,76 54,76C62.84,76 70,68.84 70,60C70,48 54,28 54,28Z"
+        android:strokeWidth="2"
+        android:strokeColor="@color/md_theme_onPrimary" />
+
+    <!-- Shine effect on water drop -->
+    <path
+        android:fillColor="@android:color/white"
+        android:fillAlpha="0.4"
+        android:pathData="M48,40C48,40 44,48 44,54C44,58 46.5,61 50,61C53.5,61 56,58 56,54C56,48 48,40 48,40Z" />
+</vector>

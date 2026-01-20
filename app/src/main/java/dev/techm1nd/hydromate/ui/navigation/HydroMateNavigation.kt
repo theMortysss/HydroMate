@@ -17,20 +17,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
@@ -42,7 +38,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -65,9 +60,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.chrisbanes.haze.ExperimentalHazeApi
@@ -77,7 +72,6 @@ import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.techm1nd.hydromate.domain.entities.AuthState
-import dev.techm1nd.hydromate.ui.screens.auth.AuthScreen
 import dev.techm1nd.hydromate.ui.screens.auth.AuthViewModel
 import dev.techm1nd.hydromate.ui.screens.auth.navigation.authScreen
 import dev.techm1nd.hydromate.ui.screens.history.navigation.historyScreen
@@ -91,12 +85,11 @@ sealed class Screen(
     val title: String,
     val icon: ImageVector
 ) {
-    object Loading : Screen("loading", "Loading", Icons.Filled.Cached)
     object Auth : Screen("auth", "Auth", Icons.Filled.Person)
     object Home : Screen("home", "Home", Icons.Filled.Home)
     object Statistics : Screen("statistics", "Stats", Icons.Outlined.BarChart)
     object History : Screen("history", "History", Icons.Outlined.History)
-    object Profile : Screen("profile", "Profile", Icons.Filled.Person) // NEW
+    object Profile : Screen("profile", "Profile", Icons.Filled.Person)
     object Settings : Screen("settings", "Settings", Icons.Filled.Settings)
 }
 
@@ -138,28 +131,39 @@ sealed class BottomBarTab(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalHazeApi::class)
 @Composable
 fun HydroMateNavigation() {
-    val navController = rememberNavController()
     val hazeState = remember { HazeState() }
+
+    // Get auth state from ViewModel
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val authUiState by authViewModel.state.collectAsStateWithLifecycle()
+
+    // Don't render navigation until we know the auth state
+    // This prevents the flicker of auth screen
+    if (authUiState.isLoading) {
+        // Show nothing while loading - splash screen is still visible
+        Box(modifier = Modifier.fillMaxSize())
+        return
+    }
+
+    // Determine auth state and start destination
+    val isAuthenticated = authUiState.currentUser != null
+    val startDestination = if (isAuthenticated) Screen.Home.route else Screen.Auth.route
+
+    // Create navController only after we know the start destination
+    val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Test auth observe
-    val authViewModel: AuthViewModel = hiltViewModel()
-    var authState by remember { mutableStateOf<AuthState>(AuthState.Loading) }
-
-    LaunchedEffect(Unit) {
-        authViewModel.state.collect { uiState ->
-            authState = when {
-                uiState.isLoading -> AuthState.Loading
-                uiState.currentUser != null -> AuthState.Authenticated(uiState.currentUser)
-                else -> AuthState.Unauthenticated
-            }
-            val currentNavRoute = navController.currentDestination?.route
-            if (authState is AuthState.Authenticated && currentNavRoute != Screen.Home.route) {
+    // Handle auth state changes after initial load
+    LaunchedEffect(isAuthenticated) {
+        val currentDestination = navController.currentDestination?.route
+        when {
+            isAuthenticated && currentDestination == Screen.Auth.route -> {
                 navController.navigate(Screen.Home.route) {
-                    popUpTo(0) { inclusive = true }
+                    popUpTo(Screen.Auth.route) { inclusive = true }
                 }
-            } else if (authState is AuthState.Unauthenticated && currentNavRoute != Screen.Auth.route) {
+            }
+            !isAuthenticated && currentDestination != Screen.Auth.route -> {
                 navController.navigate(Screen.Auth.route) {
                     popUpTo(0) { inclusive = true }
                 }
@@ -169,7 +173,7 @@ fun HydroMateNavigation() {
 
     Scaffold(
         topBar = {
-            if (authState is AuthState.Authenticated) {
+            if (isAuthenticated) {
                 TopAppBar(
                     modifier = Modifier
                         .hazeEffect(
@@ -234,7 +238,7 @@ fun HydroMateNavigation() {
             }
         },
         bottomBar = {
-            if (authState is AuthState.Authenticated) {
+            if (isAuthenticated) {
                 val tabs = listOf(
                     BottomBarTab.Home,
                     BottomBarTab.Statistics,
@@ -278,11 +282,10 @@ fun HydroMateNavigation() {
                             selectedTabIndex = tabs.indexOf(it)
                             navController.navigate(it.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true // Save the state of the destination
+                                    saveState = true
                                 }
-                                launchSingleTop =
-                                    true // Avoid multiple copies of the same destination
-                                restoreState = true // Restore the previous state if it exists
+                                launchSingleTop = true
+                                restoreState = true
                             }
                         }
                     )
@@ -339,18 +342,13 @@ fun HydroMateNavigation() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Loading.route,
+            startDestination = startDestination,
             modifier = Modifier
                 .hazeSource(
                     state = hazeState,
                 )
                 .padding(top = innerPadding.calculateTopPadding())
         ) {
-            composable(Screen.Loading.route) {
-                Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
             authScreen(
                 modifier = Modifier,
                 navController = navController,
