@@ -3,6 +3,7 @@ package dev.techm1nd.hydromate
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,12 +26,15 @@ class HydroMateApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
+    @Inject
+    lateinit var firebaseAuth: FirebaseAuth
+
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
         super.onCreate()
 
-        // Инициализация дефолтных напитков при первом запуске
+        // Инициализация дефолтных напитков при первом запуске (работает offline)
         applicationScope.launch {
             initializeDefaultDrinksUseCase()
                 .onSuccess {
@@ -41,7 +45,7 @@ class HydroMateApplication : Application(), Configuration.Provider {
                 }
         }
 
-        // Инициализация достижений при первом запуске
+        // Инициализация достижений при первом запуске (работает offline)
         applicationScope.launch {
             initializeAchievementsUseCase()
                 .onSuccess {
@@ -52,8 +56,19 @@ class HydroMateApplication : Application(), Configuration.Provider {
                 }
         }
 
-        // Schedule background sync
-        SyncWorker.schedule(this)
+        // FIXED: Schedule sync ONLY if user is authenticated and NOT anonymous
+        // Don't schedule on first launch - will be scheduled after successful login/linking
+        val currentUser = firebaseAuth.currentUser
+        if (currentUser != null && !currentUser.isAnonymous) {
+            if (!SyncWorker.isScheduled(this)) {
+                SyncWorker.schedule(this)
+                android.util.Log.d("HydroMate", "Sync worker scheduled for registered user")
+            } else {
+                android.util.Log.d("HydroMate", "Sync worker already scheduled")
+            }
+        } else {
+            android.util.Log.d("HydroMate", "User is null or anonymous, sync not scheduled")
+        }
 
         android.util.Log.d("HydroMate", "Application initialized")
     }
@@ -61,5 +76,6 @@ class HydroMateApplication : Application(), Configuration.Provider {
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
+            .setMinimumLoggingLevel(android.util.Log.DEBUG)
             .build()
 }

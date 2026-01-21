@@ -1,11 +1,14 @@
 package dev.techm1nd.hydromate.ui.screens.profile
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import dev.techm1nd.hydromate.data.worker.SyncWorker
 import dev.techm1nd.hydromate.domain.entities.*
 import dev.techm1nd.hydromate.domain.repositories.ProfileRepository
 import dev.techm1nd.hydromate.domain.repositories.SyncRepository
@@ -25,6 +28,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val profileRepository: ProfileRepository,
     private val getActiveChallengesUseCase: GetActiveChallengesUseCase,
     private val startChallengeUseCase: StartChallengeUseCase,
@@ -374,6 +378,9 @@ class ProfileViewModel @Inject constructor(
                     syncRepository.uploadAllData()
                         .onSuccess {
                             _effects.trySend(ProfileEffect.ShowSuccess("Data synced successfully!"))
+
+                            // IMPORTANT: Schedule background sync worker for registered user
+                            SyncWorker.schedule(context)
                         }
                         .onFailure { e ->
                             _effects.trySend(ProfileEffect.ShowError("Linked but sync failed: ${e.message}"))
@@ -407,6 +414,9 @@ class ProfileViewModel @Inject constructor(
                     syncRepository.uploadAllData()
                         .onSuccess {
                             _effects.trySend(ProfileEffect.ShowSuccess("Data synced successfully!"))
+
+                            // IMPORTANT: Schedule background sync worker for registered user
+                            SyncWorker.schedule(context)
                         }
                         .onFailure { e ->
                             _effects.trySend(ProfileEffect.ShowError("Linked but sync failed: ${e.message}"))

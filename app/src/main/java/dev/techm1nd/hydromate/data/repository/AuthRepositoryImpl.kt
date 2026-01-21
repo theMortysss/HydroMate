@@ -13,6 +13,7 @@ import dev.techm1nd.hydromate.domain.entities.AuthResult
 import dev.techm1nd.hydromate.domain.entities.AuthState
 import dev.techm1nd.hydromate.domain.entities.User
 import dev.techm1nd.hydromate.domain.repositories.AuthRepository
+import java.io.IOException
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -56,9 +57,11 @@ class AuthRepositoryImpl @Inject constructor(
                 AuthResult.Error("Failed to get user data")
             }
         } catch (e: FirebaseAuthException) {
-            AuthResult.Error(e.localizedMessage ?: "Authentication failed", e)
+            AuthResult.Error(getReadableErrorMessage(e), e)
+        } catch (e: IOException) {
+            AuthResult.Error("No internet connection. Please check your network.", e)
         } catch (e: Exception) {
-            AuthResult.Error(e.localizedMessage ?: "Unknown error occurred", e)
+            AuthResult.Error(getReadableErrorMessage(e), e)
         }
     }
 
@@ -72,7 +75,7 @@ class AuthRepositoryImpl @Inject constructor(
             val firebaseUser = result.user
 
             if (firebaseUser != null) {
-                // Обновляем displayName если указан
+                // Update displayName if provided
                 if (displayName != null) {
                     val profileUpdates = UserProfileChangeRequest.Builder()
                         .setDisplayName(displayName)
@@ -85,9 +88,11 @@ class AuthRepositoryImpl @Inject constructor(
                 AuthResult.Error("Failed to create user")
             }
         } catch (e: FirebaseAuthException) {
-            AuthResult.Error(e.localizedMessage ?: "Sign up failed", e)
+            AuthResult.Error(getReadableErrorMessage(e), e)
+        } catch (e: IOException) {
+            AuthResult.Error("No internet connection. Please check your network.", e)
         } catch (e: Exception) {
-            AuthResult.Error(e.localizedMessage ?: "Unknown error occurred", e)
+            AuthResult.Error(getReadableErrorMessage(e), e)
         }
     }
 
@@ -102,9 +107,11 @@ class AuthRepositoryImpl @Inject constructor(
                 AuthResult.Error("Failed to get user data")
             }
         } catch (e: FirebaseAuthException) {
-            AuthResult.Error(e.localizedMessage ?: "Google sign in failed", e)
+            AuthResult.Error(getReadableErrorMessage(e), e)
+        } catch (e: IOException) {
+            AuthResult.Error("No internet connection. Please check your network.", e)
         } catch (e: Exception) {
-            AuthResult.Error(e.localizedMessage ?: "Unknown error occurred", e)
+            AuthResult.Error(getReadableErrorMessage(e), e)
         }
     }
 
@@ -118,13 +125,14 @@ class AuthRepositoryImpl @Inject constructor(
                 AuthResult.Error("Failed to create anonymous user")
             }
         } catch (e: FirebaseAuthException) {
-            AuthResult.Error(e.localizedMessage ?: "Anonymous sign in failed", e)
+            AuthResult.Error(getReadableErrorMessage(e), e)
+        } catch (e: IOException) {
+            // Anonymous sign-in should work offline
+            AuthResult.Error("Failed to start anonymous session", e)
         } catch (e: Exception) {
-            AuthResult.Error(e.localizedMessage ?: "Unknown error occurred", e)
+            AuthResult.Error(getReadableErrorMessage(e), e)
         }
     }
-
-    // ... (существующий код)
 
     override suspend fun linkAnonymousWithEmail(email: String, password: String): AuthResult {
         return try {
@@ -143,11 +151,15 @@ class AuthRepositoryImpl @Inject constructor(
         } catch (e: FirebaseAuthException) {
             val message = when (e.errorCode) {
                 "ERROR_EMAIL_ALREADY_IN_USE" -> "Email already in use. Try signing in instead."
-                else -> e.localizedMessage ?: "Failed to link account"
+                "ERROR_INVALID_EMAIL" -> "Invalid email address"
+                "ERROR_WEAK_PASSWORD" -> "Password is too weak"
+                else -> getReadableErrorMessage(e)
             }
             AuthResult.Error(message, e)
+        } catch (e: IOException) {
+            AuthResult.Error("No internet connection. Please check your network.", e)
         } catch (e: Exception) {
-            AuthResult.Error(e.localizedMessage ?: "Unknown error occurred", e)
+            AuthResult.Error(getReadableErrorMessage(e), e)
         }
     }
 
@@ -168,12 +180,14 @@ class AuthRepositoryImpl @Inject constructor(
             }
         } catch (e: FirebaseAuthException) {
             val message = when (e.errorCode) {
-                "ERROR_GOOGLE_ALREADY_IN_USE" -> "Google already in use. Try signing in instead."
-                else -> e.localizedMessage ?: "Failed to link account"
+                "ERROR_CREDENTIAL_ALREADY_IN_USE" -> "Google account already linked to another user"
+                else -> getReadableErrorMessage(e)
             }
             AuthResult.Error(message, e)
+        } catch (e: IOException) {
+            AuthResult.Error("No internet connection. Please check your network.", e)
         } catch (e: Exception) {
-            AuthResult.Error(e.localizedMessage ?: "Unknown error occurred", e)
+            AuthResult.Error(getReadableErrorMessage(e), e)
         }
     }
 
@@ -181,6 +195,8 @@ class AuthRepositoryImpl @Inject constructor(
         return try {
             firebaseAuth.sendPasswordResetEmail(email).await()
             Result.success(Unit)
+        } catch (e: IOException) {
+            Result.failure(IOException("No internet connection. Please check your network."))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -205,13 +221,35 @@ class AuthRepositoryImpl @Inject constructor(
             } else {
                 Result.failure(e)
             }
+        } catch (e: IOException) {
+            Result.failure(IOException("No internet connection. Please check your network."))
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     /**
-     * Конвертация FirebaseUser в domain User
+     * Convert Firebase errors to readable messages
+     */
+    private fun getReadableErrorMessage(exception: Exception): String {
+        return when (exception) {
+            is FirebaseAuthException -> when (exception.errorCode) {
+                "ERROR_INVALID_EMAIL" -> "Invalid email address"
+                "ERROR_USER_NOT_FOUND" -> "No account found with this email"
+                "ERROR_WRONG_PASSWORD" -> "Incorrect password"
+                "ERROR_WEAK_PASSWORD" -> "Password is too weak (min 6 characters)"
+                "ERROR_EMAIL_ALREADY_IN_USE" -> "Email already in use"
+                "ERROR_NETWORK_REQUEST_FAILED" -> "No internet connection"
+                "ERROR_TOO_MANY_REQUESTS" -> "Too many attempts. Try again later"
+                else -> exception.localizedMessage ?: "Authentication failed"
+            }
+            is IOException -> "No internet connection. Please check your network."
+            else -> exception.localizedMessage ?: "An error occurred"
+        }
+    }
+
+    /**
+     * Convert FirebaseUser to domain User
      */
     private fun FirebaseUser.toUser(): User {
         return User(

@@ -1,11 +1,14 @@
 package dev.techm1nd.hydromate.ui.screens.auth
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import dev.techm1nd.hydromate.data.worker.SyncWorker
 import dev.techm1nd.hydromate.domain.entities.AuthResult
 import dev.techm1nd.hydromate.domain.entities.AuthState
 import dev.techm1nd.hydromate.domain.usecases.auth.*
@@ -15,6 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val observeAuthStateUseCase: ObserveAuthStateUseCase,
     private val signInWithEmailUseCase: SignInWithEmailUseCase,
     private val signUpWithEmailUseCase: SignUpWithEmailUseCase,
@@ -110,7 +114,12 @@ class AuthViewModel @Inject constructor(
             when (val result = signInWithEmailUseCase(email, password)) {
                 is AuthResult.Success -> {
                     _effects.trySend(AuthEffect.ShowSuccess("Welcome back!"))
-                    _state.update { it.copy(showEmailSignIn = false) }
+                    _state.update { it.copy(showEmailSignIn = false, isLoading = false) }
+
+                    // Schedule sync worker for registered user
+                    if (!result.user.isAnonymous) {
+                        SyncWorker.schedule(context)
+                    }
                     // NavigateToHome will be triggered by observeAuthState
                 }
                 is AuthResult.Error -> {
@@ -131,6 +140,11 @@ class AuthViewModel @Inject constructor(
                 is AuthResult.Success -> {
                     _effects.trySend(AuthEffect.ShowSuccess("Account created successfully!"))
                     _state.update { it.copy(showEmailSignUp = false) }
+
+                    // Schedule sync worker for registered user
+                    if (!result.user.isAnonymous) {
+                        SyncWorker.schedule(context)
+                    }
                     // NavigateToHome will be triggered by observeAuthState
                 }
                 is AuthResult.Error -> {
@@ -150,6 +164,11 @@ class AuthViewModel @Inject constructor(
             when (val result = signInWithGoogleUseCase(idToken)) {
                 is AuthResult.Success -> {
                     _effects.trySend(AuthEffect.ShowSuccess("Welcome!"))
+
+                    // Schedule sync worker for registered user
+                    if (!result.user.isAnonymous) {
+                        SyncWorker.schedule(context)
+                    }
                     // NavigateToHome will be triggered by observeAuthState
                 }
                 is AuthResult.Error -> {
@@ -173,6 +192,9 @@ class AuthViewModel @Inject constructor(
                             "Started anonymously. Link your account later to save your progress!"
                         )
                     )
+
+                    // Cancel any existing sync worker for anonymous user
+                    SyncWorker.cancel(context)
                     // NavigateToHome will be triggered by observeAuthState
                 }
                 is AuthResult.Error -> {
