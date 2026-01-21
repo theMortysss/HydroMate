@@ -19,6 +19,7 @@ import dev.techm1nd.hydromate.ui.notification.NotificationScheduler
 import dev.techm1nd.hydromate.ui.screens.history.model.HistoryEffect
 import dev.techm1nd.hydromate.ui.screens.history.model.HistoryIntent
 import dev.techm1nd.hydromate.ui.screens.history.model.HistoryState
+import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -34,14 +35,12 @@ class HistoryViewModel @Inject constructor(
     private val deleteWaterEntryUseCase: DeleteWaterEntryUseCase,
     private val checkGoalReachedUseCase: CheckGoalReachedUseCase,
     private val notificationScheduler: NotificationScheduler,
-    private val addWaterEntryForDateUseCase: AddWaterEntryForDateUseCase
+    private val addWaterEntryForDateUseCase: AddWaterEntryForDateUseCase,
+    private val globalSnackbarController: GlobalSnackbarController
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HistoryState())
     val state: StateFlow<HistoryState> = _state.asStateFlow()
-
-    private val _effects = Channel<HistoryEffect>(Channel.BUFFERED)
-    val effects: Flow<HistoryEffect> = _effects.receiveAsFlow()
 
     init {
         observeSettings()
@@ -237,21 +236,17 @@ class HistoryViewModel @Inject constructor(
             // Создаем запись с указанной датой
             addWaterEntryForDateUseCase(amount, drink, time)
                 .onSuccess {
-                    _effects.trySend(
-                        HistoryEffect.ShowSuccess(
-                            "Added ${amount}ml of ${drink.name} for ${date.format(
-                                DateTimeFormatter.ofPattern("MMM dd")
-                            )}"
-                        )
+                    globalSnackbarController.showSuccess(
+                        "Added ${amount}ml of ${drink.name} for ${date.format(
+                            DateTimeFormatter.ofPattern("MMM dd")
+                        )}"
                     )
                     hideAddWaterDialog()
                     loadMonthlyData() // Перезагружаем данные
                 }
                 .onFailure { exception ->
-                    _effects.trySend(
-                        HistoryEffect.ShowError(
-                            exception.message ?: "Failed to add water entry"
-                        )
+                    globalSnackbarController.showError(
+                        exception.message ?: "Failed to add water entry"
                     )
                 }
         }
@@ -263,12 +258,11 @@ class HistoryViewModel @Inject constructor(
                 .onSuccess {
                     // После удаления проверяем, возможно цель больше не достигнута
                     checkAndHandleGoalAchievement()
+                    globalSnackbarController.showMessage("Entry deleted")
                 }
                 .onFailure { exception ->
-                    _effects.trySend(
-                        HistoryEffect.ShowError(
-                            exception.message ?: "Failed to delete entry"
-                        )
+                    globalSnackbarController.showError(
+                        exception.message ?: "Failed to delete entry"
                     )
                 }
         }
@@ -294,16 +288,10 @@ class HistoryViewModel @Inject constructor(
         viewModelScope.launch {
             drinkRepository.createCustomDrink(drink)
                 .onSuccess { drinkId ->
-                    _effects.trySend(
-                        HistoryEffect.ShowSuccess("Custom drink \"${drink.name}\" created!")
-                    )
+                    globalSnackbarController.showSuccess("Custom drink \"${drink.name}\" created!")
                 }
                 .onFailure { exception ->
-                    _effects.trySend(
-                        HistoryEffect.ShowError(
-                            exception.message ?: "Failed to create custom drink"
-                        )
-                    )
+                    globalSnackbarController.showError(exception.message ?: "Failed to create custom drink")
                 }
         }
     }

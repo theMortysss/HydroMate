@@ -24,15 +24,10 @@ fun SettingsRoute(
 ) {
     val viewModel: SettingsViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle side effects
     LaunchedEffect(state.error) {
         state.error?.let { error ->
-            snackbarHostState.showSnackbar(
-                message = error,
-                duration = SnackbarDuration.Short
-            )
             viewModel.handleIntent(SettingsIntent.ClearError)
         }
     }
@@ -40,7 +35,6 @@ fun SettingsRoute(
     SettingsScreen(
         modifier = modifier,
         state = state,
-        snackbarHostState = snackbarHostState,
         handleIntent = viewModel::handleIntent,
         navController = navController
     )

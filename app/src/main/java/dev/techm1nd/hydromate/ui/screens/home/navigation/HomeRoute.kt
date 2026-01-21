@@ -22,7 +22,7 @@ fun HomeRoute(
 ) {
     val viewModel: HomeViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
+//    val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle side effects
     LaunchedEffect(viewModel.effects) {
@@ -32,22 +32,22 @@ fun HomeRoute(
                     // Trigger animation
                 }
                 HomeEffect.ShowGoalReachedCelebration -> {
-                    snackbarHostState.showSnackbar(
-                        message = "🎉 Daily goal reached! Great job!",
-                        duration = SnackbarDuration.Short
-                    )
+//                    snackbarHostState.showSnackbar(
+//                        message = "🎉 Daily goal reached! Great job!",
+//                        duration = SnackbarDuration.Short
+//                    )
                 }
                 is HomeEffect.ShowError -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Short
-                    )
+//                    snackbarHostState.showSnackbar(
+//                        message = effect.message,
+//                        duration = SnackbarDuration.Short
+//                    )
                 }
                 is HomeEffect.ShowSuccess -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Short
-                    )
+//                    snackbarHostState.showSnackbar(
+//                        message = effect.message,
+//                        duration = SnackbarDuration.Short
+//                    )
                 }
                 HomeEffect.HapticFeedback -> {
                     // Trigger haptic feedback
@@ -62,7 +62,7 @@ fun HomeRoute(
     HomeScreen(
         modifier = modifier,
         state = state,
-        snackbarHostState = snackbarHostState,
+//        snackbarHostState = snackbarHostState,
         handleIntent = viewModel::handleIntent,
         navController = navController
     )

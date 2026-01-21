@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -79,6 +80,9 @@ import dev.techm1nd.hydromate.ui.screens.home.navigation.homeScreen
 import dev.techm1nd.hydromate.ui.screens.profile.navigation.profileScreen
 import dev.techm1nd.hydromate.ui.screens.settings.navigation.settingsScreen
 import dev.techm1nd.hydromate.ui.screens.statistics.navigation.statisticsScreen
+import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
+import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarHost
+import javax.inject.Inject
 
 sealed class Screen(
     val route: String,
@@ -130,7 +134,9 @@ sealed class BottomBarTab(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalHazeApi::class)
 @Composable
-fun HydroMateNavigation() {
+fun HydroMateNavigation(
+    globalSnackbarController: GlobalSnackbarController
+) {
     val hazeState = remember { HazeState() }
 
     // Get auth state from ViewModel
@@ -340,6 +346,13 @@ fun HydroMateNavigation() {
             }
         },
     ) { innerPadding ->
+        // Global Snackbar Host - поверх всего контента
+        GlobalSnackbarHost(
+            modifier = Modifier
+                .padding(top = innerPadding.calculateTopPadding()),
+            snackbarController = globalSnackbarController,
+            hazeState = hazeState
+        )
         NavHost(
             navController = navController,
             startDestination = startDestination,

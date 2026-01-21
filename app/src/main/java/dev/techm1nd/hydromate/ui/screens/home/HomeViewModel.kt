@@ -30,6 +30,7 @@ import dev.techm1nd.hydromate.ui.notification.NotificationScheduler
 import dev.techm1nd.hydromate.ui.screens.home.model.HomeEffect
 import dev.techm1nd.hydromate.ui.screens.home.model.HomeIntent
 import dev.techm1nd.hydromate.ui.screens.home.model.HomeState
+import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -51,6 +52,7 @@ class HomeViewModel @Inject constructor(
     private val updateChallengeStreaksUseCase: UpdateChallengeStreaksUseCase,
     private val addXPUseCase: AddXPUseCase,
     private val tipsRepository: TipsRepository,
+    private val globalSnackbarController: GlobalSnackbarController
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -89,13 +91,11 @@ class HomeViewModel @Inject constructor(
 
             updateUserSettingsUseCase(newSettings)
                 .onSuccess {
-                    _effects.trySend(HomeEffect.ShowSuccess("Quick presets updated successfully!"))
+                    globalSnackbarController.showSuccess("Quick presets updated successfully!")
                 }
                 .onFailure { exception ->
-                    _effects.trySend(
-                        HomeEffect.ShowError(
-                            exception.message ?: "Failed to update quick presets"
-                        )
+                    globalSnackbarController.showError(
+                        exception.message ?: "Failed to update quick presets"
                     )
                 }
         }
@@ -167,7 +167,7 @@ class HomeViewModel @Inject constructor(
 
                 // Показать празднование достижения цели
                 if (!previousGoalReached && currentGoalReached) {
-                    _effects.trySend(HomeEffect.ShowGoalReachedCelebration)
+                    globalSnackbarController.showGoalReached()
 
                     // НОВАЯ ЛОГИКА: Автоматически планируем напоминания на следующий день
                     if (settings.notificationsEnabled) {
@@ -193,10 +193,9 @@ class HomeViewModel @Inject constructor(
                     updateChallengeProgressUseCase(drink)
                         .onSuccess { violatedChallengeIds ->
                             if (violatedChallengeIds.isNotEmpty()) {
-                                _effects.trySend(
-                                    HomeEffect.ShowError(
-                                        "⚠️ Challenge violated! ${drink.name} is not allowed in your active challenge."
-                                    )
+                                globalSnackbarController.showChallengeViolation(
+                                    challengeName = "Active Challenge",
+                                    drinkName = drink.name
                                 )
                             }
                         }
@@ -222,10 +221,8 @@ class HomeViewModel @Inject constructor(
                     updateChallengeStreaksUseCase()
                 }
                 .onFailure { exception ->
-                    _effects.trySend(
-                        HomeEffect.ShowError(
-                            exception.message ?: "Failed to add water entry"
-                        )
+                    globalSnackbarController.showError(
+                        exception.message ?: "Failed to add water entry"
                     )
                 }
 
@@ -241,10 +238,8 @@ class HomeViewModel @Inject constructor(
                     checkAndHandleGoalAchievement()
                 }
                 .onFailure { exception ->
-                    _effects.trySend(
-                        HomeEffect.ShowError(
-                            exception.message ?: "Failed to delete entry"
-                        )
+                    globalSnackbarController.showError(
+                        exception.message ?: "Failed to delete entry"
                     )
                 }
         }
@@ -254,18 +249,13 @@ class HomeViewModel @Inject constructor(
         checkAchievementProgressUseCase()
             .onSuccess { newlyUnlocked ->
                 newlyUnlocked.forEach { achievement ->
-                    _effects.trySend(
-                        HomeEffect.ShowSuccess(
-                            "🎉 Achievement unlocked: ${achievement.title}!"
-                        )
+                    globalSnackbarController.showAchievement(
+                        title = achievement.title,
+                        description = achievement.description
                     )
 
                     achievement.unlockableCharacter?.let { character ->
-                        _effects.trySend(
-                            HomeEffect.ShowSuccess(
-                                "🎭 New character unlocked: ${character.displayName}!"
-                            )
-                        )
+                        globalSnackbarController.showCharacterUnlocked(character.displayName)
                     }
                 }
             }
@@ -298,18 +288,16 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             drinkRepository.createCustomDrink(drink)
                 .onSuccess { drinkId ->
-                    _effects.trySend(
-                        HomeEffect.ShowSuccess("Custom drink \"${drink.name}\" created!")
+                    globalSnackbarController.showSuccess(
+                        "Custom drink \"${drink.name}\" created!"
                     )
 
                     val createdDrink = drink.copy(id = drinkId)
                     _state.update { it.copy(selectedDrink = createdDrink) }
                 }
                 .onFailure { exception ->
-                    _effects.trySend(
-                        HomeEffect.ShowError(
-                            exception.message ?: "Failed to create custom drink"
-                        )
+                    globalSnackbarController.showError(
+                        exception.message ?: "Failed to create custom drink"
                     )
                 }
         }

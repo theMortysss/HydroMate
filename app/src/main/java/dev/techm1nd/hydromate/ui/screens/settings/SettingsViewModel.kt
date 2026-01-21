@@ -18,6 +18,7 @@ import dev.techm1nd.hydromate.domain.usecases.profile.GetUserProfileUseCase
 import dev.techm1nd.hydromate.ui.notification.NotificationScheduler
 import dev.techm1nd.hydromate.ui.screens.settings.model.SettingsIntent
 import dev.techm1nd.hydromate.ui.screens.settings.model.SettingsState
+import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
 import java.time.LocalTime
 import javax.inject.Inject
 
@@ -30,6 +31,7 @@ class SettingsViewModel @Inject constructor(
     private val drinkRepository: DrinkRepository,
     private val calculateRecommendedGoalUseCase: CalculateRecommendedGoalUseCase,
     private val getUserProfileUseCase: GetUserProfileUseCase,
+    private val globalSnackbarController: GlobalSnackbarController
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsState())
@@ -83,6 +85,7 @@ class SettingsViewModel @Inject constructor(
                         error = exception.message ?: "Failed to load settings"
                     )
                 }
+                globalSnackbarController.showError(exception.message ?: "Failed to load settings")
             }.collect { (settings, drinks, profile) ->
                 _state.update {
                     it.copy(
@@ -126,6 +129,7 @@ class SettingsViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = exception.message ?: "Failed to update profile")
                     }
+                    globalSnackbarController.showError(exception.message ?: "Failed to update profile")
                 }
         }
     }
@@ -146,54 +150,7 @@ class SettingsViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = exception.message ?: "Failed to update daily goal")
                     }
-                }
-        }
-    }
-
-//    private fun updateCharacter(character: CharacterType) {
-//        viewModelScope.launch {
-//            val newSettings = _uiState.value.settings.copy(selectedCharacter = character)
-//            updateUserSettingsUseCase(newSettings)
-//                .onFailure { exception ->
-//                    _uiState.update {
-//                        it.copy(error = exception.message ?: "Failed to update character")
-//                    }
-//                }
-//        }
-//    }
-
-    private fun updateNotifications(enabled: Boolean) {
-        viewModelScope.launch {
-            val newSettings = _state.value.settings.copy(notificationsEnabled = enabled)
-            updateUserSettingsUseCase(newSettings)
-                .onSuccess {
-                    // Обновляем расписание уведомлений
-                    notificationScheduler.scheduleNotifications(newSettings)
-                }
-                .onFailure { exception ->
-                    _state.update {
-                        it.copy(error = exception.message ?: "Failed to update notifications")
-                    }
-                }
-        }
-    }
-
-    private fun updateNotificationInterval(intervalMinutes: Int) {
-        viewModelScope.launch {
-            val newSettings =
-                _state.value.settings.copy(notificationInterval = intervalMinutes)
-            updateUserSettingsUseCase(newSettings)
-                .onSuccess {
-                    // Обновляем расписание уведомлений
-                    notificationScheduler.scheduleNotifications(newSettings)
-                }
-                .onFailure { exception ->
-                    _state.update {
-                        it.copy(
-                            error = exception.message
-                                ?: "Failed to update notification interval"
-                        )
-                    }
+                    globalSnackbarController.showError(exception.message ?: "Failed to update daily goal")
                 }
         }
     }
@@ -209,6 +166,7 @@ class SettingsViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = exception.message ?: "Failed to update settings")
                     }
+                    globalSnackbarController.showError(exception.message ?: "Failed to update settings")
                 }
         }
     }
@@ -225,6 +183,7 @@ class SettingsViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = exception.message ?: "Failed to update wake up time")
                     }
+                    globalSnackbarController.showError(exception.message ?: "Failed to update wake up time")
                 }
         }
     }
@@ -241,6 +200,7 @@ class SettingsViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = exception.message ?: "Failed to update bed time")
                     }
+                    globalSnackbarController.showError(exception.message ?: "Failed to update bed time")
                 }
         }
     }
@@ -253,19 +213,8 @@ class SettingsViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = exception.message ?: "Failed to update quick amounts")
                     }
+                    globalSnackbarController.showError(exception.message ?: "Failed to update quick amounts")
                 }
         }
     }
-
-//    private fun updateShowNetHydration(show: Boolean) {
-//        viewModelScope.launch {
-//            val newSettings = _uiState.value.settings.copy(showNetHydration = show)
-//            updateUserSettingsUseCase(newSettings)
-//                .onFailure { exception ->
-//                    _uiState.update {
-//                        it.copy(error = exception.message ?: "Failed to update display mode")
-//                    }
-//                }
-//        }
-//    }
 }

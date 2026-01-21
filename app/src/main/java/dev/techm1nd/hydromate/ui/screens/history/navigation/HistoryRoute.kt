@@ -21,15 +21,10 @@ fun HistoryRoute(
 ) {
     val viewModel: HistoryViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle side effects
     LaunchedEffect(state.error) {
         state.error?.let { error ->
-            snackbarHostState.showSnackbar(
-                message = error,
-                duration = SnackbarDuration.Short
-            )
             viewModel.handleIntent(HistoryIntent.ClearError)
         }
     }
@@ -37,7 +32,6 @@ fun HistoryRoute(
     HistoryScreen(
         modifier = modifier,
         state = state,
-        snackbarHostState = snackbarHostState,
         handleIntent = viewModel::handleIntent,
         navController = navController
     )

@@ -26,7 +26,6 @@ fun AuthRoute(
 ) {
     val viewModel: AuthViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle side effects
     // Handle effects
@@ -34,16 +33,8 @@ fun AuthRoute(
         viewModel.effects.collectLatest { effect ->
             when (effect) {
                 is AuthEffect.ShowSuccess -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Short
-                    )
                 }
                 is AuthEffect.ShowError -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Long
-                    )
                 }
                 AuthEffect.NavigateToHome -> {
                     onNavigateToHome()
@@ -58,7 +49,6 @@ fun AuthRoute(
     AuthScreen(
         modifier = modifier,
         state = state,
-        snackbarHostState = snackbarHostState,
         handleIntent = viewModel::handleIntent,
         navController = navController
     )

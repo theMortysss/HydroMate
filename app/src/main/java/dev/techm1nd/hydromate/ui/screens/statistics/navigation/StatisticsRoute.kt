@@ -22,15 +22,10 @@ fun StatisticsRoute(
 ) {
     val viewModel: StatisticsViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle side effects
     LaunchedEffect(state.error) {
         state.error?.let { error ->
-            snackbarHostState.showSnackbar(
-                message = error,
-                duration = SnackbarDuration.Short
-            )
             viewModel.handleIntent(StatisticsIntent.ClearError)
         }
     }
@@ -38,7 +33,6 @@ fun StatisticsRoute(
     StatisticsScreen(
         modifier = modifier,
         state = state,
-        snackbarHostState = snackbarHostState,
         handleIntent = viewModel::handleIntent,
         navController = navController
     )

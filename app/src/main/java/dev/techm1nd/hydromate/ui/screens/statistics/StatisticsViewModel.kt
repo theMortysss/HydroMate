@@ -13,6 +13,7 @@ import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
 import dev.techm1nd.hydromate.domain.usecases.stat.GetWeeklyStatisticsUseCase
 import dev.techm1nd.hydromate.ui.screens.statistics.model.StatisticsIntent
 import dev.techm1nd.hydromate.ui.screens.statistics.model.StatisticsState
+import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -22,6 +23,7 @@ class StatisticsViewModel @Inject constructor(
     private val getUserSettingsUseCase: GetUserSettingsUseCase,
     private val drinkRepository: DrinkRepository,
     private val calculateHydrationUseCase: CalculateHydrationUseCase,
+    private val globalSnackbarController: GlobalSnackbarController
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(StatisticsState())
@@ -57,6 +59,7 @@ class StatisticsViewModel @Inject constructor(
                         error = exception.message ?: "Failed to load statistics"
                     )
                 }
+                globalSnackbarController.showError(exception.message ?: "Failed to load statistics")
             }.collect { (stats, drinks) ->
                 val drinksMap = drinks.associateBy { it.id }
 

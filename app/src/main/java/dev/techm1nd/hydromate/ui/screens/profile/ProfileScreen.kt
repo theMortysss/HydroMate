@@ -50,53 +50,11 @@ import androidx.compose.ui.res.stringResource
 fun ProfileScreen(
     modifier: Modifier,
     state: ProfileState,
-    snackbarHostState: SnackbarHostState,
     handleIntent: (ProfileIntent) -> Unit,
     navController: NavHostController
 ) {
     val hazeState = remember { HazeState() }
     val isAnonymous = state.currentUser?.isAnonymous == true
-
-    SnackbarHost(
-        modifier = Modifier
-            .zIndex(1f)
-            .padding(vertical = 12.dp, horizontal = 32.dp),
-        hostState = snackbarHostState
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Text(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .clip(CircleShape)
-                    .hazeEffect(
-                        state = hazeState,
-                        style = HazeStyle(
-                            backgroundColor = MaterialTheme.colorScheme.primary,
-                            tint = HazeTint(
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = .7f),
-                                blendMode = BlendMode.Src
-                            ),
-                            blurRadius = 30.dp,
-                        )
-                    )
-                    .border(
-                        width = Dp.Hairline,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = .8f),
-                                Color.White.copy(alpha = .2f),
-                            ),
-                        ),
-                        shape = CircleShape
-                    )
-                    .padding(16.dp),
-                text = it.visuals.message,
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 18.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
 
     Box(modifier = modifier.fillMaxSize()) {
         if (state.isLoading && state.profile.level == 1) {
@@ -402,7 +360,6 @@ private fun ProfileScreen_Preview() {
         ProfileScreen(
             modifier = Modifier,
             state = ProfileState(),
-            snackbarHostState = remember { SnackbarHostState() },
             handleIntent = {},
             navController = rememberNavController()
         )

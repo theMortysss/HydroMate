@@ -27,38 +27,25 @@ fun ProfileRoute(
 ) {
     val viewModel: ProfileViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle effects
     LaunchedEffect(viewModel.effects) {
         viewModel.effects.collectLatest { effect ->
             when (effect) {
                 is ProfileEffect.ShowSuccess -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Short
-                    )
+
                 }
 
                 is ProfileEffect.ShowError -> {
-                    snackbarHostState.showSnackbar(
-                        message = effect.message,
-                        duration = SnackbarDuration.Long
-                    )
+
                 }
 
                 is ProfileEffect.CharacterUnlocked -> {
-                    snackbarHostState.showSnackbar(
-                        message = "🎉 New character unlocked: ${effect.character.displayName}!",
-                        duration = SnackbarDuration.Long
-                    )
+
                 }
 
                 ProfileEffect.LevelUp -> {
-                    snackbarHostState.showSnackbar(
-                        message = "🎊 Level Up! You reached level ${state.profile.level}!",
-                        duration = SnackbarDuration.Long
-                    )
+
                 }
 
                 ProfileEffect.NavigateToAuth -> onNavigateToAuth()
@@ -69,10 +56,6 @@ fun ProfileRoute(
     // Handle errors
     LaunchedEffect(state.error) {
         state.error?.let { error ->
-            snackbarHostState.showSnackbar(
-                message = error,
-                duration = SnackbarDuration.Short
-            )
             viewModel.handleIntent(ProfileIntent.ClearError)
         }
     }
@@ -80,7 +63,6 @@ fun ProfileRoute(
     ProfileScreen(
         modifier = modifier,
         state = state,
-        snackbarHostState = snackbarHostState,
         handleIntent = viewModel::handleIntent,
         navController = navController
     )

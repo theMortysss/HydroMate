@@ -38,52 +38,10 @@ import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
 fun StatisticsScreen(
     modifier: Modifier,
     state: StatisticsState,
-    snackbarHostState: SnackbarHostState,
     handleIntent: (StatisticsIntent) -> Unit,
     navController: NavHostController
 ) {
     val hazeState = remember { HazeState() }
-
-    SnackbarHost(
-        modifier = Modifier
-            .zIndex(1f)
-            .padding(vertical = 12.dp, horizontal = 32.dp),
-        hostState = snackbarHostState
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Text(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .clip(CircleShape)
-                    .hazeEffect(
-                        state = hazeState,
-                        style = HazeStyle(
-                            backgroundColor = MaterialTheme.colorScheme.primary,
-                            tint = HazeTint(
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = .7f),
-                                blendMode = BlendMode.Src
-                            ),
-                            blurRadius = 30.dp,
-                        )
-                    )
-                    .border(
-                        width = Dp.Hairline,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = .8f),
-                                Color.White.copy(alpha = .2f),
-                            ),
-                        ),
-                        shape = CircleShape
-                    )
-                    .padding(16.dp),
-                text = it.visuals.message,
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 18.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
 
     if (state.isLoading) {
         Box(
@@ -161,7 +119,6 @@ private fun StatisticsScreen_Preview() {
         StatisticsScreen(
             modifier = Modifier,
             state = StatisticsState(),
-            snackbarHostState = remember { SnackbarHostState() },
             handleIntent = {},
             navController = rememberNavController()
         )

@@ -13,8 +13,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -22,6 +24,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import dev.techm1nd.hydromate.domain.entities.AuthState
@@ -29,6 +33,8 @@ import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
 import dev.techm1nd.hydromate.ui.navigation.HydroMateNavigation
 import dev.techm1nd.hydromate.ui.notification.NotificationScheduler
 import dev.techm1nd.hydromate.ui.screens.auth.AuthViewModel
+import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
+import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarHost
 import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
 import javax.inject.Inject
 
@@ -40,6 +46,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var getUserSettingsUseCase: GetUserSettingsUseCase
+
+    @Inject
+    lateinit var globalSnackbarController: GlobalSnackbarController
 
     private var showPermissionRationale by mutableStateOf(false)
     private var showExactAlarmInfo by mutableStateOf(false)
@@ -75,18 +84,18 @@ class MainActivity : ComponentActivity() {
                 val authUiState by authViewModel.state.collectAsStateWithLifecycle()
 
                 // Hide splash screen once we have determined auth state
-                // Wait a tiny bit longer to ensure navigation is ready
                 LaunchedEffect(authUiState.isLoading) {
                     if (!authUiState.isLoading) {
-                        // Small delay to ensure UI is ready
                         kotlinx.coroutines.delay(50)
                         keepSplashScreen = false
                     }
                 }
 
                 Box(modifier = Modifier.fillMaxSize()) {
-                    HydroMateNavigation()
+                    // Main content with haze source
+                    HydroMateNavigation(globalSnackbarController)
 
+                    // Permission dialogs
                     if (showPermissionRationale) {
                         PermissionRationaleDialog(
                             onDismiss = { showPermissionRationale = false },

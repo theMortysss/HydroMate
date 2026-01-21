@@ -57,7 +57,6 @@ import androidx.compose.ui.res.stringResource
 fun AuthScreen(
     modifier: Modifier,
     state: AuthState,
-    snackbarHostState: SnackbarHostState,
     handleIntent: (AuthIntent) -> Unit,
     navController: NavHostController,
 ) {
@@ -88,52 +87,10 @@ fun AuthScreen(
                 handleSignInResult(result, handleIntent)
             } catch (e: GetCredentialException) {
                 android.util.Log.e("AuthScreen", "Google Sign-In failed", e)
-                coroutineScope.launch {
-                    snackbarHostState.showSnackbar("Sign-in failed: ${e.message}")
-                }
             }
         }
     }
 
-    SnackbarHost(
-        modifier = Modifier
-            .zIndex(1f)
-            .padding(vertical = 12.dp, horizontal = 32.dp),
-        hostState = snackbarHostState
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Text(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .clip(CircleShape)
-                    .hazeEffect(
-                        state = hazeState,
-                        style = HazeStyle(
-                            backgroundColor = MaterialTheme.colorScheme.primary,
-                            tint = HazeTint(
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = .7f)
-                            ),
-                            blurRadius = 30.dp,
-                        )
-                    )
-                    .border(
-                        width = Dp.Hairline,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = .8f),
-                                Color.White.copy(alpha = .2f),
-                            ),
-                        ),
-                        shape = CircleShape
-                    )
-                    .padding(16.dp),
-                text = it.visuals.message,
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 18.sp,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
 
     Column(
         modifier = modifier
@@ -597,7 +554,6 @@ private fun AuthScreen_Preview() {
         AuthScreen(
             modifier = Modifier,
             state = AuthState(),
-            snackbarHostState = remember { SnackbarHostState() },
             handleIntent = {},
             navController = rememberNavController()
         )
