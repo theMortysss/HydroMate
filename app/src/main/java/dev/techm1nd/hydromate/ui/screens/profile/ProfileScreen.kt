@@ -28,7 +28,6 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialException
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -40,17 +39,12 @@ import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.techm1nd.hydromate.R
-import kotlinx.coroutines.flow.collectLatest
 import dev.techm1nd.hydromate.ui.components.*
-import dev.techm1nd.hydromate.ui.screens.auth.AuthScreen
-import dev.techm1nd.hydromate.ui.screens.auth.model.AuthState
-import dev.techm1nd.hydromate.ui.screens.history.model.HistoryIntent
-import dev.techm1nd.hydromate.ui.screens.history.model.HistoryState
-import dev.techm1nd.hydromate.ui.screens.profile.model.ProfileEffect
 import dev.techm1nd.hydromate.ui.screens.profile.model.ProfileIntent
 import dev.techm1nd.hydromate.ui.screens.profile.model.ProfileState
 import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun ProfileScreen(
@@ -61,6 +55,7 @@ fun ProfileScreen(
     navController: NavHostController
 ) {
     val hazeState = remember { HazeState() }
+    val isAnonymous = state.currentUser?.isAnonymous == true
 
     SnackbarHost(
         modifier = Modifier
@@ -105,7 +100,6 @@ fun ProfileScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         if (state.isLoading && state.profile.level == 1) {
-            // Initial loading
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
             Column(
@@ -118,12 +112,14 @@ fun ProfileScreen(
             ) {
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Account Settings
+                // Account Settings - UPDATED with anonymous check
                 AccountSettingsCard(
                     currentUser = state.currentUser,
                     syncStatus = state.syncStatus,
                     onSyncNow = {
-                        handleIntent(ProfileIntent.SyncNow)
+                        if (!isAnonymous) {
+                            handleIntent(ProfileIntent.SyncNow)
+                        }
                     },
                     onSignOut = {
                         handleIntent(ProfileIntent.SignOut)
@@ -131,7 +127,13 @@ fun ProfileScreen(
                     onLinkAccount = {
                         handleIntent(ProfileIntent.ShowLinkAccount)
                     },
-                    onEditProfile = { handleIntent(ProfileIntent.ShowEditProfileDialog) }
+                    onEditProfile = {
+                        if (!isAnonymous) {
+                            handleIntent(ProfileIntent.ShowEditProfileDialog)
+                        }
+                    },
+                    // NEW: Disable sync for anonymous users
+                    isSyncEnabled = !isAnonymous
                 )
 
                 // Profile Header
@@ -174,7 +176,7 @@ fun ProfileScreen(
     }
 
     // Dialogs
-    if (state.showEditProfileDialog) {
+    if (state.showEditProfileDialog && !isAnonymous) {
         var newName by remember { mutableStateOf(state.currentUser?.displayName ?: "") }
         AlertDialog(
             onDismissRequest = { handleIntent(ProfileIntent.HideEditProfileDialog) },
@@ -191,11 +193,16 @@ fun ProfileScreen(
                     handleIntent(ProfileIntent.EditProfile(newName))
                     handleIntent(ProfileIntent.HideEditProfileDialog)
                 }) { Text("Save") }
+            },
+            dismissButton = {
+                TextButton(onClick = { handleIntent(ProfileIntent.HideEditProfileDialog) }) {
+                    Text("Cancel")
+                }
             }
         )
     }
 
-    if (state.showLinkAccountDialog) {
+    if (state.showLinkAccountDialog && isAnonymous) {
         LinkAccountDialog(
             onLinkWithEmail = { email, password ->
                 handleIntent(ProfileIntent.LinkWithEmail(email, password))
@@ -267,90 +274,129 @@ private fun LinkAccountDialog(
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     val passwordsMatch = password == confirmPassword && password.length >= 6
-
-    // Function to build Google ID request
-    fun buildGoogleIdRequest(): GetCredentialRequest {
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false) // For linking, allow new accounts
-            .setServerClientId(context.getString(R.string.default_web_client_id))
-            .build()
-
-        return GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
-    }
-
-    // Handle Google credential
-    fun handleGoogleCredential(result: GetCredentialResponse) {
-        val credential = result.credential
-        if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-            try {
-                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                onLinkWithGoogle(googleIdTokenCredential.idToken)
-            } catch (e: GoogleIdTokenParsingException) {
-                // Handle parsing error (show snackbar or log)
-            }
-        }
-    }
-
-    // Trigger Google Sign-In
+    val clientId = stringResource(R.string.default_web_client_id)
+    // FIXED: Proper Google Sign-In flow for linking
     fun linkWithGoogle() {
         coroutineScope.launch {
             try {
+                val googleIdOption = GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false) // Allow any Google account
+                    .setServerClientId(clientId)
+                    .setAutoSelectEnabled(false) // Don't auto-select for linking
+                    .build()
+
+                val request = GetCredentialRequest.Builder()
+                    .addCredentialOption(googleIdOption)
+                    .build()
+
                 val result = credentialManager.getCredential(
-                    request = buildGoogleIdRequest(),
+                    request = request,
                     context = context
                 )
-                handleGoogleCredential(result)
+
+                // Handle the credential
+                val credential = result.credential
+                if (credential is CustomCredential &&
+                    credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    try {
+                        val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                        onLinkWithGoogle(googleIdTokenCredential.idToken)
+                    } catch (e: GoogleIdTokenParsingException) {
+                        android.util.Log.e("LinkAccount", "Failed to parse Google ID token", e)
+                    }
+                }
             } catch (e: GetCredentialException) {
-                // Handle exceptions (e.g., no credential, cancellation)
+                android.util.Log.e("LinkAccount", "Google Sign-In failed", e)
             }
         }
     }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Link Account") },
+        title = { Text("Link Your Account") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Save your progress by linking your anonymous account to email or Google.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                // Google Link Button
+                FilledTonalButton(
+                    onClick = { linkWithGoogle() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("🔍", fontSize = 20.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Link with Google")
+                }
+
+                Text(
+                    text = "OR",
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                // Email Link Section
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
                     label = { Text("Email") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    modifier = Modifier.fillMaxWidth()
                 )
+
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
                     label = { Text("Password") },
                     visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    supportingText = { Text("At least 6 characters") },
+                    modifier = Modifier.fillMaxWidth()
                 )
+
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
                     label = { Text("Confirm Password") },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    isError = confirmPassword.isNotBlank() && !passwordsMatch
+                    isError = confirmPassword.isNotBlank() && !passwordsMatch,
+                    supportingText = {
+                        if (confirmPassword.isNotBlank() && !passwordsMatch) {
+                            Text("Passwords don't match", color = MaterialTheme.colorScheme.error)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Button(onClick = { linkWithGoogle() }) {
-                    Text("Link with Google")
-                }
             }
         },
         confirmButton = {
             Button(
                 onClick = { onLinkWithEmail(email, password) },
                 enabled = passwordsMatch && email.isNotBlank()
-            ) { Text("Link with Email") }
+            ) {
+                Text("Link with Email")
+            }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
     )
 }
 
 @Composable
-@Preview(showBackground = true,)
+@Preview(showBackground = true)
 private fun ProfileScreen_Preview() {
     HydroMateTheme {
         ProfileScreen(

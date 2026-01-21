@@ -111,6 +111,7 @@ class AuthViewModel @Inject constructor(
                 is AuthResult.Success -> {
                     _effects.trySend(AuthEffect.ShowSuccess("Welcome back!"))
                     _state.update { it.copy(showEmailSignIn = false) }
+                    // NavigateToHome will be triggered by observeAuthState
                 }
                 is AuthResult.Error -> {
                     _state.update {
@@ -130,6 +131,7 @@ class AuthViewModel @Inject constructor(
                 is AuthResult.Success -> {
                     _effects.trySend(AuthEffect.ShowSuccess("Account created successfully!"))
                     _state.update { it.copy(showEmailSignUp = false) }
+                    // NavigateToHome will be triggered by observeAuthState
                 }
                 is AuthResult.Error -> {
                     _state.update {
@@ -148,6 +150,7 @@ class AuthViewModel @Inject constructor(
             when (val result = signInWithGoogleUseCase(idToken)) {
                 is AuthResult.Success -> {
                     _effects.trySend(AuthEffect.ShowSuccess("Welcome!"))
+                    // NavigateToHome will be triggered by observeAuthState
                 }
                 is AuthResult.Error -> {
                     _state.update {
@@ -170,6 +173,7 @@ class AuthViewModel @Inject constructor(
                             "Started anonymously. Link your account later to save your progress!"
                         )
                     )
+                    // NavigateToHome will be triggered by observeAuthState
                 }
                 is AuthResult.Error -> {
                     _state.update {

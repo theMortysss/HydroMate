@@ -36,10 +36,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
-import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
-import androidx.credentials.exceptions.NoCredentialException
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
@@ -50,16 +47,11 @@ import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
-import dev.techm1nd.hydromate.ui.screens.auth.model.AuthEffect
 import dev.techm1nd.hydromate.ui.screens.auth.model.AuthIntent
 import dev.techm1nd.hydromate.ui.screens.auth.model.AuthState
-import dev.techm1nd.hydromate.ui.screens.history.model.HistoryIntent
-import dev.techm1nd.hydromate.ui.screens.history.model.HistoryState
-import dev.techm1nd.hydromate.ui.screens.home.HomeScreen
-import dev.techm1nd.hydromate.ui.screens.home.model.HomeState
 import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun AuthScreen(
@@ -73,6 +65,35 @@ fun AuthScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val credentialManager = remember { CredentialManager.create(context) }
+    val clientId = stringResource(dev.techm1nd.hydromate.R.string.default_web_client_id)
+    // Google Sign-In Handler
+    fun handleGoogleSignIn() {
+        coroutineScope.launch {
+            try {
+                val googleIdOption = GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false) // Allow any Google account
+                    .setServerClientId(clientId)
+                    .setAutoSelectEnabled(true) // Enable one-tap
+                    .build()
+
+                val request = GetCredentialRequest.Builder()
+                    .addCredentialOption(googleIdOption)
+                    .build()
+
+                val result = credentialManager.getCredential(
+                    request = request,
+                    context = context
+                )
+
+                handleSignInResult(result, handleIntent)
+            } catch (e: GetCredentialException) {
+                android.util.Log.e("AuthScreen", "Google Sign-In failed", e)
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar("Sign-in failed: ${e.message}")
+                }
+            }
+        }
+    }
 
     SnackbarHost(
         modifier = Modifier
@@ -151,37 +172,9 @@ fun AuthScreen(
                 modifier = Modifier.padding(32.dp)
             )
         } else {
-            // Google Sign-In Button
+            // Google Sign-In Button - FIXED
             GoogleSignInButton(
-                onClick = {
-                    coroutineScope.launch {
-                        try {
-                            val googleIdOption = GetGoogleIdOption.Builder()
-                                .setFilterByAuthorizedAccounts(false)  // Allow new accounts
-                                .setServerClientId(context.getString(dev.techm1nd.hydromate.R.string.default_web_client_id))  // Same as before
-                                .setAutoSelectEnabled(true)  // Enable one-tap if possible
-                                .build()
-
-                            val request = GetCredentialRequest.Builder()
-                                .addCredentialOption(googleIdOption)
-                                .build()
-
-                            val result: GetCredentialResponse = credentialManager.getCredential(
-                                request = request,
-                                context = context
-                            )
-
-                            handleSignInResult(result, handleIntent)
-                        } catch (e: GetCredentialCancellationException) {
-                            // User cancelled
-                        } catch (e: NoCredentialException) {
-                            // No Google accounts available
-                        } catch (e: GetCredentialException) {
-                            // Handle other errors
-                            snackbarHostState.showSnackbar("Sign-in failed: ${e.message}")
-                        }
-                    }
-                },
+                onClick = { handleGoogleSignIn() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
@@ -218,14 +211,14 @@ fun AuthScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Divider(modifier = Modifier.weight(1f))
+                HorizontalDivider(modifier = Modifier.weight(1f))
                 Text(
                     text = "OR",
                     modifier = Modifier.padding(horizontal = 16.dp),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
-                Divider(modifier = Modifier.weight(1f))
+                HorizontalDivider(modifier = Modifier.weight(1f))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -305,10 +298,8 @@ private fun handleSignInResult(
             val idToken = googleIdTokenCredential.idToken
             handleIntent(AuthIntent.SignInWithGoogle(idToken))
         } catch (e: GoogleIdTokenParsingException) {
-            // Invalid token
+            android.util.Log.e("AuthScreen", "Failed to parse Google ID token", e)
         }
-    } else {
-        // Not a Google credential
     }
 }
 
@@ -319,8 +310,7 @@ fun GoogleSignInButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier
-            .height(56.dp),
+        modifier = modifier.height(56.dp),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.White,
@@ -331,7 +321,6 @@ fun GoogleSignInButton(
             pressedElevation = 4.dp
         )
     ) {
-        // Google icon would go here
         Text(
             text = "🔍",
             fontSize = 20.sp
@@ -602,7 +591,7 @@ fun EmailSignUpDialog(
 }
 
 @Composable
-@Preview(showBackground = true,)
+@Preview(showBackground = true)
 private fun AuthScreen_Preview() {
     HydroMateTheme {
         AuthScreen(

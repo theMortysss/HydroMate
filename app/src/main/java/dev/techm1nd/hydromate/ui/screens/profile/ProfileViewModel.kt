@@ -91,7 +91,14 @@ class ProfileViewModel @Inject constructor(
 
             ProfileIntent.ClearError -> _state.update { it.copy(error = null) }
             is ProfileIntent.EditProfile -> editProfile(intent.newDisplayName)
-            ProfileIntent.ShowEditProfileDialog -> _state.update { it.copy(showEditProfileDialog = true) }
+            ProfileIntent.ShowEditProfileDialog -> {
+                // Only allow for registered users
+                if (_state.value.currentUser?.isAnonymous == false) {
+                    _state.update { it.copy(showEditProfileDialog = true) }
+                } else {
+                    _effects.trySend(ProfileEffect.ShowError("Link your account to edit profile"))
+                }
+            }
             ProfileIntent.HideEditProfileDialog -> _state.update { it.copy(showEditProfileDialog = false) }
             ProfileIntent.SyncNow -> syncNow()
             ProfileIntent.SignOut -> signOut()
@@ -104,9 +111,26 @@ class ProfileViewModel @Inject constructor(
 
     private fun observeAuthState() {
         viewModelScope.launch {
-            observeAuthStateUseCase().collect { state ->
-                when (state) {
-                    is AuthState.Authenticated -> _state.update { it.copy(currentUser = state.user) }
+            observeAuthStateUseCase().collect { authState ->
+                when (authState) {
+                    is AuthState.Authenticated -> {
+                        _state.update { currentState ->
+                            // Close dialog if user is no longer anonymous (successful link)
+                            val shouldCloseDialog = currentState.currentUser?.isAnonymous == true &&
+                                    !authState.user.isAnonymous
+
+                            currentState.copy(
+                                currentUser = authState.user,
+                                showLinkAccountDialog = if (shouldCloseDialog) false else currentState.showLinkAccountDialog,
+                                // Set sync status to idle for anonymous users
+                                syncStatus = if (authState.user.isAnonymous) {
+                                    SyncStatus.Idle
+                                } else {
+                                    currentState.syncStatus
+                                }
+                            )
+                        }
+                    }
                     else -> _state.update { it.copy(currentUser = null) }
                 }
             }
@@ -140,7 +164,6 @@ class ProfileViewModel @Inject constructor(
                     )
                 }
 
-                // Проверяем завершенные челленджи
                 checkCompletedChallenges(data.activeChallenges)
             }
         }
@@ -150,7 +173,6 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            // Проверяем прогресс достижений
             checkAchievementProgressUseCase()
                 .onSuccess { newlyUnlocked ->
                     newlyUnlocked.forEach { achievement ->
@@ -170,9 +192,19 @@ class ProfileViewModel @Inject constructor(
 
     private fun editProfile(newDisplayName: String) {
         viewModelScope.launch {
-            updateAuthProfileUseCase(newDisplayName) // Новый use case: обновляет в Firebase Auth и sync
-                .onSuccess { _effects.trySend(ProfileEffect.ShowSuccess("Profile updated")) }
-                .onFailure { _effects.trySend(ProfileEffect.ShowError("Failed to update profile")) }
+            // Check if user is anonymous
+            if (_state.value.currentUser?.isAnonymous == true) {
+                _effects.trySend(ProfileEffect.ShowError("Link your account to edit profile"))
+                return@launch
+            }
+
+            updateAuthProfileUseCase(newDisplayName)
+                .onSuccess {
+                    _effects.trySend(ProfileEffect.ShowSuccess("Profile updated"))
+                }
+                .onFailure {
+                    _effects.trySend(ProfileEffect.ShowError("Failed to update profile"))
+                }
         }
     }
 
@@ -249,7 +281,6 @@ class ProfileViewModel @Inject constructor(
 
         challenges.forEach { challenge ->
             if (challenge.isActive && !today.isBefore(challenge.endDate)) {
-                // Челлендж завершен!
                 completeChallengeUseCase(challenge.id)
                     .onSuccess { result ->
                         _state.update { it.copy(showChallengeCompletion = result) }
@@ -272,8 +303,6 @@ class ProfileViewModel @Inject constructor(
                             }
                         }
 
-                        // Проверяем, повысился ли уровень
-                        val currentProfile = _state.value.profile
                         if (result.challenge.xpReward > 0) {
                             _effects.trySend(ProfileEffect.LevelUp)
                         }
@@ -284,15 +313,30 @@ class ProfileViewModel @Inject constructor(
 
     private fun syncNow() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            // CRITICAL: Check if user is anonymous
+            val currentUser = _state.value.currentUser
+            if (currentUser == null) {
+                _effects.trySend(ProfileEffect.ShowError("Sign in to sync your data"))
+                return@launch
+            }
+
+            if (currentUser.isAnonymous) {
+                _effects.trySend(ProfileEffect.ShowError("Link your account to enable sync"))
+                return@launch
+            }
+
+            _state.update { it.copy(syncStatus = SyncStatus.Syncing) }
+
             syncRepository.syncAll()
                 .onSuccess {
+                    val syncTime = java.time.LocalDateTime.now()
+                    _state.update { it.copy(syncStatus = SyncStatus.Success(syncTime)) }
                     _effects.trySend(ProfileEffect.ShowSuccess("Sync completed"))
                 }
                 .onFailure { e ->
+                    _state.update { it.copy(syncStatus = SyncStatus.Error(e.message ?: "Sync failed")) }
                     _effects.trySend(ProfileEffect.ShowError(e.message ?: "Sync failed"))
                 }
-            _state.update { it.copy(isLoading = false) }
         }
     }
 
@@ -302,7 +346,7 @@ class ProfileViewModel @Inject constructor(
             signOutUseCase()
                 .onSuccess {
                     _effects.trySend(ProfileEffect.ShowSuccess("Signed out"))
-                    _effects.trySend(ProfileEffect.NavigateToAuth)  // Для навигации в effects
+                    _effects.trySend(ProfileEffect.NavigateToAuth)
                 }
                 .onFailure { e ->
                     _effects.trySend(ProfileEffect.ShowError(e.message ?: "Sign out failed"))
@@ -313,34 +357,66 @@ class ProfileViewModel @Inject constructor(
 
     private fun linkWithEmail(email: String, password: String) {
         viewModelScope.launch {
+            // Verify user is anonymous
+            if (_state.value.currentUser?.isAnonymous != true) {
+                _effects.trySend(ProfileEffect.ShowError("Account is already linked"))
+                return@launch
+            }
+
             _state.update { it.copy(isLoading = true) }
+
             when (val result = linkAnonymousWithEmailUseCase(email, password)) {
                 is AuthResult.Success -> {
-                    _effects.trySend(ProfileEffect.ShowSuccess("Account linked"))
-                    _state.update { it.copy(showLinkAccountDialog = false) }
-                }
+                    // AuthState observer will automatically update currentUser and close dialog
+                    _effects.trySend(ProfileEffect.ShowSuccess("Account linked successfully! Uploading your data..."))
 
+                    // Trigger sync after successful linking
+                    syncRepository.uploadAllData()
+                        .onSuccess {
+                            _effects.trySend(ProfileEffect.ShowSuccess("Data synced successfully!"))
+                        }
+                        .onFailure { e ->
+                            _effects.trySend(ProfileEffect.ShowError("Linked but sync failed: ${e.message}"))
+                        }
+                }
                 is AuthResult.Error -> {
                     _effects.trySend(ProfileEffect.ShowError(result.message))
                 }
             }
+
             _state.update { it.copy(isLoading = false) }
         }
     }
 
     private fun linkWithGoogle(idToken: String) {
         viewModelScope.launch {
+            // Verify user is anonymous
+            if (_state.value.currentUser?.isAnonymous != true) {
+                _effects.trySend(ProfileEffect.ShowError("Account is already linked"))
+                return@launch
+            }
+
             _state.update { it.copy(isLoading = true) }
+
             when (val result = linkAnonymousWithGoogleUseCase(idToken)) {
                 is AuthResult.Success -> {
-                    _effects.trySend(ProfileEffect.ShowSuccess("Account linked"))
-                    _state.update { it.copy(showLinkAccountDialog = false) }
-                }
+                    // AuthState observer will automatically update currentUser and close dialog
+                    _effects.trySend(ProfileEffect.ShowSuccess("Account linked successfully! Uploading your data..."))
 
+                    // Trigger sync after successful linking
+                    syncRepository.uploadAllData()
+                        .onSuccess {
+                            _effects.trySend(ProfileEffect.ShowSuccess("Data synced successfully!"))
+                        }
+                        .onFailure { e ->
+                            _effects.trySend(ProfileEffect.ShowError("Linked but sync failed: ${e.message}"))
+                        }
+                }
                 is AuthResult.Error -> {
                     _effects.trySend(ProfileEffect.ShowError(result.message))
                 }
             }
+
             _state.update { it.copy(isLoading = false) }
         }
     }
