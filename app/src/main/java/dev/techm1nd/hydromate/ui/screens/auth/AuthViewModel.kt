@@ -12,6 +12,7 @@ import dev.techm1nd.hydromate.data.worker.SyncWorker
 import dev.techm1nd.hydromate.domain.entities.AuthResult
 import dev.techm1nd.hydromate.domain.entities.AuthState
 import dev.techm1nd.hydromate.domain.usecases.auth.*
+import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
 import dev.techm1nd.hydromate.ui.screens.auth.model.AuthEffect
 import dev.techm1nd.hydromate.ui.screens.auth.model.AuthIntent
 import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
@@ -29,6 +30,7 @@ class AuthViewModel @Inject constructor(
     private val linkAnonymousWithGoogleUseCase: LinkAnonymousWithGoogleUseCase,
     private val resetPasswordUseCase: ResetPasswordUseCase,
     private val signOutUseCase: SignOutUseCase,
+    private val getUserSettingsUseCase: GetUserSettingsUseCase,
     private val globalSnackbarController: GlobalSnackbarController,
 ) : ViewModel() {
 
@@ -39,6 +41,7 @@ class AuthViewModel @Inject constructor(
     val effects: Flow<AuthEffect> = _effects.receiveAsFlow()
 
     init {
+        checkOnboardingStatus()
         observeAuthState()
     }
 
@@ -279,6 +282,16 @@ class AuthViewModel @Inject constructor(
                 }
 
             _state.update { it.copy(isLoading = false) }
+        }
+    }
+
+    private fun checkOnboardingStatus() {
+        viewModelScope.launch {
+            getUserSettingsUseCase().collectLatest { settings ->
+                _state.update {
+                    it.copy(needsOnboarding = !settings.onboardingCompleted)
+                }
+            }
         }
     }
 }

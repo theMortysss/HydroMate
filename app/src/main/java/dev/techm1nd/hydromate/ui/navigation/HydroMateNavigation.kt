@@ -77,6 +77,7 @@ import dev.techm1nd.hydromate.ui.screens.auth.AuthViewModel
 import dev.techm1nd.hydromate.ui.screens.auth.navigation.authScreen
 import dev.techm1nd.hydromate.ui.screens.history.navigation.historyScreen
 import dev.techm1nd.hydromate.ui.screens.home.navigation.homeScreen
+import dev.techm1nd.hydromate.ui.screens.onboarding.navigation.onboardingScreen
 import dev.techm1nd.hydromate.ui.screens.profile.navigation.profileScreen
 import dev.techm1nd.hydromate.ui.screens.settings.navigation.settingsScreen
 import dev.techm1nd.hydromate.ui.screens.statistics.navigation.statisticsScreen
@@ -90,6 +91,7 @@ sealed class Screen(
     val icon: ImageVector
 ) {
     object Auth : Screen("auth", "Auth", Icons.Filled.Person)
+    object Onboarding : Screen("onboarding", "Onboarding", Icons.Filled.Person)
     object Home : Screen("home", "Home", Icons.Filled.Home)
     object Statistics : Screen("statistics", "Stats", Icons.Outlined.BarChart)
     object History : Screen("history", "History", Icons.Outlined.History)
@@ -153,7 +155,13 @@ fun HydroMateNavigation(
 
     // Determine auth state and start destination
     val isAuthenticated = authUiState.currentUser != null
-    val startDestination = if (isAuthenticated) Screen.Home.route else Screen.Auth.route
+    val needsOnboarding = isAuthenticated && authUiState.needsOnboarding
+
+    val startDestination = when {
+        !isAuthenticated -> Screen.Auth.route
+        needsOnboarding -> Screen.Onboarding.route
+        else -> Screen.Home.route
+    }
 
     // Create navController only after we know the start destination
     val navController = rememberNavController()
@@ -179,7 +187,7 @@ fun HydroMateNavigation(
 
     Scaffold(
         topBar = {
-            if (isAuthenticated) {
+            if (isAuthenticated && !needsOnboarding) {
                 TopAppBar(
                     modifier = Modifier
                         .hazeEffect(
@@ -244,7 +252,7 @@ fun HydroMateNavigation(
             }
         },
         bottomBar = {
-            if (isAuthenticated) {
+            if (isAuthenticated && !needsOnboarding) {
                 val tabs = listOf(
                     BottomBarTab.Home,
                     BottomBarTab.Statistics,
@@ -370,6 +378,15 @@ fun HydroMateNavigation(
                         popUpTo(Screen.Auth.route) { inclusive = true }
                     }
                 })
+            onboardingScreen(
+                modifier = Modifier,
+                navController = navController,
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                }
+            )
             homeScreen(modifier = Modifier, navController = navController)
             statisticsScreen(modifier = Modifier, navController = navController)
             historyScreen(modifier = Modifier, navController = navController)

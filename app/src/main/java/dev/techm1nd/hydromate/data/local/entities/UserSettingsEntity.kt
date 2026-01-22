@@ -83,5 +83,8 @@ data class UserSettingsEntity(
     val manualGoalEnabled: Boolean = false,
 
     @ColumnInfo(name = "manual_goal", defaultValue = "2000")
-    val manualGoalMl: Int = 2000
+    val manualGoalMl: Int = 2000,
+
+    @ColumnInfo(name = "onboarding_completed", defaultValue = "0")
+    val onboardingCompleted: Boolean = false
 )

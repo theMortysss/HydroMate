@@ -4,6 +4,8 @@ import java.time.DayOfWeek
 import java.time.LocalTime
 
 data class UserSettings(
+    val onboardingCompleted: Boolean = false,
+
     val dailyGoal: Int = 2000,
 //    val selectedCharacter: CharacterType = CharacterType.PENGUIN,
 
@@ -32,7 +34,7 @@ data class UserSettings(
     // Остальные настройки
     val quickAddPresets: List<QuickAddPreset> = QuickAddPreset.getDefaults(),
 //    val showNetHydration: Boolean = true,
-    val profile: UserProfile = UserProfile()
+    val profile: UserProfile = UserProfile(),
 ) {
     @Deprecated("Use quickAddPresets instead")
     val quickAmounts: List<Int>

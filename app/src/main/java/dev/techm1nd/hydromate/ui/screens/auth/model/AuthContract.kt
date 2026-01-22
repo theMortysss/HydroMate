@@ -11,6 +11,7 @@ data class AuthState(
     val showEmailSignUp: Boolean = false,
     val showLinkAccount: Boolean = false,
     val isAnonymous: Boolean = false,
+    val needsOnboarding: Boolean = false
 )
 
 sealed class AuthIntent {

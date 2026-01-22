@@ -24,10 +24,11 @@ object UserSettingsMapper {
                 activityLevel = ActivityLevel.fromString(it.profileActivityLevel),
                 climate = Climate.fromString(it.profileClimate),
                 isManualGoal = it.manualGoalEnabled,
-                manualGoal = it.manualGoalMl
+                manualGoal = it.manualGoalMl,
             )
 
             UserSettings(
+                onboardingCompleted = it.onboardingCompleted,
                 dailyGoal = it.dailyGoal,
 //                selectedCharacter = CharacterType.valueOf(it.selectedCharacter),
                 notificationsEnabled = it.notificationsEnabled,
@@ -52,6 +53,7 @@ object UserSettingsMapper {
     fun toEntity(domain: UserSettings): UserSettingsEntity {
         return UserSettingsEntity(
             id = 1,
+            onboardingCompleted = domain.onboardingCompleted,
             dailyGoal = domain.dailyGoal,
 //            selectedCharacter = domain.selectedCharacter.name,
             notificationsEnabled = domain.notificationsEnabled,
