@@ -145,11 +145,11 @@ fun HydroMateNavigation(
     val authViewModel: AuthViewModel = hiltViewModel()
     val authUiState by authViewModel.state.collectAsStateWithLifecycle()
 
-    // Don't render navigation until we know the auth state
-    // This prevents the flicker of auth screen
+    // CRITICAL FIX: Don't render ANYTHING until auth state is determined
+    // This prevents the flicker of auth screen while splash is visible
     if (authUiState.isLoading) {
-        // Show nothing while loading - splash screen is still visible
-        Box(modifier = Modifier.fillMaxSize())
+        // Show nothing - splash screen is still visible
+        // This is the key: complete empty composable
         return
     }
 
@@ -169,14 +169,23 @@ fun HydroMateNavigation(
     val currentRoute = navBackStackEntry?.destination?.route
 
     // Handle auth state changes after initial load
-    LaunchedEffect(isAuthenticated) {
+    LaunchedEffect(isAuthenticated, needsOnboarding) {
         val currentDestination = navController.currentDestination?.route
+
         when {
-            isAuthenticated && currentDestination == Screen.Auth.route -> {
+            // User logged in and completed onboarding, but on wrong screen
+            isAuthenticated && !needsOnboarding && currentDestination != Screen.Home.route -> {
                 navController.navigate(Screen.Home.route) {
-                    popUpTo(Screen.Auth.route) { inclusive = true }
+                    popUpTo(0) { inclusive = true }
                 }
             }
+            // User logged in but needs onboarding
+            isAuthenticated && needsOnboarding && currentDestination != Screen.Onboarding.route -> {
+                navController.navigate(Screen.Onboarding.route) {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+            // User logged out, go to auth
             !isAuthenticated && currentDestination != Screen.Auth.route -> {
                 navController.navigate(Screen.Auth.route) {
                     popUpTo(0) { inclusive = true }
