@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun ProfileRoute(
     modifier: Modifier,
     navController: NavHostController,
-    onNavigateToAuth: () -> Unit,
+//    onNavigateToAuth: () -> Unit,
 ) {
     val viewModel: ProfileViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -48,7 +48,7 @@ fun ProfileRoute(
 
                 }
 
-                ProfileEffect.NavigateToAuth -> onNavigateToAuth()
+//                ProfileEffect.NavigateToAuth -> onNavigateToAuth()
             }
         }
     }

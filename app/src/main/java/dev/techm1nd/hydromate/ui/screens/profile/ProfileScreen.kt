@@ -71,28 +71,28 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 // Account Settings - UPDATED with anonymous check
-                AccountSettingsCard(
-                    currentUser = state.currentUser,
-                    syncStatus = state.syncStatus,
-                    onSyncNow = {
-                        if (!isAnonymous) {
-                            handleIntent(ProfileIntent.SyncNow)
-                        }
-                    },
-                    onSignOut = {
-                        handleIntent(ProfileIntent.SignOut)
-                    },
-                    onLinkAccount = {
-                        handleIntent(ProfileIntent.ShowLinkAccount)
-                    },
-                    onEditProfile = {
-                        if (!isAnonymous) {
-                            handleIntent(ProfileIntent.ShowEditProfileDialog)
-                        }
-                    },
-                    // NEW: Disable sync for anonymous users
-                    isSyncEnabled = !isAnonymous
-                )
+//                AccountSettingsCard(
+//                    currentUser = state.currentUser,
+//                    syncStatus = state.syncStatus,
+//                    onSyncNow = {
+//                        if (!isAnonymous) {
+//                            handleIntent(ProfileIntent.SyncNow)
+//                        }
+//                    },
+//                    onSignOut = {
+//                        handleIntent(ProfileIntent.SignOut)
+//                    },
+//                    onLinkAccount = {
+//                        handleIntent(ProfileIntent.ShowLinkAccount)
+//                    },
+//                    onEditProfile = {
+//                        if (!isAnonymous) {
+//                            handleIntent(ProfileIntent.ShowEditProfileDialog)
+//                        }
+//                    },
+//                    // NEW: Disable sync for anonymous users
+//                    isSyncEnabled = !isAnonymous
+//                )
 
                 // Profile Header
                 ProfileHeaderCard(
@@ -138,41 +138,41 @@ fun ProfileScreen(
         var newName by remember { mutableStateOf(state.currentUser?.displayName ?: "") }
         AlertDialog(
             onDismissRequest = { handleIntent(ProfileIntent.HideEditProfileDialog) },
-            title = { Text("Edit Profile") },
+            title = { Text(stringResource(R.string.edit_profile)) },
             text = {
                 OutlinedTextField(
                     value = newName,
                     onValueChange = { newName = it },
-                    label = { Text("Display Name") }
+                    label = { Text(stringResource(R.string.display_name)) }
                 )
             },
             confirmButton = {
                 Button(onClick = {
                     handleIntent(ProfileIntent.EditProfile(newName))
                     handleIntent(ProfileIntent.HideEditProfileDialog)
-                }) { Text("Save") }
+                }) { Text(stringResource(R.string.save)) }
             },
             dismissButton = {
                 TextButton(onClick = { handleIntent(ProfileIntent.HideEditProfileDialog) }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
     }
 
-    if (state.showLinkAccountDialog && isAnonymous) {
-        LinkAccountDialog(
-            onLinkWithEmail = { email, password ->
-                handleIntent(ProfileIntent.LinkWithEmail(email, password))
-            },
-            onLinkWithGoogle = { idToken ->
-                handleIntent(ProfileIntent.LinkWithGoogle(idToken))
-            },
-            onDismiss = {
-                handleIntent(ProfileIntent.HideLinkAccount)
-            }
-        )
-    }
+//    if (state.showLinkAccountDialog && isAnonymous) {
+//        LinkAccountDialog(
+//            onLinkWithEmail = { email, password ->
+//                handleIntent(ProfileIntent.LinkWithEmail(email, password))
+//            },
+//            onLinkWithGoogle = { idToken ->
+//                handleIntent(ProfileIntent.LinkWithGoogle(idToken))
+//            },
+//            onDismiss = {
+//                handleIntent(ProfileIntent.HideLinkAccount)
+//            }
+//        )
+//    }
 
     if (state.showCharacterSelection) {
         CharacterSelectionDialogEnhanced(

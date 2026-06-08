@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +38,7 @@ import dev.techm1nd.hydromate.ui.screens.home.model.HomeIntent
 import dev.techm1nd.hydromate.ui.screens.home.model.HomeState
 import dev.techm1nd.hydromate.ui.theme.HydroMateTheme
 import java.time.LocalDate
+import dev.techm1nd.hydromate.R
 
 @Composable
 fun HomeScreen(
@@ -120,13 +122,13 @@ fun HomeScreen(
 
                         Column {
                             Text(
-                                text = "Add Custom Entry",
+                                text = stringResource(R.string.add_custom_entry),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             Text(
-                                text = "Choose drink type & amount",
+                                text = stringResource(R.string.add_custom_entry_desc),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                             )
@@ -155,13 +157,13 @@ fun HomeScreen(
             )
 
             // Hydration Tips
-            HydrationTipsStories(
-                viewedTipIds = state.viewedTipIds,
-                onTipViewed = { tipId ->
-                    handleIntent(HomeIntent.MarkTipAsViewed(tipId))
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+//            HydrationTipsStories(
+//                viewedTipIds = state.viewedTipIds,
+//                onTipViewed = { tipId ->
+//                    handleIntent(HomeIntent.MarkTipAsViewed(tipId))
+//                },
+//                modifier = Modifier.fillMaxWidth()
+//            )
 
             // Today's Entries
             TodayEntriesList(

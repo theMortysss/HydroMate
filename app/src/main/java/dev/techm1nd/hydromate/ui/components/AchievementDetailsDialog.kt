@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import dev.techm1nd.hydromate.domain.entities.Achievement
 import java.time.format.DateTimeFormatter
+import dev.techm1nd.hydromate.R
 
 @Composable
 fun AchievementDetailsDialog(
@@ -95,7 +97,7 @@ fun AchievementDetailsDialog(
                         color = MaterialTheme.colorScheme.primary
                     ) {
                         Text(
-                            text = "✓ Unlocked",
+                            text = stringResource(R.string.unlocked),
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
@@ -106,7 +108,7 @@ fun AchievementDetailsDialog(
                     achievement.unlockedAt?.let { date ->
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Unlocked on ${date.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))}",
+                            text = stringResource(R.string.unlocked_on, date.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
@@ -119,7 +121,7 @@ fun AchievementDetailsDialog(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "Progress: ${achievement.progress}/${achievement.progressMax}",
+                                text = stringResource(R.string.progress, achievement.progress, achievement.progressMax),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -139,7 +141,7 @@ fun AchievementDetailsDialog(
                             color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Text(
-                                text = "🔒 Locked",
+                                text = stringResource(R.string.locked),
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold
@@ -162,7 +164,7 @@ fun AchievementDetailsDialog(
                             .padding(16.dp)
                     ) {
                         Text(
-                            text = "Rewards",
+                            text = stringResource(R.string.rewards),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -173,7 +175,7 @@ fun AchievementDetailsDialog(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("XP Reward:")
+                            Text(stringResource(R.string.xp_reward))
                             Text(
                                 "+${achievement.xpReward} XP",
                                 fontWeight = FontWeight.Bold,
@@ -187,7 +189,7 @@ fun AchievementDetailsDialog(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Unlocks:")
+                                Text(stringResource(R.string.character_reward))
                                 Row(
                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                                     verticalAlignment = Alignment.CenterVertically

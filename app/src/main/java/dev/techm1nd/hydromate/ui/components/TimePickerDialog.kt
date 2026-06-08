@@ -1,8 +1,13 @@
 package dev.techm1nd.hydromate.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.techm1nd.hydromate.ui.screens.settings.model.TimePickerType
 import java.time.LocalTime
@@ -22,8 +27,8 @@ fun TimePickerDialog(
     )
 
     val title = when (type) {
-        TimePickerType.WAKE_UP -> "Set Wake Up Time"
-        TimePickerType.BED_TIME -> "Set Bed Time"
+        TimePickerType.WAKE_UP -> "Установите время пробуждения"
+        TimePickerType.BED_TIME -> "Установите время отхода ко сну"
     }
 
     DatePickerDialog(
@@ -43,13 +48,26 @@ fun TimePickerDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Отмена")
             }
-        }
-    ) {
-        TimePicker(
-            state = timePickerState,
-            modifier = androidx.compose.ui.Modifier.padding(16.dp)
+        },
+        colors = DatePickerDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.surface
         )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                modifier = Modifier.padding(vertical = 16.dp),
+                text = title,)
+            TimePicker(
+                state = timePickerState,
+            )
+        }
     }
 }

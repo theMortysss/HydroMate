@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -30,7 +31,8 @@ fun EditQuickPresetsDialog(
     onPresetsChanged: (List<QuickAddPreset>) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val presets: SnapshotStateList<QuickAddPreset> = remember { mutableStateListOf(*currentPresets.toTypedArray()) }
+    val presets: SnapshotStateList<QuickAddPreset> =
+        remember { mutableStateListOf(*currentPresets.toTypedArray()) }
     var showAddDialog by remember { mutableStateOf(false) }
     var editingPreset by remember { mutableStateOf<QuickAddPreset?>(null) }
 
@@ -43,7 +45,10 @@ fun EditQuickPresetsDialog(
                 .fillMaxWidth()
                 .fillMaxHeight(0.8f)
                 .padding(16.dp),
-            shape = RoundedCornerShape(24.dp)
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
         ) {
             Column(
                 modifier = Modifier.fillMaxSize()
@@ -57,7 +62,7 @@ fun EditQuickPresetsDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Quick Add Presets",
+                        text = "Быстрое добавление",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -73,7 +78,7 @@ fun EditQuickPresetsDialog(
                     )
                 ) {
                     Text(
-                        text = "ℹ️ Create quick shortcuts for your favorite drinks and amounts. Maximum 6 presets.",
+                        text = "ℹ️ Создавайте быстрые сочетания для ваших любимых напитков и их количества. Максимум 6 предустановок.",
                         modifier = Modifier.padding(12.dp),
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -110,7 +115,7 @@ fun EditQuickPresetsDialog(
                             ) {
                                 Icon(Icons.Default.Add, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Add Preset")
+                                Text("Добавить")
                             }
                         }
                     }
@@ -127,7 +132,7 @@ fun EditQuickPresetsDialog(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Cancel")
+                        Text("Отмена")
                     }
 
                     Button(
@@ -140,7 +145,7 @@ fun EditQuickPresetsDialog(
                         modifier = Modifier.weight(1f),
                         enabled = presets.isNotEmpty()
                     ) {
-                        Text("Save")
+                        Text("Сохранить")
                     }
                 }
             }
@@ -251,7 +256,7 @@ private fun AddEditPresetDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (preset != null) "Edit Preset" else "Add Preset") },
+        title = { Text(if (preset != null) "Редактировать" else "Добавить") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 // Drink selector
@@ -273,7 +278,7 @@ private fun AddEditPresetDialog(
                             Text(text = selectedDrink.icon, fontSize = 28.sp)
                             Column {
                                 Text(
-                                    text = "Drink",
+                                    text = "Напиток",
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
@@ -296,8 +301,8 @@ private fun AddEditPresetDialog(
                             errorMessage = null
                         }
                     },
-                    label = { Text("Amount (ml)") },
-                    placeholder = { Text("e.g., 250") },
+                    label = { Text("Объем (ml)") },
+                    placeholder = { Text("н-р, 250") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     isError = errorMessage != null,
@@ -314,9 +319,11 @@ private fun AddEditPresetDialog(
                         amountValue == null || amountValue <= 0 -> {
                             errorMessage = "Please enter a valid amount"
                         }
+
                         isDuplicate(amountValue, selectedDrink.id, preset, existingPresets) -> {
                             errorMessage = "This preset already exists"
                         }
+
                         else -> {
                             val newPreset = QuickAddPreset(
                                 id = preset?.id ?: java.util.UUID.randomUUID().toString(),
@@ -331,14 +338,15 @@ private fun AddEditPresetDialog(
                     }
                 }
             ) {
-                Text("Save")
+                Text("Сохранить")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Отмена")
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.surface
     )
 
     if (showDrinkSelector) {

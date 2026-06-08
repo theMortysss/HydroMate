@@ -16,11 +16,11 @@ enum class ReminderType {
  * Интервал для умных напоминаний
  */
 enum class ReminderInterval(val displayName: String, val minutes: Int) {
-    MIN_30("Every 30 minutes", 30),
-    HOUR_1("Every hour", 60),
-    HOUR_2("Every 2 hours", 120),
-    HOUR_3("Every 3 hours", 180),
-    HOUR_4("Every 4 hours", 240);
+    MIN_30("Каждые 30 минут", 30),
+    HOUR_1("Каждый час", 60),
+    HOUR_2("Каждые 2 часа", 120),
+    HOUR_3("Каждые 3 часа", 180),
+    HOUR_4("Каждые 4 часа", 240);
 
     companion object {
         fun fromMinutes(minutes: Int): ReminderInterval {
@@ -33,11 +33,11 @@ enum class ReminderInterval(val displayName: String, val minutes: Int) {
  * Время отсрочки уведомления
  */
 enum class SnoozeDelay(val displayName: String, val minutes: Int) {
-    DISABLED("Disabled", 0),
-    MIN_5("5 minutes", 5),
-    MIN_10("10 minutes", 10),
-    MIN_15("15 minutes", 15),
-    MIN_30("30 minutes", 30);
+    DISABLED("Выключено", 0),
+    MIN_5("5 минут", 5),
+    MIN_10("10 минут", 10),
+    MIN_15("15 минут", 15),
+    MIN_30("30 минут", 30);
 
     companion object {
         fun fromMinutes(minutes: Int): SnoozeDelay {

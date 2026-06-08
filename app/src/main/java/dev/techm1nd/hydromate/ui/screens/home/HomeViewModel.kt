@@ -3,6 +3,7 @@ package dev.techm1nd.hydromate.ui.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.techm1nd.hydromate.R
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -31,6 +32,7 @@ import dev.techm1nd.hydromate.ui.screens.home.model.HomeEffect
 import dev.techm1nd.hydromate.ui.screens.home.model.HomeIntent
 import dev.techm1nd.hydromate.ui.screens.home.model.HomeState
 import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
+import dev.techm1nd.hydromate.utils.UiText
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -91,11 +93,13 @@ class HomeViewModel @Inject constructor(
 
             updateUserSettingsUseCase(newSettings)
                 .onSuccess {
-                    globalSnackbarController.showSuccess("Quick presets updated successfully!")
+                    globalSnackbarController.showSuccess(
+                        UiText.StringResource(R.string.quick_presets_updated)
+                    )
                 }
                 .onFailure { exception ->
                     globalSnackbarController.showError(
-                        exception.message ?: "Failed to update quick presets"
+                        UiText.DynamicString(exception.message ?: "Failed to update quick presets")
                     )
                 }
         }
@@ -222,7 +226,7 @@ class HomeViewModel @Inject constructor(
                 }
                 .onFailure { exception ->
                     globalSnackbarController.showError(
-                        exception.message ?: "Failed to add water entry"
+                        UiText.DynamicString(exception.message ?: "Failed to add water entry")
                     )
                 }
 
@@ -239,7 +243,7 @@ class HomeViewModel @Inject constructor(
                 }
                 .onFailure { exception ->
                     globalSnackbarController.showError(
-                        exception.message ?: "Failed to delete entry"
+                        UiText.DynamicString(exception.message ?: "Failed to delete entry")
                     )
                 }
         }
@@ -289,7 +293,7 @@ class HomeViewModel @Inject constructor(
             drinkRepository.createCustomDrink(drink)
                 .onSuccess { drinkId ->
                     globalSnackbarController.showSuccess(
-                        "Custom drink \"${drink.name}\" created!"
+                        UiText.StringResource(R.string.custom_drink_createdd, listOf(drink.name))
                     )
 
                     val createdDrink = drink.copy(id = drinkId)
@@ -297,7 +301,9 @@ class HomeViewModel @Inject constructor(
                 }
                 .onFailure { exception ->
                     globalSnackbarController.showError(
-                        exception.message ?: "Failed to create custom drink"
+                        UiText.DynamicString(
+                            exception.message ?: "Failed to create custom drink"
+                        )
                     )
                 }
         }

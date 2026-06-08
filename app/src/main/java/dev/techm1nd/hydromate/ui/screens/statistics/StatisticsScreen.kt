@@ -27,7 +27,6 @@ import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.techm1nd.hydromate.ui.components.*
-import dev.techm1nd.hydromate.ui.screens.auth.AuthScreen
 import dev.techm1nd.hydromate.ui.screens.auth.model.AuthState
 import dev.techm1nd.hydromate.ui.screens.home.model.HomeIntent
 import dev.techm1nd.hydromate.ui.screens.statistics.model.StatisticsIntent

@@ -11,11 +11,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.techm1nd.hydromate.domain.entities.Achievement
+import dev.techm1nd.hydromate.R
 
 @Composable
 fun AchievementsSection(
@@ -30,7 +32,7 @@ fun AchievementsSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Achievements",
+                text = stringResource(R.string.achievements),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )

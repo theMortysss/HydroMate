@@ -118,7 +118,7 @@ class AuthViewModel @Inject constructor(
 
             when (val result = signInWithEmailUseCase(email, password)) {
                 is AuthResult.Success -> {
-                    globalSnackbarController.showSuccess("Welcome back!")
+//                    globalSnackbarController.showSuccess("Welcome back!")
                     _state.update { it.copy(showEmailSignIn = false, isLoading = false) }
 
                     // Schedule sync worker for registered user
@@ -131,7 +131,7 @@ class AuthViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = result.message, isLoading = false)
                     }
-                    globalSnackbarController.showError(result.message)
+//                    globalSnackbarController.showError(result.message)
                 }
             }
         }
@@ -143,7 +143,7 @@ class AuthViewModel @Inject constructor(
 
             when (val result = signUpWithEmailUseCase(email, password, displayName)) {
                 is AuthResult.Success -> {
-                    globalSnackbarController.showSuccess("Account created successfully!")
+//                    globalSnackbarController.showSuccess("Account created successfully!")
                     _state.update { it.copy(showEmailSignUp = false) }
 
                     // Schedule sync worker for registered user
@@ -156,7 +156,7 @@ class AuthViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = result.message, isLoading = false)
                     }
-                    globalSnackbarController.showError(result.message)
+//                    globalSnackbarController.showError(result.message)
                 }
             }
         }
@@ -168,7 +168,7 @@ class AuthViewModel @Inject constructor(
 
             when (val result = signInWithGoogleUseCase(idToken)) {
                 is AuthResult.Success -> {
-                    globalSnackbarController.showSuccess("Welcome!")
+//                    globalSnackbarController.showSuccess("Welcome!")
 
                     // Schedule sync worker for registered user
                     if (!result.user.isAnonymous) {
@@ -180,7 +180,7 @@ class AuthViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = result.message, isLoading = false)
                     }
-                    globalSnackbarController.showError(result.message)
+//                    globalSnackbarController.showError(result.message)
                 }
             }
         }
@@ -192,9 +192,9 @@ class AuthViewModel @Inject constructor(
 
             when (val result = signInAnonymouslyUseCase()) {
                 is AuthResult.Success -> {
-                    globalSnackbarController.showSuccess(
-                        "Started anonymously. Link your account later to save your progress!"
-                    )
+//                    globalSnackbarController.showSuccess(
+//                        "Started anonymously. Link your account later to save your progress!"
+//                    )
 
                     // Cancel any existing sync worker for anonymous user
                     SyncWorker.cancel(context)
@@ -204,7 +204,7 @@ class AuthViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = result.message, isLoading = false)
                     }
-                    globalSnackbarController.showError(result.message)
+//                    globalSnackbarController.showError(result.message)
                 }
             }
         }
@@ -216,14 +216,14 @@ class AuthViewModel @Inject constructor(
 
             when (val result = linkAnonymousWithEmailUseCase(email, password)) {
                 is AuthResult.Success -> {
-                    globalSnackbarController.showSuccess("Account linked! Your progress is now saved.")
+//                    globalSnackbarController.showSuccess("Account linked! Your progress is now saved.")
                     _state.update { it.copy(showLinkAccount = false, isAnonymous = false) }
                 }
                 is AuthResult.Error -> {
                     _state.update {
                         it.copy(error = result.message, isLoading = false)
                     }
-                    globalSnackbarController.showError(result.message)
+//                    globalSnackbarController.showError(result.message)
                 }
             }
         }
@@ -235,14 +235,14 @@ class AuthViewModel @Inject constructor(
 
             when (val result = linkAnonymousWithGoogleUseCase(idToken)) {
                 is AuthResult.Success -> {
-                    globalSnackbarController.showSuccess("Account linked! Your progress is now saved.")
+//                    globalSnackbarController.showSuccess("Account linked! Your progress is now saved.")
                     _state.update { it.copy(showLinkAccount = false, isAnonymous = false) }
                 }
                 is AuthResult.Error -> {
                     _state.update {
                         it.copy(error = result.message, isLoading = false)
                     }
-                    globalSnackbarController.showError(result.message)
+//                    globalSnackbarController.showError(result.message)
                 }
             }
         }
@@ -254,7 +254,7 @@ class AuthViewModel @Inject constructor(
 
             resetPasswordUseCase(email)
                 .onSuccess {
-                    globalSnackbarController.showSuccess("Password reset email sent! Check your inbox.")
+//                    globalSnackbarController.showSuccess("Password reset email sent! Check your inbox.")
                     _state.update { it.copy(isLoading = false) }
                 }
                 .onFailure { exception ->
@@ -264,7 +264,7 @@ class AuthViewModel @Inject constructor(
                             isLoading = false
                         )
                     }
-                    globalSnackbarController.showError(exception.message ?: "Failed to send reset email")
+//                    globalSnackbarController.showError(exception.message ?: "Failed to send reset email")
                 }
         }
     }
@@ -275,10 +275,10 @@ class AuthViewModel @Inject constructor(
 
             signOutUseCase()
                 .onSuccess {
-                    globalSnackbarController.showSuccess("Signed out successfully")
+//                    globalSnackbarController.showSuccess("Signed out successfully")
                 }
                 .onFailure { exception ->
-                    globalSnackbarController.showError(exception.message ?: "Failed to sign out")
+//                    globalSnackbarController.showError(exception.message ?: "Failed to sign out")
                 }
 
             _state.update { it.copy(isLoading = false) }

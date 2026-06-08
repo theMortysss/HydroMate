@@ -62,7 +62,7 @@ fun WaterCalendar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Water Intake Calendar",
+                    text = "Календарь потребления жидкости",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -72,7 +72,7 @@ fun WaterCalendar(
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                 ) {
                     Text(
-                        text = "Total",
+                        text = "Всего",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Medium
@@ -87,7 +87,7 @@ fun WaterCalendar(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun").forEach { day ->
+                listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс").forEach { day ->
                     Text(
                         text = day,
                         style = MaterialTheme.typography.bodySmall,
@@ -298,19 +298,19 @@ fun DateDetailsModal(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     ProgressMetric(
-                        label = "Total",
+                        label = "Всего",
                         value = "${currentAmount}ml",
                         icon = "💧"
                     )
 
                     ProgressMetric(
-                        label = "Goal",
+                        label = "Цель",
                         value = "${progress.goalAmount}ml",
                         icon = "🎯"
                     )
 
                     ProgressMetric(
-                        label = "Progress",
+                        label = "Прогресс",
                         value = "$progressPercentage%",
                         icon = if (currentAmount >= progress.goalAmount) "✅" else "⏳"
                     )
@@ -353,7 +353,7 @@ fun DateDetailsModal(
                                 .padding(12.dp)
                         ) {
                             Text(
-                                text = "Hydration Breakdown",
+                                text = "Анализ гидратации",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold
                             )
@@ -363,7 +363,7 @@ fun DateDetailsModal(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    "Total consumed:",
+                                    "Всего:",
                                     style = MaterialTheme.typography.bodySmall
                                 )
                                 Text(
@@ -377,7 +377,7 @@ fun DateDetailsModal(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    "Effective hydration:",
+                                    "Эффективная гидратация:",
                                     style = MaterialTheme.typography.bodySmall
                                 )
                                 Text(
@@ -395,7 +395,7 @@ fun DateDetailsModal(
                 // Entries list
                 if (progress.entries.isNotEmpty()) {
                     Text(
-                        text = "Water Entries (${progress.entries.size})",
+                        text = "Записи потребления (${progress.entries.size})",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
@@ -433,7 +433,7 @@ fun DateDetailsModal(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "No entries for this day",
+                                text = "Записей за этот день нет",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
@@ -466,12 +466,12 @@ fun DateDetailsModal(
                             )
                             Column {
                                 Text(
-                                    text = "Daily Goal Achieved!",
+                                    text = "Ежедневная цель достигнута!",
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "Great job staying hydrated!",
+                                    text = "Отличная работа!",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onTertiaryContainer.copy(
                                         alpha = 0.7f
@@ -495,7 +495,7 @@ fun DateDetailsModal(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(Icons.Default.Add, contentDescription = "Add more")
-                            Text("Add More")
+                            Text("Добавить еще")
                         }
                     }
                 }
@@ -603,9 +603,9 @@ private fun EntryRowWithDelete(
     if (showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text("Delete Entry") },
+            title = { Text("Удалить запись") },
             text = {
-                Text("Are you sure you want to delete this ${entry.amount}ml ${entry.type.displayName} entry?")
+                Text("Вы уверены, что хотите удалить эту ${entry.amount}ml ${entry.type.displayName} запись?")
             },
             confirmButton = {
                 TextButton(
@@ -617,12 +617,12 @@ private fun EntryRowWithDelete(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Delete")
+                    Text("Удалить")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text("Cancel")
+                    Text("Отмена")
                 }
             }
         )
@@ -649,7 +649,7 @@ fun MonthlySummary(
                     Text("📊", fontSize = 48.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "No data for this month",
+                        "Нет данных за этот месяц",
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -672,7 +672,10 @@ fun MonthlySummary(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             modifier = Modifier
@@ -685,7 +688,7 @@ fun MonthlySummary(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Monthly Summary",
+                    "Месячный отчет",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -695,7 +698,7 @@ fun MonthlySummary(
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                 ) {
                     Text(
-                        text = "Total",
+                        text = "Всего",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Medium
@@ -711,25 +714,25 @@ fun MonthlySummary(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 SummaryMetric(
-                    label = "Total",
+                    label = "Всего\nвыпито",
                     value = "${totalDisplay / 1000f}L",
-                    subtitle = "${monthlyProgress.size} days tracked",
+                    subtitle = "${monthlyProgress.size}\nдней отслеживания",
                     icon = "💧",
                     modifier = Modifier.weight(1f)
                 )
 
                 SummaryMetric(
-                    label = "Daily Avg",
+                    label = "Среднесуточный\nпоказатель",
                     value = "${averageDaily}ml",
-                    subtitle = "per day",
+                    subtitle = "за день",
                     icon = "📊",
                     modifier = Modifier.weight(1f)
                 )
 
                 SummaryMetric(
-                    label = "Goals Hit",
+                    label = "Целей\nдостигнуто",
                     value = "$goalReachedDays",
-                    subtitle = "$consistency% success",
+                    subtitle = "$consistency% успеха",
                     icon = "🎯",
                     modifier = Modifier.weight(1f)
                 )
@@ -761,12 +764,12 @@ fun MonthlySummary(
                         )
                         Column {
                             Text(
-                                "Best Day",
+                                "Лучший день",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                "$bestDayAmount ml on ${
+                                "$bestDayAmount ml за ${
                                     best.date.format(
                                         DateTimeFormatter.ofPattern("MMM dd")
                                     )
@@ -775,7 +778,7 @@ fun MonthlySummary(
                             )
                             if (bestDayAmount >= best.goalAmount) {
                                 Text(
-                                    "Goal achieved! 🏆",
+                                    "Цель достигнута! 🏆",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.primary
                                 )
@@ -806,16 +809,19 @@ private fun SummaryMetric(
             value,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.primary
         )
         Text(
             label,
             style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
             fontWeight = FontWeight.Medium
         )
         Text(
             subtitle,
             style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
     }
@@ -829,15 +835,15 @@ private fun CalendarLegend() {
     ) {
         LegendItem(
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-            text = "Goal reached"
+            text = "Цель достигнута"
         )
         LegendItem(
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-            text = "Some progress"
+            text = "Есть прогресс"
         )
         LegendItem(
             color = Color.Transparent,
-            text = "No data",
+            text = "Нет данных",
             showBorder = true
         )
     }

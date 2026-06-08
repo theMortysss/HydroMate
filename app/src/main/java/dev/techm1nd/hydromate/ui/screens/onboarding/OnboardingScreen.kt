@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -23,6 +24,7 @@ import dev.chrisbanes.haze.hazeSource
 import dev.techm1nd.hydromate.domain.entities.UserProfile
 import dev.techm1nd.hydromate.domain.usecases.hydration.RecommendedGoalResult
 import dev.techm1nd.hydromate.ui.screens.onboarding.model.*
+import dev.techm1nd.hydromate.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +41,7 @@ fun OnboardingScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Welcome to HydroMate",
+                        text = stringResource(R.string.welcome),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Medium
                     )
@@ -54,7 +56,7 @@ fun OnboardingScreen(
                 actions = {
                     if (state.currentStep != OnboardingStep.COMPLETE) {
                         TextButton(onClick = { handleIntent(OnboardingIntent.SkipOnboarding) }) {
-                            Text("Skip")
+                            Text(stringResource(R.string.skiip))
                         }
                     }
                 }
@@ -135,8 +137,8 @@ fun OnboardingScreen(
                         } else {
                             Text(
                                 when (state.currentStep) {
-                                    OnboardingStep.COMPLETE -> "Get Started"
-                                    else -> "Continue"
+                                    OnboardingStep.COMPLETE -> stringResource(R.string.get_started)
+                                    else -> stringResource(R.string.next)
                                 }
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -161,14 +163,14 @@ private fun WelcomeStep() {
         )
 
         Text(
-            text = "Stay Hydrated,\nStay Healthy",
+            text = stringResource(R.string.stay_hydrated),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
 
         Text(
-            text = "Let's personalize your hydration goals based on your lifestyle",
+            text = stringResource(R.string.personalized_hydration),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -186,10 +188,10 @@ private fun WelcomeStep() {
                 modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                FeatureItem("📊", "Track your daily water intake")
-                FeatureItem("🎯", "Set personalized hydration goals")
-                FeatureItem("⏰", "Smart reminders throughout the day")
-                FeatureItem("🏆", "Earn achievements and unlock characters")
+                FeatureItem("📊", stringResource(R.string.track_intake))
+                FeatureItem("🎯", stringResource(R.string.set_goals))
+                FeatureItem("⏰", stringResource(R.string.get_reminders))
+                FeatureItem("🏆", stringResource(R.string.earn_rewards))
             }
         }
     }
@@ -206,14 +208,14 @@ private fun ProfileStep(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Tell us about yourself",
+            text = stringResource(R.string.tell_us_about_you),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
 
         Text(
-            text = "We'll calculate your personalized hydration goal",
+            text = stringResource(R.string.profile_info_helps),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -239,13 +241,13 @@ private fun ProfileStep(
                             }
                         }
                     },
-                    label = { Text("Weight (kg)") },
+                    label = { Text(stringResource(R.string.weight)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
 
                 // Gender
-                Text("Gender", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.gender), style = MaterialTheme.typography.labelLarge)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -264,7 +266,7 @@ private fun ProfileStep(
                 }
 
                 // Activity Level
-                Text("Activity Level", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.activity_level), style = MaterialTheme.typography.labelLarge)
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(
                         dev.techm1nd.hydromate.domain.entities.ActivityLevel.LOW,
@@ -281,7 +283,7 @@ private fun ProfileStep(
                 }
 
                 // Climate
-                Text("Climate", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.climate), style = MaterialTheme.typography.labelLarge)
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(
                         dev.techm1nd.hydromate.domain.entities.Climate.COLD,
@@ -302,7 +304,7 @@ private fun ProfileStep(
                 if (recommendedGoal.recommendedGoal > 0) {
                     HorizontalDivider()
                     Text(
-                        text = "Your recommended goal: ${recommendedGoal.recommendedGoal}ml",
+                        text = stringResource(R.string.rec_goal, recommendedGoal.recommendedGoal),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -324,7 +326,7 @@ private fun GoalStep(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Choose your daily goal",
+            text = stringResource(R.string.set_your_goal),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
@@ -354,12 +356,12 @@ private fun GoalStep(
                 ) {
                     Column {
                         Text(
-                            text = "Recommended",
+                            text = stringResource(R.string.recommended_goal),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Based on your profile",
+                            text = stringResource(R.string.based_on_profile),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
@@ -392,7 +394,7 @@ private fun GoalStep(
         }
 
         Text(
-            text = "OR",
+            text = stringResource(R.string.or_set_custom_goal),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
         )
@@ -414,7 +416,7 @@ private fun GoalStep(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Set custom goal",
+                    text = stringResource(R.string.custom_goal),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -429,14 +431,14 @@ private fun GoalStep(
                             }
                         }
                     },
-                    label = { Text("Daily goal (ml)") },
+                    label = { Text(stringResource(R.string.daily_goal)) },
                     suffix = { Text("ml") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
 
                 Text(
-                    text = "Recommended range: 500ml - 5000ml",
+                    text = stringResource(R.string.custom_goal_desc),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -457,14 +459,14 @@ private fun CompleteStep() {
         )
 
         Text(
-            text = "You're all set!",
+            text = stringResource(R.string.all_set),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
 
         Text(
-            text = "Your personalized hydration journey starts now. Let's make staying hydrated fun and easy!",
+            text = stringResource(R.string.onboarding_complete_desc),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -483,14 +485,14 @@ private fun CompleteStep() {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = "Quick Tips",
+                    text = stringResource(R.string.what_to_expect),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
-                FeatureItem("💧", "Tap quick add buttons for fast logging")
-                FeatureItem("📱", "Enable notifications for reminders")
-                FeatureItem("🏆", "Complete challenges to earn XP")
-                FeatureItem("🐧", "Unlock new characters as you progress")
+                FeatureItem("💧", stringResource(R.string.track_daily_intake))
+                FeatureItem("📱", stringResource(R.string.get_reminders_desc))
+                FeatureItem("🏆", stringResource(R.string.earn_rewards_desc))
+                FeatureItem("🐧", stringResource(R.string.join_community))
             }
         }
     }

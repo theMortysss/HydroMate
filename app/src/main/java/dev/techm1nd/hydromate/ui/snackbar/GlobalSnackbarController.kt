@@ -1,5 +1,8 @@
 package dev.techm1nd.hydromate.ui.snackbar
 
+import androidx.annotation.StringRes
+import dev.techm1nd.hydromate.R
+import dev.techm1nd.hydromate.utils.UiText
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -11,16 +14,14 @@ import javax.inject.Singleton
  * Позволяет показывать уведомления о достижениях, челленджах и других событиях
  * независимо от текущего экрана
  */
+
 @Singleton
 class GlobalSnackbarController @Inject constructor() {
 
     private val _messages = Channel<SnackbarMessage>(Channel.BUFFERED)
     val messages: Flow<SnackbarMessage> = _messages.receiveAsFlow()
 
-    /**
-     * Показать обычное сообщение
-     */
-    fun showMessage(message: String) {
+    fun showMessage(message: UiText) {
         _messages.trySend(
             SnackbarMessage(
                 message = message,
@@ -29,10 +30,7 @@ class GlobalSnackbarController @Inject constructor() {
         )
     }
 
-    /**
-     * Показать сообщение об успехе
-     */
-    fun showSuccess(message: String) {
+    fun showSuccess(message: UiText) {
         _messages.trySend(
             SnackbarMessage(
                 message = message,
@@ -41,10 +39,7 @@ class GlobalSnackbarController @Inject constructor() {
         )
     }
 
-    /**
-     * Показать сообщение об ошибке
-     */
-    fun showError(message: String) {
+    fun showError(message: UiText) {
         _messages.trySend(
             SnackbarMessage(
                 message = message,
@@ -53,84 +48,98 @@ class GlobalSnackbarController @Inject constructor() {
         )
     }
 
-    /**
-     * Показать сообщение о достижении
-     */
-    fun showAchievement(title: String, description: String? = null) {
-        val message = if (description != null) {
-            "🏆 $title\n$description"
-        } else {
-            "🏆 $title"
-        }
-
+    fun showAchievement(
+        title: String,
+        description: String? = null
+    ) {
         _messages.trySend(
             SnackbarMessage(
-                message = message,
+                message = if (description != null) {
+                    UiText.StringResource(
+                        R.string.snackbar_achievement_with_description,
+                        listOf(title, description)
+                    )
+                } else {
+                    UiText.StringResource(
+                        R.string.snackbar_achievement,
+                        listOf(title)
+                    )
+                },
                 type = SnackbarType.ACHIEVEMENT,
                 duration = SnackbarDuration.LONG
             )
         )
     }
 
-    /**
-     * Показать сообщение о повышении уровня
-     */
-    fun showLevelUp(level: Int, xpGained: Int) {
+    fun showLevelUp(
+        level: Int,
+        xpGained: Int
+    ) {
         _messages.trySend(
             SnackbarMessage(
-                message = "🎊 Level Up!\nYou reached level $level (+${xpGained} XP)",
+                message = UiText.StringResource(
+                    R.string.snackbar_level_up,
+                    listOf(level, xpGained)
+                ),
                 type = SnackbarType.LEVEL_UP,
                 duration = SnackbarDuration.LONG
             )
         )
     }
 
-    /**
-     * Показать сообщение о провале челленджа
-     */
-    fun showChallengeViolation(challengeName: String, drinkName: String) {
+    fun showChallengeViolation(
+        challengeName: String,
+        drinkName: String
+    ) {
         _messages.trySend(
             SnackbarMessage(
-                message = "⚠️ Challenge Failed!\n$challengeName violated by drinking $drinkName",
+                message = UiText.StringResource(
+                    R.string.snackbar_challenge_failed,
+                    listOf(challengeName, drinkName)
+                ),
                 type = SnackbarType.WARNING,
                 duration = SnackbarDuration.LONG
             )
         )
     }
 
-    /**
-     * Показать сообщение о завершении челленджа
-     */
-    fun showChallengeCompleted(challengeName: String, xpGained: Int) {
+    fun showChallengeCompleted(
+        challengeName: String,
+        xpGained: Int
+    ) {
         _messages.trySend(
             SnackbarMessage(
-                message = "🎉 Challenge Completed!\n$challengeName (+${xpGained} XP)",
+                message = UiText.StringResource(
+                    R.string.snackbar_challenge_completed,
+                    listOf(challengeName, xpGained)
+                ),
                 type = SnackbarType.SUCCESS,
                 duration = SnackbarDuration.LONG
             )
         )
     }
 
-    /**
-     * Показать сообщение о разблокировке персонажа
-     */
-    fun showCharacterUnlocked(characterName: String) {
+    fun showCharacterUnlocked(
+        characterName: String
+    ) {
         _messages.trySend(
             SnackbarMessage(
-                message = "🎭 New Character Unlocked!\n$characterName is now available",
+                message = UiText.StringResource(
+                    R.string.snackbar_character_unlocked,
+                    listOf(characterName)
+                ),
                 type = SnackbarType.ACHIEVEMENT,
                 duration = SnackbarDuration.LONG
             )
         )
     }
 
-    /**
-     * Показать сообщение о достижении цели
-     */
     fun showGoalReached() {
         _messages.trySend(
             SnackbarMessage(
-                message = "🎉 Daily Goal Reached!\nGreat job staying hydrated!",
+                message = UiText.StringResource(
+                    R.string.snackbar_goal_reached
+                ),
                 type = SnackbarType.SUCCESS,
                 duration = SnackbarDuration.MEDIUM
             )
@@ -142,10 +151,10 @@ class GlobalSnackbarController @Inject constructor() {
  * Модель сообщения для Snackbar
  */
 data class SnackbarMessage(
-    val message: String,
+    val message: UiText,
     val type: SnackbarType = SnackbarType.INFO,
     val duration: SnackbarDuration = SnackbarDuration.SHORT,
-    val actionLabel: String? = null,
+    val actionLabel: UiText? = null,
     val onAction: (() -> Unit)? = null
 )
 

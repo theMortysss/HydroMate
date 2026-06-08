@@ -5,69 +5,112 @@
     <string name="statistics">Statistics</string>
     <string name="history">History</string>
     <string name="settings">Settings</string>
-
-    <!-- Home Screen -->
-    <string name="daily_goal_reached">🎉 Daily goal reached! Great job!</string>
-    <string name="add_water">Add Water</string>
-    <string name="quick_add">Quick Add</string>
-    <string name="custom">Custom</string>
-    <string name="today_entries">Today\'s Water Intake</string>
-    <string name="no_entries">No water entries yet</string>
-    <string name="add_first_drink">Add your first drink above!</string>
-
-    <!-- Statistics Screen -->
-    <string name="week_statistics">Week Statistics</string>
-    <string name="weekly_overview">Weekly Overview</string>
-    <string name="daily_progress">Daily Progress</string>
-    <string name="total">Total</string>
-    <string name="daily_avg">Daily Avg</string>
-    <string name="goals_hit">Goals Hit</string>
-
-    <!-- History Screen -->
-    <string name="water_intake_calendar">Water Intake Calendar</string>
-    <string name="monthly_summary">Monthly Summary</string>
-    <string name="goal_reached">Goal reached</string>
-    <string name="some_progress">Some progress</string>
-    <string name="no_data">No data</string>
-
-    <!-- Settings Screen -->
-    <string name="daily_goal">Daily Goal</string>
-    <string name="character">Character</string>
-    <string name="notifications">Notifications</string>
-    <string name="about">About</string>
-    <string name="enable_reminders">Enable Reminders</string>
-    <string name="reminder_interval">Reminder Interval</string>
-    <string name="wake_up_time">Wake Up Time</string>
-    <string name="bed_time">Bed Time</string>
-
-    <!-- Dialogs -->
-    <string name="set_daily_goal">Set Daily Goal</string>
-    <string name="choose_your_buddy">Choose Your Buddy</string>
-    <string name="edit_quick_amounts">Edit Quick Amounts</string>
-    <string name="custom_amount">Custom Amount</string>
-    <string name="cancel">Cancel</string>
-    <string name="save">Save</string>
-    <string name="add">Add</string>
-
-    <!-- Character messages -->
-    <string name="character_very_happy">Amazing! Goal completed! 🎉</string>
-    <string name="character_happy">Doing great! Keep it up! 😊</string>
-    <string name="character_content">Good progress! 👍</string>
-    <string name="character_slightly_thirsty">Time for some water! 💧</string>
-    <string name="character_thirsty">I\'m thirsty! Help me! 🥺</string>
-
-    <!-- Achievements -->
-    <string name="perfect_week">Perfect Week</string>
-    <string name="on_fire">On Fire</string>
-    <string name="hydration_hero">Hydration Hero</string>
-    <string name="consistent">Consistent</string>
-
-    <!-- Errors -->
-    <string name="error_generic">Something went wrong</string>
-    <string name="error_failed_to_add_water">Failed to add water entry</string>
-    <string name="error_failed_to_delete_entry">Failed to delete entry</string>
-    <string name="error_failed_to_load_statistics">Failed to load statistics</string>
-    <string name="error_failed_to_load_history">Failed to load history</string>
-    <string name="error_failed_to_load_settings">Failed to load settings</string>
     <string name="default_web_client_id">589373202282-26lfuk1o1fr58oq2cbrtvn833aeafv99.apps.googleusercontent.com</string>
+    <string name="perm_notif_title">Notification Permission Required</string>
+    <string name="perm_notif_text">HydroMate needs notification permission to remind you to drink water throughout the day.\nThis helps you stay hydrated and reach your daily goals.\n\n\nYou can enable it in the app settings.</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="skip">Maybe Later</string>
+    <string name="precise_alarms_title">Precise Reminders</string>
+    <string name="precise_alarms_text">For the most accurate hydration reminders, please allow HydroMate to \n schedule exact alarms.\n\n\n This ensures you get reminded at the right times throughout the day.</string>
+    <string name="enable">Enable</string>
+    <string name="skiip">Skip</string>
+    <string name="add_custom_entry">Add Custom Entry</string>
+    <string name="add_custom_entry_desc">Choose drink type and amount></string>
+    <string name="welcome">Welcome to HydroMate</string>
+    <string name="get_started">Get Started</string>
+    <string name="next">Continue</string>
+    <string name="stay_hydrated">Stay Hydrated,\nStay Healthy</string>
+    <string name="personalized_hydration">Let\'s personalize your hydration goals based on your lifestyle</string>
+    <string name="track_intake">Track your daily water intake</string>
+    <string name="set_goals">Set personalized hydration goals</string>
+    <string name="get_reminders">Smart reminders throughout the day</string>
+    <string name="earn_rewards">Earn achievements and unlock characters</string>
+    <string name="tell_us_about_you">Tell us about yourself</string>
+    <string name="profile_info_helps">We\'ll calculate your personalized hydration goal</string>
+    <string name="weight">Weight (kg)</string>
+    <string name="gender">Gender</string>
+    <string name="activity_level">Activity Level</string>
+    <string name="climate">Climate</string>
+    <string name="rec_goal">Your recommended goal: %d ml</string>
+    <string name="set_your_goal">Choose your daily goal</string>
+    <string name="recommended_goal">Recommended</string>
+    <string name="based_on_profile">Based on your profile</string>
+    <string name="or_set_custom_goal">OR</string>
+    <string name="custom_goal">Set custom goal</string>
+    <string name="daily_goal">Daily goal (ml)</string>
+    <string name="custom_goal_desc">Recommended range: 500ml - 5000ml</string>
+    <string name="all_set">You\'re all set!</string>
+    <string name="onboarding_complete_desc">Your personalized hydration journey starts now. Let\'s make staying hydrated fun and easy!</string>
+    <string name="what_to_expect">Quick Tips</string>
+    <string name="track_daily_intake">Tap quick add buttons for fast logging</string>
+    <string name="get_reminders_desc">Enable notifications for reminders</string>
+    <string name="earn_rewards_desc">Complete challenges to earn XP</string>
+    <string name="join_community">Unlock new characters as you progress</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="display_name">Display Name</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="snackbar_achievement_with_description">🏆 $title\n$description</string>
+    <string name="snackbar_achievement">🏆 $title</string>
+    <string name="snackbar_level_up">🎊 Level Up!\nYou reached level %d (+$%d XP)</string>
+    <string name="snackbar_challenge_failed">⚠️ Challenge Failed!\n%s violated by drinking %s</string>
+    <string name="snackbar_character_unlocked">🎭 New Character Unlocked!\n%s is now available</string>
+    <string name="snackbar_goal_reached">🎉 Daily Goal Reached!\nGreat job staying hydrated!</string>
+    <string name="snackbar_challenge_completed">🎉 Challenge Completed!\n%1$s (+%2$d XP)</string>
+    <string name="achievement_unlocked">🎉 Achievement unlocked: %s!</string>
+    <string name="link_account_to_edit_profile">Link your account to edit profile</string>
+    <string name="profile_updated">Profile updated</string>
+    <string name="profile_update_failed">Failed to update profile</string>
+    <string name="character_locked">Character not unlocked yet! Complete challenges to unlock.</string>
+    <string name="character_changed">Character changed to %s!</string>
+    <string name="challenge_started">Challenge started! Complete %d days to earn %d XP</string>
+    <string name="challenge_abandoned">Challenge abandoned</string>
+    <string name="challenge_completed">🎉 Challenge completed! +%d XP</string>
+    <string name="achievement_unlockedd">🏆 Achievement unlocked: %s!</string>
+    <string name="added">Added %d ml of %s for %s</string>
+    <string name="entry_deleted">Entry deleted</string>
+    <string name="custom_drink_created">Custom drink %s created!</string>
+    <string name="quick_presets_updated">Quick presets updated successfully!</string>
+    <string name="custom_drink_createdd">Custom drink %s created!</string>
+    <string name="onboarding_profile_validation_error">Please fill in your profile information</string>
+    <string name="onboarding_settings_saved">Profile setup complete! Let\'s start hydrating! 💧</string>
+    <string name="unlocked">✓ Unlocked</string>
+    <string name="unlocked_on">Unlocked on %s</string>
+    <string name="progress">Progress: %d/%d</string>
+    <string name="locked">🔒 Locked</string>
+    <string name="rewards">Rewards</string>
+    <string name="xp_reward">XP Reward:</string>
+    <string name="character_reward">Unlocks:</string>
+    <string name="achievements">Achievements</string>
+    <string name="achievements_summary">Achievements This Week</string>
+    <string name="no_achievements_yet">Keep going to unlock achievements! 💪</string>
+    <string name="active_challenges">Active Challenges</string>
+    <string name="days_remaining">Day %d/%d</string>
+    <string name="challenge_progress">%d days remaining</string>
+    <string name="abandon">Abandon Challenge?</string>
+    <string name="abandon_desc">Are you sure you want to abandon this challenge? All progress will be lost.</string>
+    <string name="abandon_confirm">Abandon</string>
+    <string name="no_challenges_yet">No Active Challenges</string>
+    <string name="start_challenge_desc">Start a challenge to unlock achievements and XP!</string>
+    <string name="start_challenge">Start Challenge</string>
+    <string name="add_water_for_date">Add Water Entry</string>
+    <string name="add_water_info">Add water intake for past dates to keep your hydration history complete</string>
+    <string name="select_drink">Select Drink</string>
+    <string name="drink_attributes">%s %% hydration</string>
+    <string name="enter_amount">Amount (ml)</string>
+    <string name="enter_amount_label">Enter amount</string>
+    <string name="enter_amount_placeholder">e.g., 250</string>
+    <string name="select_time">Time</string>
+    <string name="add">Add Entry</string>
+    <string name="selected_time">Select time</string>
+    <string name="hour">Hour</string>
+    <string name="minute">Minute</string>
+    <string name="set_time">Set Time</string>
+    <string name="challenge_complete">Challenge Complete!</string>
+    <string name="achievement_unlock">🎉 Achievement Unlocked!</string>
+    <string name="character_unlock">🎭 Character Unlocked!</string>
+    <string name="awesome">Awesome!</string>
+    <string name="choose_character">Choose Your Character</string>
+    <string name="character_selection_info">💡 Complete challenges and unlock achievements to get new characters!</string>
+    <string name="not_sure_how_to_rate">💡 Not sure about hydration values?</string>
 </resources>

@@ -45,12 +45,12 @@ fun TodayEntriesList(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "No water entries yet",
+                        text = "Пока никаких записей о воде.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Text(
-                        text = "Add your first drink above!",
+                        text = "Добавьте свой первый напиток выше!",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
@@ -60,7 +60,7 @@ fun TodayEntriesList(
     } else {
         Column(modifier = modifier) {
             Text(
-                text = "Today's Water Intake",
+                text = "Потребление жидкости за сегодня",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(bottom = 12.dp)

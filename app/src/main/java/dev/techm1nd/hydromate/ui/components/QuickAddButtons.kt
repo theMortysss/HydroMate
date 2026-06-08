@@ -35,13 +35,13 @@ fun QuickAddButtons(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Quick Add",
+                text = "Быстрое добавление",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium
             )
 
             TextButton(onClick = onEditPresets) {
-                Text("Edit")
+                Text("Редактировать")
             }
         }
 

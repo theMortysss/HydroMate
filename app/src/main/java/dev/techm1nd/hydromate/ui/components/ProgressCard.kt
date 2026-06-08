@@ -89,13 +89,13 @@ fun ProgressCard(
             // Remaining amount
             if (progressPercentage < 1f) {
                 Text(
-                    text = "${goalAmount - currentAmount}ml remaining",
+                    text = "${goalAmount - currentAmount}ml осталось до цели",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )
             } else {
                 Text(
-                    text = "Daily goal completed! 🎉",
+                    text = "Ежедневная цель достигнута! 🎉",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.primary

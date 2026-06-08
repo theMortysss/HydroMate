@@ -73,7 +73,7 @@ fun ProfileHeaderCard(
                 color = MaterialTheme.colorScheme.primary
             ) {
                 Text(
-                    text = "Level ${profile.level}",
+                    text = "Уровень ${profile.level}",
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
@@ -121,17 +121,17 @@ fun ProfileHeaderCard(
             ) {
                 StatItem(
                     icon = "🏆",
-                    label = "Challenges",
+                    label = "Вызовы",
                     value = profile.challengesCompleted.toString()
                 )
                 StatItem(
                     icon = "⭐",
-                    label = "Achievements",
+                    label = "Достижения",
                     value = profile.achievementsUnlocked.toString()
                 )
                 StatItem(
                     icon = "🎭",
-                    label = "Characters",
+                    label = "Персонажи",
                     value = "${profile.unlockedCharacters.size}/${CharacterType.entries.size}"
                 )
             }

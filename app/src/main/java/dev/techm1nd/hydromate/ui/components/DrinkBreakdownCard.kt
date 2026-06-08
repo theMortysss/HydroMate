@@ -62,7 +62,7 @@ fun DrinkBreakdownCard(
                 .padding(20.dp)
         ) {
             Text(
-                text = "Drink Breakdown",
+                text = "Обзор напитков",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)

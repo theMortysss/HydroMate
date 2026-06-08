@@ -9,10 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.techm1nd.hydromate.domain.entities.Challenge
+import dev.techm1nd.hydromate.R
 
 @Composable
 fun ActiveChallengesSection(
@@ -28,7 +30,7 @@ fun ActiveChallengesSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Active Challenges",
+                text = stringResource(R.string.active_challenges),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -134,12 +136,12 @@ private fun ChallengeCard(
             ) {
                 Column {
                     Text(
-                        text = "Day ${challenge.daysPassed}/${challenge.durationDays}",
+                        text = stringResource(R.string.days_remaining, challenge.daysPassed, challenge.durationDays),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "${challenge.daysRemaining} days remaining",
+                        text = stringResource(R.string.challenge_progress, challenge.daysRemaining),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
@@ -164,8 +166,8 @@ private fun ChallengeCard(
     if (showAbandonDialog) {
         AlertDialog(
             onDismissRequest = { showAbandonDialog = false },
-            title = { Text("Abandon Challenge?") },
-            text = { Text("Are you sure you want to abandon this challenge? All progress will be lost.") },
+            title = { Text(stringResource(R.string.abandon)) },
+            text = { Text(stringResource(R.string.abandon_desc)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -176,12 +178,12 @@ private fun ChallengeCard(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Abandon")
+                    Text(stringResource(R.string.abandon_confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAbandonDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -205,12 +207,12 @@ private fun EmptyChallengesPlaceholder(onStartChallenge: () -> Unit) {
             Text("🎯", fontSize = 48.sp)
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "No Active Challenges",
+                text = stringResource(R.string.no_challenges_yet),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Start a challenge to unlock achievements and XP!",
+                text = stringResource(R.string.start_challenge_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
@@ -218,7 +220,7 @@ private fun EmptyChallengesPlaceholder(onStartChallenge: () -> Unit) {
             Button(onClick = onStartChallenge) {
                 Icon(Icons.Default.Add, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Start Challenge")
+                Text(stringResource(R.string.start_challenge))
             }
         }
     }

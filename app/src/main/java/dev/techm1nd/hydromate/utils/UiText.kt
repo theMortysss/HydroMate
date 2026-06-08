@@ -1,0 +1,31 @@
+package dev.techm1nd.hydromate.utils
+
+import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+
+sealed interface UiText {
+
+    data class DynamicString(
+        val value: String
+    ) : UiText
+
+    data class StringResource(
+        @StringRes val resId: Int,
+        val args: List<Any> = emptyList()
+    ) : UiText
+}
+
+@Composable
+fun UiText.asString(): String {
+    return when (this) {
+        is UiText.DynamicString -> value
+
+        is UiText.StringResource -> {
+            stringResource(
+                resId,
+                *args.toTypedArray()
+            )
+        }
+    }
+}

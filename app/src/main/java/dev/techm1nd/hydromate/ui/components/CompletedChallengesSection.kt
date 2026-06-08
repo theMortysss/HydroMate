@@ -29,7 +29,7 @@ fun CompletedChallengesSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Challenge History",
+                text = "История",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -81,7 +81,7 @@ private fun CompletedChallengeCard(challenge: Challenge) {
                 )
 
                 Text(
-                    text = "Completed on ${challenge.endDate.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))}",
+                    text = "Выполнено ${challenge.endDate.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )

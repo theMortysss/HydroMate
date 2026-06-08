@@ -122,12 +122,12 @@ fun DrinkSelectorDialog(
                 ) {
                     Column {
                         Text(
-                            text = "Select Drink",
+                            text = "Выберите напиток",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "${drinks.size} drinks available",
+                            text = "${drinks.size} напитков доступно",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
@@ -148,7 +148,7 @@ fun DrinkSelectorDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp),
-                    placeholder = { Text("Search drinks...") },
+                    placeholder = { Text("Поиск...") },
                     leadingIcon = {
                         Icon(Icons.Default.Search, contentDescription = null)
                     },
@@ -237,7 +237,7 @@ fun DrinkSelectorDialog(
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Create Custom Drink")
+                    Text("Создать свой напиток")
                 }
             }
         }
@@ -282,7 +282,7 @@ private fun CategoryHeader(
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = "$drinkCount drinks",
+                        text = "$drinkCount напитков",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
                     )
@@ -357,15 +357,15 @@ private fun DrinkItem(
                         HydrationBadge(drink.hydrationMultiplier)
 
                         if (drink.containsCaffeine) {
-                            Badge(text = "☕ Caffeine")
+                            Badge(text = "☕ Кофеин")
                         }
 
                         if (drink.containsAlcohol) {
-                            Badge(text = "🍺 Alcohol")
+                            Badge(text = "🍺 Алкоголь")
                         }
 
                         if (drink.isCustom) {
-                            Badge(text = "✨ Custom")
+                            Badge(text = "✨ Свой")
                         }
                     }
                 }
@@ -398,7 +398,7 @@ private fun HydrationBadge(multiplier: Float) {
         border = BorderStroke(1.dp, color.copy(alpha = 0.5f))
     ) {
         Text(
-            text = "${(multiplier * 100).toInt()}% hydration",
+            text = "${(multiplier * 100).toInt()}% гидратации",
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
             style = MaterialTheme.typography.labelSmall,
             color = color,

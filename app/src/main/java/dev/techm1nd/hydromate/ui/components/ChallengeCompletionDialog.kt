@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -19,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import dev.techm1nd.hydromate.domain.usecases.challenge.CompleteChallengeUseCase
 import kotlin.random.Random
+import dev.techm1nd.hydromate.R
 
 @Composable
 fun ChallengeCompletionDialog(
@@ -71,7 +73,7 @@ fun ChallengeCompletionDialog(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
-                        text = "Challenge Complete!",
+                        text = stringResource(R.string.challenge_complete),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
@@ -100,7 +102,7 @@ fun ChallengeCompletionDialog(
                                 .padding(16.dp)
                         ) {
                             Text(
-                                text = "Rewards",
+                                text = stringResource(R.string.rewards),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -112,7 +114,7 @@ fun ChallengeCompletionDialog(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("XP Gained:", style = MaterialTheme.typography.bodyLarge)
+                                Text("XP получено:", style = MaterialTheme.typography.bodyLarge)
                                 Text(
                                     "+${result.xpGained} XP",
                                     style = MaterialTheme.typography.titleLarge,
@@ -129,7 +131,7 @@ fun ChallengeCompletionDialog(
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 Text(
-                                    text = "🎉 Achievement Unlocked!",
+                                    text = stringResource(R.string.achievement_unlock),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -159,7 +161,7 @@ fun ChallengeCompletionDialog(
                                     Spacer(modifier = Modifier.height(8.dp))
 
                                     Text(
-                                        text = "🎭 Character Unlocked!",
+                                        text = stringResource(R.string.character_unlock),
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -188,7 +190,7 @@ fun ChallengeCompletionDialog(
                         onClick = onDismiss,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Awesome!")
+                        Text(stringResource(R.string.awesome))
                     }
                 }
             }

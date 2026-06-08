@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 fun NavGraphBuilder.profileScreen(
     modifier: Modifier,
     navController: NavHostController,
-    onNavigateToAuth: () -> Unit,
+//    onNavigateToAuth: () -> Unit,
 ) = composable(
     route = Screen.Profile.route,
     enterTransition = { EnterTransition.None },
@@ -21,7 +21,7 @@ fun NavGraphBuilder.profileScreen(
     ProfileRoute(
         modifier = modifier,
         navController = navController,
-        onNavigateToAuth = onNavigateToAuth,
+//        onNavigateToAuth = onNavigateToAuth,
     )
 }
 

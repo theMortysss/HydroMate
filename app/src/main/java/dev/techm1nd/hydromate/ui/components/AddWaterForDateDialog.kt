@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -27,6 +28,7 @@ import dev.techm1nd.hydromate.domain.entities.Drink
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import dev.techm1nd.hydromate.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,7 +96,7 @@ fun AddWaterForDateDialog(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Add Water Entry",
+                            text = stringResource(R.string.add_water_for_date),
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -152,7 +154,7 @@ fun AddWaterForDateDialog(
                         ) {
                             Text("💡", fontSize = 24.sp)
                             Text(
-                                text = "Add water intake for past dates to keep your hydration history complete",
+                                text = stringResource(R.string.add_water_info),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
                             )
@@ -161,7 +163,7 @@ fun AddWaterForDateDialog(
 
                     // Селектор напитка
                     Text(
-                        text = "Select Drink",
+                        text = stringResource(R.string.select_drink),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -217,7 +219,7 @@ fun AddWaterForDateDialog(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = "${(selectedDrink.hydrationMultiplier * 100).toInt()}% hydration",
+                                            text = stringResource(R.string.drink_attributes, (selectedDrink.hydrationMultiplier * 100).toInt().toString()),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurface.copy(
                                                 alpha = 0.6f
@@ -242,7 +244,7 @@ fun AddWaterForDateDialog(
 
                     // Ввод количества
                     Text(
-                        text = "Amount (ml)",
+                        text = stringResource(R.string.enter_amount),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -255,8 +257,8 @@ fun AddWaterForDateDialog(
                                 errorMessage = null
                             }
                         },
-                        label = { Text("Enter amount") },
-                        placeholder = { Text("e.g., 250") },
+                        label = { Text(stringResource(R.string.enter_amount_label)) },
+                        placeholder = { Text(stringResource(R.string.enter_amount_placeholder)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Add,
@@ -274,7 +276,7 @@ fun AddWaterForDateDialog(
 
                     // Селектор времени
                     Text(
-                        text = "Time",
+                        text = stringResource(R.string.select_time),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -333,7 +335,7 @@ fun AddWaterForDateDialog(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
 
                     Button(
@@ -341,10 +343,10 @@ fun AddWaterForDateDialog(
                             val amountValue = amount.toIntOrNull()
                             when {
                                 amountValue == null || amountValue <= 0 -> {
-                                    errorMessage = "Please enter a valid amount"
+                                    errorMessage = "Пожалуйста, введите корректную сумму."
                                 }
                                 amountValue > 3000 -> {
-                                    errorMessage = "Amount seems too large (max 3000ml)"
+                                    errorMessage = "Объем кажется слишком большим"
                                 }
                                 else -> {
                                     val dateTime = date.atTime(selectedHour, selectedMinute)
@@ -362,7 +364,7 @@ fun AddWaterForDateDialog(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Add Entry")
+                        Text(stringResource(R.string.add))
                     }
                 }
             }
@@ -421,21 +423,34 @@ fun TimePickerDialog(
     var selectedHour by remember { mutableStateOf(initialHour) }
     var selectedMinute by remember { mutableStateOf(initialMinute) }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Select Time",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
             )
-        },
-        text = {
+        ) {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Отображение времени
+
+                Text(
+                    text = stringResource(R.string.selected_time),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
                 Text(
                     text = String.format("%02d:%02d", selectedHour, selectedMinute),
                     style = MaterialTheme.typography.displayMedium,
@@ -443,126 +458,157 @@ fun TimePickerDialog(
                     color = MaterialTheme.colorScheme.primary
                 )
 
+                Spacer(modifier = Modifier.height(24.dp))
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    // Hour picker
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Hour",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            text = stringResource(R.string.hour),
+                            style = MaterialTheme.typography.labelMedium
                         )
+
                         Spacer(modifier = Modifier.height(8.dp))
+
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconButton(
                                 onClick = {
-                                    selectedHour = if (selectedHour > 0) selectedHour - 1 else 23
+                                    selectedHour =
+                                        if (selectedHour > 0) selectedHour - 1 else 23
                                 }
                             ) {
-                                Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Decrease")
+                                Icon(
+                                    Icons.Default.KeyboardArrowUp,
+                                    contentDescription = null
+                                )
                             }
 
                             Text(
                                 text = String.format("%02d", selectedHour),
                                 style = MaterialTheme.typography.headlineLarge,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.widthIn(min = 60.dp),
+                                modifier = Modifier.width(70.dp),
                                 textAlign = TextAlign.Center
                             )
 
                             IconButton(
                                 onClick = {
-                                    selectedHour = if (selectedHour < 23) selectedHour + 1 else 0
+                                    selectedHour =
+                                        if (selectedHour < 23) selectedHour + 1 else 0
                                 }
                             ) {
-                                Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Increase")
+                                Icon(
+                                    Icons.Default.KeyboardArrowDown,
+                                    contentDescription = null
+                                )
                             }
                         }
                     }
 
-                    // Minute picker
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Minute",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            text = stringResource(R.string.minute),
+                            style = MaterialTheme.typography.labelMedium
                         )
+
                         Spacer(modifier = Modifier.height(8.dp))
+
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconButton(
                                 onClick = {
-                                    selectedMinute = if (selectedMinute >= 5) selectedMinute - 5 else 55
+                                    selectedMinute =
+                                        if (selectedMinute >= 5) selectedMinute - 5 else 55
                                 }
                             ) {
-                                Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Decrease")
+                                Icon(
+                                    Icons.Default.KeyboardArrowUp,
+                                    contentDescription = null
+                                )
                             }
 
                             Text(
                                 text = String.format("%02d", selectedMinute),
                                 style = MaterialTheme.typography.headlineLarge,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.widthIn(min = 60.dp),
+                                modifier = Modifier.width(70.dp),
                                 textAlign = TextAlign.Center
                             )
 
                             IconButton(
                                 onClick = {
-                                    selectedMinute = if (selectedMinute < 55) selectedMinute + 5 else 0
+                                    selectedMinute =
+                                        if (selectedMinute < 55) selectedMinute + 5 else 0
                                 }
                             ) {
-                                Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Increase")
+                                Icon(
+                                    Icons.Default.KeyboardArrowDown,
+                                    contentDescription = null
+                                )
                             }
                         }
                     }
                 }
 
-                // Быстрые кнопки времени
-                Row(
+                Spacer(modifier = Modifier.height(24.dp))
+
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     listOf(
-                        "Morning" to Pair(8, 0),
-                        "Noon" to Pair(12, 0),
-                        "Evening" to Pair(18, 0),
-                        "Night" to Pair(21, 0)
+                        "Утро" to (8 to 0),
+                        "Полдень" to (12 to 0),
+                        "Вечер" to (18 to 0),
+                        "Ночь" to (21 to 0)
                     ).forEach { (label, time) ->
                         AssistChip(
                             onClick = {
                                 selectedHour = time.first
                                 selectedMinute = time.second
                             },
-                            label = { Text(label, fontSize = 11.sp) },
-                            modifier = Modifier.weight(1f)
+                            label = { Text(label) }
                         )
                     }
                 }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onTimeSelected(selectedHour, selectedMinute) },
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text("Set Time")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+
+                    OutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = onDismiss
+                    ) {
+                        Text(stringResource(R.string.cancel))
+                    }
+
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            onTimeSelected(
+                                selectedHour,
+                                selectedMinute
+                            )
+                        }
+                    ) {
+                        Text(stringResource(R.string.set_time))
+                    }
+                }
             }
         }
-    )
+    }
 }

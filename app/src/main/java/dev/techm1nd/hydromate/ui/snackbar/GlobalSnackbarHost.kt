@@ -20,11 +20,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.zIndex
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
+import dev.techm1nd.hydromate.utils.asString
 import kotlinx.coroutines.delay
 
 /**
@@ -164,7 +166,7 @@ private fun EnhancedSnackbar(
             }
 
             Text(
-                text = message.message,
+                text = message.message.asString(),
                 color = textColor,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
@@ -179,7 +181,7 @@ private fun EnhancedSnackbar(
                         contentColor = textColor
                     )
                 ) {
-                    Text(label)
+                    Text(label.asString())
                 }
             }
         }

@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import dev.techm1nd.hydromate.domain.entities.CharacterType
 import dev.techm1nd.hydromate.domain.entities.UserProfile
+import dev.techm1nd.hydromate.R
 
 @Composable
 fun CharacterSelectionDialogEnhanced(
@@ -37,7 +39,8 @@ fun CharacterSelectionDialogEnhanced(
                 .fillMaxWidth()
                 .fillMaxHeight(0.85f)
                 .padding(16.dp),
-            shape = RoundedCornerShape(24.dp)
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Header
@@ -50,12 +53,12 @@ fun CharacterSelectionDialogEnhanced(
                 ) {
                     Column {
                         Text(
-                            text = "Choose Your Character",
+                            text = stringResource(R.string.choose_character),
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "${profile.unlockedCharacters.size}/${CharacterType.values().size} unlocked",
+                            text = "${profile.unlockedCharacters.size}/${CharacterType.entries.size} разблокировано",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
@@ -76,7 +79,7 @@ fun CharacterSelectionDialogEnhanced(
                     )
                 ) {
                     Text(
-                        text = "💡 Complete challenges and unlock achievements to get new characters!",
+                        text = stringResource(R.string.character_selection_info),
                         modifier = Modifier.padding(12.dp),
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -93,7 +96,7 @@ fun CharacterSelectionDialogEnhanced(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(CharacterType.values()) { character ->
+                    items(CharacterType.entries.toTypedArray()) { character ->
                         CharacterCardEnhanced(
                             character = character,
                             isUnlocked = profile.isCharacterUnlocked(character),
@@ -116,7 +119,7 @@ fun CharacterSelectionDialogEnhanced(
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp, vertical = 20.dp)
                 ) {
-                    Text("Close")
+                    Text("Закрыть")
                 }
             }
         }
@@ -202,7 +205,7 @@ private fun CharacterCardEnhanced(
                         color = MaterialTheme.colorScheme.primary
                     ) {
                         Text(
-                            text = "✓ Selected",
+                            text = "✓ Выбран",
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,

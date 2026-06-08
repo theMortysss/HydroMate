@@ -60,33 +60,6 @@ fun HydrationProgressCard(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Hydration Progress",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
-
-                // Mode badge
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                ) {
-                    Text(
-                        text = "Total",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             // Circular Progress with detailed info
             Box(
                 contentAlignment = Alignment.Center,
@@ -155,16 +128,9 @@ fun HydrationProgressCard(
             ) {
                 HydrationMetricRow(
                     icon = "💧",
-                    label = "Total Consumed",
+                    label = "Всего выпито",
                     value = "${totalHydration.totalActual}ml",
                     color = Color(0xFF2196F3)
-                )
-
-                HydrationMetricRow(
-                    icon = "✨",
-                    label = "Effective Hydration",
-                    value = "${totalHydration.totalEffective}ml",
-                    color = Color(0xFF4CAF50)
                 )
                 Divider(
                     modifier = Modifier.padding(vertical = 8.dp),
@@ -174,7 +140,7 @@ fun HydrationProgressCard(
                 if (!hydrationProgress.isGoalReached) {
                     HydrationMetricRow(
                         icon = "📊",
-                        label = "Remaining",
+                        label = "Осталось до цели",
                         value = "${hydrationProgress.remaining}ml",
                         color = MaterialTheme.colorScheme.tertiary
                     )
@@ -193,7 +159,7 @@ fun HydrationProgressCard(
                         ) {
                             Text("🎉", fontSize = 24.sp)
                             Text(
-                                text = "Daily hydration goal achieved!",
+                                text = "Цель ежедневного увлажнения достигнута!",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onTertiaryContainer

@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.techm1nd.hydromate.domain.entities.DailyProgress
@@ -51,7 +52,7 @@ fun WeeklyOverviewCard(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Weekly Overview",
+                text = "Недельный обзор",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -63,19 +64,19 @@ fun WeeklyOverviewCard(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 OverviewItem(
-                    label = "Total",
+                    label = "Всего\nвыпито",
                     value = "${totalAmount / 1000f}L",
                     icon = "💧"
                 )
 
                 OverviewItem(
-                    label = "Daily Avg",
+                    label = "Среднесуточный\nпоказатель",
                     value = "${averageDaily}ml",
                     icon = "📊"
                 )
 
                 OverviewItem(
-                    label = "Goals Hit",
+                    label = "Целей\nдостигнуто",
                     value = "${weeklyStats.daysGoalReached}/7",
                     icon = "🎯"
                 )
@@ -99,7 +100,7 @@ fun WeeklyOverviewCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "${(weekProgress * 100).toInt()}% of weekly goal",
+                text = "${(weekProgress * 100).toInt()}% от еженедельной цели",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
@@ -122,7 +123,7 @@ fun WeeklyOverviewCard(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "Total consumed:",
+                                text = "Всего:",
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
@@ -168,7 +169,7 @@ fun DailyWaterChartEnhanced(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Daily Progress",
+                    text = "Ежедневный прогресс",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -178,7 +179,7 @@ fun DailyWaterChartEnhanced(
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                 ) {
                     Text(
-                        text = "Total",
+                        text = "Всего",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Medium
@@ -353,34 +354,34 @@ fun StatisticsCards(
 
     val statisticsItems = listOf(
         StatisticItem(
-            title = "Current Streak",
-            value = "${weeklyStats.currentStreak} days",
+            title = "Текущая серия",
+            value = "${weeklyStats.currentStreak} дней",
             icon = "🔥",
-            description = "Days in a row reaching goal"
+            description = "Дней подряд с достижением цели"
         ),
         StatisticItem(
-            title = "Best Day",
+            title = "Лучший день",
             value = "${bestDayAmount}ml",
             icon = "⭐",
-            description = "Highest intake this week"
+            description = "Максимум жидкости на этой неделе"
         ),
         StatisticItem(
-            title = "Consistency",
+            title = "Процент целей",
             value = "${((weeklyStats.daysGoalReached.toFloat() / 7) * 100).toInt()}%",
             icon = "📈",
-            description = "Goals achieved this week"
+            description = "Цели, достигнутые на этой неделе"
         ),
         StatisticItem(
-            title = "Total Glasses",
+            title = "Всего стаканов",
             value = "${totalAmount / 250}",
             icon = "🥤",
-            description = "Estimated glasses (250ml)"
+            description = "Примерно стаканов выпито"
         )
     )
 
     Column(modifier = modifier) {
         Text(
-            text = "Statistics",
+            text = "Статистика недели",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 12.dp)
@@ -411,17 +412,20 @@ private fun OverviewItem(
     ) {
         Text(
             text = icon,
+            textAlign = TextAlign.Center,
             fontSize = 24.sp
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = value,
             style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
             fontWeight = FontWeight.Bold
         )
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
     }
@@ -457,12 +461,14 @@ private fun StatisticCard(
                 text = item.value,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary
             )
 
             Text(
                 text = item.title,
                 style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Medium
             )
 
@@ -471,6 +477,7 @@ private fun StatisticCard(
             Text(
                 text = item.description,
                 style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
         }
@@ -494,7 +501,7 @@ private fun EmptyChartPlaceholder() {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "No data for this week",
+                text = "Нет данных за эту неделю",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )

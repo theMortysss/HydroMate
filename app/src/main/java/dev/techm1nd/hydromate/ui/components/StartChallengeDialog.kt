@@ -35,7 +35,8 @@ fun StartChallengeDialog(
                 .fillMaxWidth()
                 .fillMaxHeight(0.85f)
                 .padding(16.dp),
-            shape = RoundedCornerShape(24.dp)
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Header
@@ -47,7 +48,7 @@ fun StartChallengeDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Start Challenge",
+                        text = "Принять вызов",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -64,7 +65,7 @@ fun StartChallengeDialog(
                         .padding(horizontal = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(ChallengeType.values()) { type ->
+                    items(ChallengeType.entries.toTypedArray()) { type ->
                         ChallengeTypeCard(
                             type = type,
                             isSelected = type == selectedType,
@@ -79,7 +80,7 @@ fun StartChallengeDialog(
 
                     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                         Text(
-                            text = "Duration",
+                            text = "Длительность",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -91,7 +92,7 @@ fun StartChallengeDialog(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "14 days",
+                                text = "14 дней",
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -100,7 +101,7 @@ fun StartChallengeDialog(
 
                         val challenge = Challenge.create(selectedType!!)
                         Text(
-                            text = "Reward: +${challenge.xpReward} XP",
+                            text = "Награда: +${challenge.xpReward} XP",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -121,7 +122,7 @@ fun StartChallengeDialog(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Cancel")
+                        Text("Отмена")
                     }
 
                     Button(
@@ -133,7 +134,7 @@ fun StartChallengeDialog(
                         enabled = selectedType != null,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Start")
+                        Text("Начать")
                     }
                 }
             }

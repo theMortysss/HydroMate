@@ -9,10 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.techm1nd.hydromate.domain.entities.WeeklyStatistics
+import dev.techm1nd.hydromate.R
 
 @Composable
 fun AchievementSummary(
@@ -36,7 +38,7 @@ fun AchievementSummary(
                     .padding(20.dp)
             ) {
                 Text(
-                    text = "Achievements This Week",
+                    text = stringResource(R.string.achievements_summary),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -60,7 +62,7 @@ fun AchievementSummary(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Keep going to unlock achievements! 💪",
+                            text = stringResource(R.string.no_achievements_yet),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )

@@ -35,12 +35,12 @@ fun SettingsHeader(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Settings",
+                text = "Настройки",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Customize your hydration journey",
+                text = "Настройте свою гидратацию",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
             )

@@ -3,6 +3,7 @@ package dev.techm1nd.hydromate.ui.screens.onboarding
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.techm1nd.hydromate.R
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -12,6 +13,7 @@ import dev.techm1nd.hydromate.domain.usecases.setting.GetUserSettingsUseCase
 import dev.techm1nd.hydromate.domain.usecases.setting.UpdateUserSettingsUseCase
 import dev.techm1nd.hydromate.ui.screens.onboarding.model.*
 import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
+import dev.techm1nd.hydromate.utils.UiText
 import javax.inject.Inject
 
 @HiltViewModel
@@ -88,11 +90,12 @@ class OnboardingViewModel @Inject constructor(
             OnboardingStep.PROFILE -> {
                 // Валидация профиля
                 if (!_state.value.profile.isValid()) {
-                    globalSnackbarController.showError("Please fill in your profile information")
+                    globalSnackbarController.showError(UiText.StringResource(R.string.onboarding_profile_validation_error))
                     return
                 }
                 OnboardingStep.GOAL
             }
+
             OnboardingStep.GOAL -> OnboardingStep.COMPLETE
             OnboardingStep.COMPLETE -> {
                 completeOnboarding()
@@ -137,7 +140,7 @@ class OnboardingViewModel @Inject constructor(
 
             updateUserSettingsUseCase(updatedSettings)
                 .onSuccess {
-                    globalSnackbarController.showSuccess("Profile setup complete! Let's start hydrating! 💧")
+                    globalSnackbarController.showSuccess(UiText.StringResource(R.string.onboarding_settings_saved))
                     _effects.trySend(OnboardingEffect.NavigateToHome)
                 }
                 .onFailure { exception ->
@@ -148,7 +151,7 @@ class OnboardingViewModel @Inject constructor(
                         )
                     }
                     globalSnackbarController.showError(
-                        exception.message ?: "Failed to save settings"
+                        UiText.DynamicString(exception.message ?: "Failed to save settings")
                     )
                 }
         }
@@ -168,7 +171,7 @@ class OnboardingViewModel @Inject constructor(
                 }
                 .onFailure { exception ->
                     globalSnackbarController.showError(
-                        exception.message ?: "Failed to save settings"
+                        UiText.DynamicString(exception.message ?: "Failed to save settings")
                     )
                 }
         }

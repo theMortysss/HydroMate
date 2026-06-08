@@ -20,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -31,6 +32,7 @@ import dev.techm1nd.hydromate.domain.entities.AlcoholCategory
 import dev.techm1nd.hydromate.domain.entities.CaffeineLevel
 import dev.techm1nd.hydromate.domain.entities.Drink
 import dev.techm1nd.hydromate.domain.entities.DrinkType
+import dev.techm1nd.hydromate.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,7 +93,7 @@ fun CreateCustomDrinkDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Create Custom Drink",
+                        text = "Создать напиток",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -129,7 +131,7 @@ fun CreateCustomDrinkDialog(
                             )
                             Column {
                                 Text(
-                                    text = "💡 Not sure about hydration values?",
+                                    text = stringResource(R.string.not_sure_how_to_rate),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -138,7 +140,7 @@ fun CreateCustomDrinkDialog(
                                     onClick = { showSimilarDrinks = true },
                                     modifier = Modifier.padding(0.dp)
                                 ) {
-                                    Text("Use \"Similar to...\" feature →")
+                                    Text("Используй похожее →")
                                 }
                             }
                         }
@@ -148,8 +150,8 @@ fun CreateCustomDrinkDialog(
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Drink Name") },
-                        placeholder = { Text("e.g., Green Tea Latte") },
+                        label = { Text("Название") },
+                        placeholder = { Text("н-р, Зеленый чай") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -173,7 +175,7 @@ fun CreateCustomDrinkDialog(
                             ) {
                                 Text(text = selectedIcon, fontSize = 48.sp)
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Text("Select Icon", style = MaterialTheme.typography.bodySmall)
+                                Text("Иконка", style = MaterialTheme.typography.bodySmall)
                             }
                         }
 
@@ -199,14 +201,14 @@ fun CreateCustomDrinkDialog(
                                     }
                                 ) {}
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Text("Select Color", style = MaterialTheme.typography.bodySmall)
+                                Text("Цвет", style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
 
                     // Category
                     Text(
-                        text = "Category",
+                        text = "Категория",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium
                     )
@@ -236,7 +238,7 @@ fun CreateCustomDrinkDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Hydration Level",
+                                text = "Индекс гидратации",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Medium
                             )
@@ -261,7 +263,7 @@ fun CreateCustomDrinkDialog(
                                     hydrationMultiplier = it
                                 }
                             },
-                            label = { Text("Percentage") },
+                            label = { Text("Процентаж") },
                             suffix = { Text("%") },
                             modifier = Modifier.fillMaxWidth(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -271,7 +273,7 @@ fun CreateCustomDrinkDialog(
                         )
 
                         Text(
-                            text = "100% = water, <100% = less hydrating, >100% = more hydrating",
+                            text = "100% = вода, <100% = меньше гидратации, >100% = больше гидратации",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                             modifier = Modifier.padding(top = 4.dp)
@@ -283,7 +285,7 @@ fun CreateCustomDrinkDialog(
                     // Caffeine Content
                     Column {
                         Text(
-                            text = "Caffeine Content (optional)",
+                            text = "Кофеин (опционально)",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium
                         )
@@ -295,29 +297,22 @@ fun CreateCustomDrinkDialog(
                                     caffeineContent = it
                                 }
                             },
-                            label = { Text("Caffeine mg per 250ml") },
+                            label = { Text("Кофеин на 250 мл") },
                             suffix = { Text("mg") },
                             modifier = Modifier.fillMaxWidth(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             singleLine = true,
-                            placeholder = { Text("e.g., 95 for coffee") }
+                            placeholder = { Text("н-р, 95") }
                         )
 
                         if (caffeineLevel != CaffeineLevel.NONE) {
                             Text(
-                                text = "Level: ${caffeineLevel.displayName}",
+                                text = "${caffeineLevel.displayName}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
                         }
-
-                        Text(
-                            text = "Reference: Coffee ~95mg, Tea ~40mg, Energy drink ~80mg",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
                     }
 
                     Divider()
@@ -325,7 +320,7 @@ fun CreateCustomDrinkDialog(
                     // Alcohol Percentage
                     Column {
                         Text(
-                            text = "Alcohol Content (optional)",
+                            text = "Алкоголь (опционально)",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium
                         )
@@ -339,53 +334,21 @@ fun CreateCustomDrinkDialog(
                                     alcoholPercentage = it
                                 }
                             },
-                            label = { Text("Alcohol percentage") },
+                            label = { Text("Алкоголь в %") },
                             suffix = { Text("%") },
                             modifier = Modifier.fillMaxWidth(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             singleLine = true,
-                            placeholder = { Text("e.g., 5.0 for beer") }
+                            placeholder = { Text("н-р, 5.0") }
                         )
 
                         if (alcoholCategory != AlcoholCategory.NONE) {
                             Text(
-                                text = "Category: ${alcoholCategory.displayName}",
+                                text = "${alcoholCategory.displayName}",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
-                        }
-
-                        Text(
-                            text = "Reference: Beer ~5%, Wine ~12%, Spirits ~40%",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-
-                    // Warning if both caffeine and alcohol
-                    if (caffeineContent.toIntOrNull() ?: 0 > 0 &&
-                        alcoholPercentage.toFloatOrNull() ?: 0f > 0f
-                    ) {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
-                            )
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text("⚠️", fontSize = 20.sp)
-                                Text(
-                                    text = "This drink contains both caffeine and alcohol. Combined dehydration effects will be calculated.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                            }
                         }
                     }
 
@@ -403,7 +366,7 @@ fun CreateCustomDrinkDialog(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Cancel")
+                        Text("Отмена")
                     }
 
                     Button(
@@ -424,7 +387,7 @@ fun CreateCustomDrinkDialog(
                         enabled = isValid,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Create")
+                        Text("Создать")
                     }
                 }
             }
@@ -464,12 +427,6 @@ fun CreateCustomDrinkDialog(
                 showSimilarDrinks = false
             },
             onDismiss = { showSimilarDrinks = false }
-        )
-    }
-
-    if (showHydrationHelp) {
-        HydrationHelpDialog(
-            onDismiss = { showHydrationHelp = false }
         )
     }
 }
@@ -537,7 +494,7 @@ private fun SimilarDrinksDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Similar to...",
+                        text = "Похоже на...",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -547,7 +504,7 @@ private fun SimilarDrinksDialog(
                 }
 
                 Text(
-                    text = "Select a drink to copy its hydration values",
+                    text = "Выберите напиток, чтобы скопировать показатели гидратации.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     modifier = Modifier.padding(horizontal = 20.dp)
@@ -605,7 +562,7 @@ private fun SimilarDrinkItem(
                     modifier = Modifier.padding(top = 4.dp)
                 ) {
                     Text(
-                        text = "${(drink.hydrationMultiplier * 100).toInt()}% hydration",
+                        text = "${(drink.hydrationMultiplier * 100).toInt()}% гидратации",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -630,79 +587,6 @@ private fun SimilarDrinkItem(
 }
 
 @Composable
-private fun HydrationHelpDialog(
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = { Text("💧", fontSize = 32.sp) },
-        title = { Text("Hydration Level Guide") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = "How hydrating is your drink compared to water?",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                HydrationExample("100%", "Water, herbal tea", "Same as water")
-                HydrationExample("95-100%", "Regular tea, milk", "Nearly as good as water")
-                HydrationExample("85-95%", "Coffee, juice", "Good hydration")
-                HydrationExample("70-85%", "Soup, smoothies", "Moderate hydration")
-                HydrationExample("105-110%", "Coconut water, sports drinks", "Enhanced hydration")
-                HydrationExample("<70%", "Alcohol, energy drinks", "Poor hydration")
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
-                    )
-                ) {
-                    Text(
-                        text = "💡 Tip: If you're not sure, use the \"Similar to...\" feature to copy values from a similar drink!",
-                        modifier = Modifier.padding(12.dp),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Got it")
-            }
-        }
-    )
-}
-
-@Composable
-private fun HydrationExample(percentage: String, examples: String, description: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            text = percentage,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.width(80.dp)
-        )
-        Column {
-            Text(
-                text = examples,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
-    }
-}
-
-@Composable
 private fun IconPickerDialog(
     currentIcon: String,
     onIconSelected: (String) -> Unit,
@@ -716,7 +600,7 @@ private fun IconPickerDialog(
     )
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Icon") },
+        title = { Text("Выберите иконку") },
         text = {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(6),
@@ -749,7 +633,7 @@ private fun IconPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Отмена")
             }
         }
     )
@@ -768,7 +652,7 @@ private fun ColorPickerDialog(
     )
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Color") },
+        title = { Text("Выберите цвет") },
         text = {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(5),
@@ -796,7 +680,7 @@ private fun ColorPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Отмена")
             }
         }
     )

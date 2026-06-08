@@ -53,7 +53,7 @@ fun NotificationSettingsCard(
     var showCustomRemindersDialog by remember { mutableStateOf(false) }
 
     SettingsCard(
-        title = "Notifications",
+        title = "Уведомления",
         icon = "🔔",
         modifier = modifier
     ) {
@@ -80,8 +80,8 @@ fun NotificationSettingsCard(
 
             // Master toggle
             ListItem(
-                headlineContent = { Text("Enable Reminders") },
-                supportingContent = { Text("Get notified to drink water regularly") },
+                headlineContent = { Text("Включить напоминания") },
+                supportingContent = { Text("Получайте уведомления о необходимости регулярно пить") },
                 trailingContent = {
                     Switch(
                         checked = settings.notificationsEnabled,
@@ -140,8 +140,8 @@ fun NotificationSettingsCard(
 
                     // Progress in notification
                     ListItem(
-                        headlineContent = { Text("Show Progress Bar") },
-                        supportingContent = { Text("Display hydration progress in notifications") },
+                        headlineContent = { Text("Показывать индикатор выполнения") },
+                        supportingContent = { Text("Отображать ход гидратации в уведомлениях") },
                         trailingContent = {
                             Switch(
                                 checked = settings.showProgressInNotification,
@@ -212,9 +212,9 @@ private fun PermissionWarningCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = if (!hasNotificationPermission) {
-                        "Notification Permission Required"
+                        "Требуется разрешение на отправку уведомлений"
                     } else {
-                        "Exact Alarm Permission Required"
+                        "Требуется разрешение на установку будильников"
                     },
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
@@ -222,9 +222,9 @@ private fun PermissionWarningCard(
                 )
                 Text(
                     text = if (!hasNotificationPermission) {
-                        "Tap to grant notification permission"
+                        "Нажмите, чтобы предоставить разрешение на отправку уведомлений"
                     } else {
-                        "Tap to enable exact alarms for precise reminders"
+                        "Нажмите, чтобы предоставить разрешение на установку будильников"
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer
@@ -244,12 +244,12 @@ private fun ActiveHoursSection(
 ) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
-            text = "Active Hours",
+            text = "Часы работы",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium
         )
         Text(
-            text = "Reminders will only be sent during these hours",
+            text = "Напоминания будут отправляться только в эти часы",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
@@ -261,7 +261,7 @@ private fun ActiveHoursSection(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             TimeCard(
-                label = "Wake Up",
+                label = "Пробуждение",
                 time = wakeUpTime.format(timeFormatter),
                 icon = "🌅",
                 onClick = onWakeUpTimeClick,
@@ -269,7 +269,7 @@ private fun ActiveHoursSection(
             )
 
             TimeCard(
-                label = "Bed Time",
+                label = "Время отхода ко сну",
                 time = bedTime.format(timeFormatter),
                 icon = "🌙",
                 onClick = onBedTimeClick,
@@ -328,12 +328,12 @@ private fun SmartRemindersSection(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Smart Reminders",
+                    text = "Умные напоминания",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Automatic reminders at regular intervals",
+                    text = "Напоминания через интервал",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -350,14 +350,14 @@ private fun SmartRemindersSection(
         AnimatedVisibility(visible = settings.smartRemindersEnabled) {
             Column(modifier = Modifier.padding(top = 16.dp)) {
                 Text(
-                    text = "Reminder Interval",
+                    text = "Интервал напоминания",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                ReminderInterval.values().forEach { interval ->
+                ReminderInterval.entries.forEach { interval ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -392,7 +392,7 @@ private fun SmartRemindersSection(
                 ) {
                     Icon(Icons.Default.DateRange, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Active Days (${settings.smartReminderDays.size}/7)")
+                    Text("Активные дни (${settings.smartReminderDays.size}/7)")
                 }
             }
         }
@@ -413,12 +413,12 @@ private fun CustomRemindersSection(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Custom Reminders",
+                    text = "Пользовательские напоминания",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Reminders at specific times of day",
+                    text = "Напоминания в определенное время суток",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -436,13 +436,13 @@ private fun CustomRemindersSection(
             Column(modifier = Modifier.padding(top = 16.dp)) {
                 if (settings.customReminders.isEmpty()) {
                     Text(
-                        text = "No custom reminders yet",
+                        text = "Пользовательских напоминаний пока нет",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 } else {
                     Text(
-                        text = "${settings.customReminders.size} reminder(s) configured",
+                        text = "${settings.customReminders.size} настроенных напоминаний",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -456,7 +456,7 @@ private fun CustomRemindersSection(
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Manage Custom Reminders")
+                    Text("Управление пользовательскими напоминаниями")
                 }
             }
         }
@@ -476,12 +476,12 @@ private fun SnoozeSettingsSection(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Snooze on Hold",
+                    text = "Отложенный режим",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = "Long-press notification to snooze",
+                    text = "Длительное нажатие на уведомление, чтобы отложить",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -498,14 +498,14 @@ private fun SnoozeSettingsSection(
         AnimatedVisibility(visible = settings.snoozeEnabled) {
             Column(modifier = Modifier.padding(top = 16.dp)) {
                 Text(
-                    text = "Snooze Duration",
+                    text = "Продолжительность повтора",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                SnoozeDelay.values().forEach { delay ->
+                SnoozeDelay.entries.forEach { delay ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -542,18 +542,18 @@ fun DaysSelectionDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { Text("📅", fontSize = 32.sp) },
-        title = { Text("Select Active Days") },
+        title = { Text("Активные дни") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = "Choose which days reminders should be active",
+                    text = "Выберите, в какие дни напоминания должны быть активны",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                DayOfWeek.values().forEach { day ->
+                DayOfWeek.entries.forEach { day ->
                     DayCheckboxItem(
                         day = day,
                         isSelected = tempSelectedDays.contains(day),
@@ -577,14 +577,15 @@ fun DaysSelectionDialog(
                 },
                 enabled = tempSelectedDays.isNotEmpty()
             ) {
-                Text("Save")
+                Text("Сохранить")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Отмена")
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.surface
     )
 }
 
@@ -625,14 +626,17 @@ fun CustomRemindersDialog(
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.85f)
                 .padding(16.dp),
-            shape = RoundedCornerShape(24.dp)
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Header
@@ -645,12 +649,12 @@ fun CustomRemindersDialog(
                 ) {
                     Column {
                         Text(
-                            text = "Custom Reminders",
+                            text = "Пользовательские напоминания",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "${tempReminders.size} reminder(s)",
+                            text = "${tempReminders.size} напоминаний",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
@@ -680,7 +684,7 @@ fun CustomRemindersDialog(
                     ) {
                         Text("💡", fontSize = 20.sp)
                         Text(
-                            text = "Set specific times for reminders. Each reminder can have its own active days.",
+                            text = "Установите определенное время для напоминаний. Для каждого напоминания могут быть свои дни.",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -702,7 +706,7 @@ fun CustomRemindersDialog(
                         ) {
                             Text("⏰", fontSize = 48.sp)
                             Text(
-                                text = "No custom reminders yet",
+                                text = "Пользовательских напоминаний пока нет",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
@@ -722,7 +726,8 @@ fun CustomRemindersDialog(
                                 onEdit = { editingReminder = reminder },
                                 onDelete = { tempReminders.removeAt(index) },
                                 onToggleEnabled = {
-                                    tempReminders[index] = reminder.copy(isEnabled = !reminder.isEnabled)
+                                    tempReminders[index] =
+                                        reminder.copy(isEnabled = !reminder.isEnabled)
                                 }
                             )
                         }
@@ -743,7 +748,7 @@ fun CustomRemindersDialog(
                         ) {
                             Icon(Icons.Default.Add, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Add Reminder")
+                            Text("Добавить напоминание")
                         }
                     }
 
@@ -755,14 +760,14 @@ fun CustomRemindersDialog(
                             onClick = onDismiss,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Cancel")
+                            Text("Отмена")
                         }
 
                         Button(
                             onClick = { onRemindersUpdated(tempReminders) },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text("Save")
+                            Text("Сохранить")
                         }
                     }
                 }
@@ -838,7 +843,7 @@ private fun CustomReminderItem(
                         )
                     }
                     Text(
-                        text = "${reminder.enabledDays.size} days active",
+                        text = "${reminder.enabledDays.size} дней активности",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
@@ -878,18 +883,28 @@ private fun AddEditReminderDialog(
     var enabledDays by remember {
         mutableStateOf(
             reminder?.enabledDays?.mapNotNull {
-                try { DayOfWeek.valueOf(it) } catch (e: Exception) { null }
+                try {
+                    DayOfWeek.valueOf(it)
+                } catch (e: Exception) {
+                    null
+                }
             }?.toSet() ?: DayOfWeek.values().toSet()
         )
     }
     var showTimePicker by remember { mutableStateOf(false) }
 
-    Dialog(onDismissRequest = onDismiss) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            shape = RoundedCornerShape(24.dp)
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
         ) {
             Column(
                 modifier = Modifier
@@ -899,7 +914,7 @@ private fun AddEditReminderDialog(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text(
-                    text = if (reminder != null) "Edit Reminder" else "Add Reminder",
+                    text = if (reminder != null) "Редактировать напоминание" else "Добавить напоминание",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -919,7 +934,7 @@ private fun AddEditReminderDialog(
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text("⏰", fontSize = 28.sp)
                             Column {
-                                Text("Time", style = MaterialTheme.typography.labelMedium)
+                                Text("Время", style = MaterialTheme.typography.labelMedium)
                                 Text(
                                     text = time,
                                     style = MaterialTheme.typography.titleLarge,
@@ -935,20 +950,20 @@ private fun AddEditReminderDialog(
                 OutlinedTextField(
                     value = label,
                     onValueChange = { label = it },
-                    label = { Text("Label (optional)") },
-                    placeholder = { Text("e.g., Morning hydration") },
+                    label = { Text("Название (опционально)") },
+                    placeholder = { Text("н-р, Утреннее напоминание") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
 
                 // Days
                 Text(
-                    text = "Active Days",
+                    text = "Активные дни",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
 
-                DayOfWeek.values().forEach { day ->
+                DayOfWeek.entries.forEach { day ->
                     DayCheckboxItem(
                         day = day,
                         isSelected = enabledDays.contains(day),
@@ -971,7 +986,7 @@ private fun AddEditReminderDialog(
                         onClick = onDismiss,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Cancel")
+                        Text("Отмена")
                     }
 
                     Button(
@@ -990,7 +1005,7 @@ private fun AddEditReminderDialog(
                         enabled = enabledDays.isNotEmpty(),
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Save")
+                        Text("Сохранить")
                     }
                 }
             }

@@ -19,6 +19,7 @@ import dev.techm1nd.hydromate.ui.notification.NotificationScheduler
 import dev.techm1nd.hydromate.ui.screens.settings.model.SettingsIntent
 import dev.techm1nd.hydromate.ui.screens.settings.model.SettingsState
 import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
+import dev.techm1nd.hydromate.utils.UiText
 import java.time.LocalTime
 import javax.inject.Inject
 
@@ -85,7 +86,9 @@ class SettingsViewModel @Inject constructor(
                         error = exception.message ?: "Failed to load settings"
                     )
                 }
-                globalSnackbarController.showError(exception.message ?: "Failed to load settings")
+                globalSnackbarController.showError(
+                    UiText.DynamicString(exception.message ?: "Failed to load settings")
+                )
             }.collect { (settings, drinks, profile) ->
                 _state.update {
                     it.copy(
@@ -129,7 +132,9 @@ class SettingsViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = exception.message ?: "Failed to update profile")
                     }
-                    globalSnackbarController.showError(exception.message ?: "Failed to update profile")
+                    globalSnackbarController.showError(
+                        UiText.DynamicString(exception.message ?: "Failed to update profile")
+                    )
                 }
         }
     }
@@ -150,7 +155,9 @@ class SettingsViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = exception.message ?: "Failed to update daily goal")
                     }
-                    globalSnackbarController.showError(exception.message ?: "Failed to update daily goal")
+                    globalSnackbarController.showError(
+                        UiText.DynamicString(exception.message ?: "Failed to update daily goal")
+                    )
                 }
         }
     }
@@ -166,7 +173,9 @@ class SettingsViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = exception.message ?: "Failed to update settings")
                     }
-                    globalSnackbarController.showError(exception.message ?: "Failed to update settings")
+                    globalSnackbarController.showError(
+                        UiText.DynamicString(exception.message ?: "Failed to update settings")
+                    )
                 }
         }
     }
@@ -183,7 +192,9 @@ class SettingsViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = exception.message ?: "Failed to update wake up time")
                     }
-                    globalSnackbarController.showError(exception.message ?: "Failed to update wake up time")
+                    globalSnackbarController.showError(
+                        UiText.DynamicString(exception.message ?: "Failed to update wake up time")
+                    )
                 }
         }
     }
@@ -200,7 +211,9 @@ class SettingsViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = exception.message ?: "Failed to update bed time")
                     }
-                    globalSnackbarController.showError(exception.message ?: "Failed to update bed time")
+                    globalSnackbarController.showError(
+                        UiText.DynamicString(exception.message ?: "Failed to update bed time")
+                    )
                 }
         }
     }
@@ -213,7 +226,9 @@ class SettingsViewModel @Inject constructor(
                     _state.update {
                         it.copy(error = exception.message ?: "Failed to update quick amounts")
                     }
-                    globalSnackbarController.showError(exception.message ?: "Failed to update quick amounts")
+                    globalSnackbarController.showError(
+                        UiText.DynamicString(exception.message ?: "Failed to update quick amounts")
+                    )
                 }
         }
     }

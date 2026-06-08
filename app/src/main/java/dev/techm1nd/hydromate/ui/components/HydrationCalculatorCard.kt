@@ -31,7 +31,7 @@ fun HydrationCalculatorCard(
     modifier: Modifier = Modifier
 ) {
     SettingsCard(
-        title = "Hydration Calculator",
+        title = "Калькулятор гидратации",
         icon = "🧮",
         modifier = modifier
     ) {
@@ -49,15 +49,15 @@ fun HydrationCalculatorCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (profile.isManualGoal) "Manual Goal" else "Calculated Goal",
+                        text = if (profile.isManualGoal) "Ручная цель" else "Рассчитанная цель",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = if (profile.isManualGoal) {
-                            "You set your own daily goal"
+                            "Вы сами ставите перед собой цель"
                         } else {
-                            "Based on your personal data"
+                            "На основании ваших данных"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -82,62 +82,62 @@ fun HydrationCalculatorCard(
             if (!profile.isManualGoal) {
                 ProfileSummaryCard(profile = profile)
 
-                if (recommendedGoal != null && !recommendedGoal.isDefault) {
-                    Spacer(modifier = Modifier.height(8.dp))
+//                if (recommendedGoal != null && !recommendedGoal.isDefault) {
+//                    Spacer(modifier = Modifier.height(8.dp))
+//
+//                     Breakdown
+//                    Card(
+//                        colors = CardDefaults.cardColors(
+//                            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
+//                                alpha = 0.5f
+//                            )
+//                        )
+//                    ) {
+//                        Column(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(12.dp),
+//                            verticalArrangement = Arrangement.spacedBy(4.dp)
+//                        ) {
+//                            Text(
+//                                text = "📊 Разбивка расчетов",
+//                                style = MaterialTheme.typography.titleSmall,
+//                                fontWeight = FontWeight.Bold,
+//                                color = MaterialTheme.colorScheme.onTertiaryContainer
+//                            )
+//                            Text(
+//                                text = recommendedGoal.explanation,
+//                                style = MaterialTheme.typography.bodySmall,
+//                                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(
+//                                    alpha = 0.8f
+//                                )
+//                            )
 
-                    // Breakdown
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                alpha = 0.5f
-                            )
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = "📊 Calculation Breakdown",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer
-                            )
-                            Text(
-                                text = recommendedGoal.explanation,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(
-                                    alpha = 0.8f
-                                )
-                            )
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    text = "Healthy range:",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onTertiaryContainer
-                                )
-                                Text(
-                                    text = "${recommendedGoal.minimumRecommended}-${recommendedGoal.maximumRecommended}ml",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                    }
-                }
+//                            Spacer(modifier = Modifier.height(4.dp))
+//
+//                            Row(
+//                                modifier = Modifier.fillMaxWidth(),
+//                                horizontalArrangement = Arrangement.SpaceBetween
+//                            ) {
+//                                Text(
+//                                    text = "Здоровый разброс потребления:",
+//                                    style = MaterialTheme.typography.bodySmall,
+//                                    fontWeight = FontWeight.Medium,
+//                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+//                                )
+//                                Text(
+//                                    text = "${recommendedGoal.minimumRecommended}-${recommendedGoal.maximumRecommended}ml",
+//                                    style = MaterialTheme.typography.bodySmall,
+//                                    fontWeight = FontWeight.Bold,
+//                                    color = MaterialTheme.colorScheme.primary
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+//            Spacer(modifier = Modifier.height(4.dp))
 
             // Edit button
             Button(
@@ -153,9 +153,9 @@ fun HydrationCalculatorCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = if (profile.isManualGoal) {
-                        "Edit Manual Goal"
+                        "Редактировать цель"
                     } else {
-                        "Update Profile"
+                        "Обновить профиль"
                     }
                 )
             }
@@ -178,22 +178,22 @@ private fun ProfileSummaryCard(profile: UserProfile) {
         ) {
             ProfileItem(
                 icon = profile.gender.icon,
-                label = "Gender",
+                label = "Пол",
                 value = profile.gender.displayName
             )
             ProfileItem(
                 icon = "⚖️",
-                label = "Weight",
+                label = "Вес",
                 value = "${profile.weightKg} kg"
             )
             ProfileItem(
                 icon = profile.activityLevel.icon,
-                label = "Activity",
+                label = "Активность",
                 value = profile.activityLevel.displayName
             )
             ProfileItem(
                 icon = profile.climate.icon,
-                label = "Climate",
+                label = "Климат",
                 value = profile.climate.displayName
             )
         }
@@ -262,6 +262,9 @@ fun HydrationProfileDialog(
                 .fillMaxHeight(0.95f)
                 .padding(16.dp),
             shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
@@ -277,12 +280,12 @@ fun HydrationProfileDialog(
                 ) {
                     Column {
                         Text(
-                            text = "Hydration Profile",
+                            text = "Профиль гидратации",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Personalize your daily goal",
+                            text = "Персонализируйте свою ежедневную цель",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
@@ -391,7 +394,7 @@ fun HydrationProfileDialog(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Cancel")
+                        Text("Отмена")
                     }
 
                     Button(
@@ -410,7 +413,7 @@ fun HydrationProfileDialog(
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Save")
+                        Text("Сохранить")
                     }
                 }
             }
@@ -425,7 +428,7 @@ private fun ModeSelector(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Goal Setting Mode",
+            text = "Режим постановки целей",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -436,8 +439,8 @@ private fun ModeSelector(
         ) {
             ModeCard(
                 icon = "🧮",
-                title = "Auto Calculate",
-                description = "Based on your profile",
+                title = "Автоматический расчет",
+                description = "На основе вашего профиля",
                 isSelected = !isManualMode,
                 onClick = { onModeChange(false) },
                 modifier = Modifier.weight(1f)
@@ -445,8 +448,8 @@ private fun ModeSelector(
 
             ModeCard(
                 icon = "✍️",
-                title = "Manual",
-                description = "Set your own goal",
+                title = "Ручной",
+                description = "Поставьте перед собой собственную цель",
                 isSelected = isManualMode,
                 onClick = { onModeChange(true) },
                 modifier = Modifier.weight(1f)
@@ -511,7 +514,7 @@ private fun ManualGoalInput(
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Your Daily Goal",
+            text = "Ваша ежедневная цель",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -528,15 +531,12 @@ private fun ManualGoalInput(
                     }
                 }
             },
-            label = { Text("Daily goal (ml)") },
+            label = { Text("Ежедневная цель (ml)") },
             suffix = { Text("ml") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,
             isError = goalText.toIntOrNull()?.let { it !in 500..5000 } == true,
-            supportingText = {
-                Text("Recommended range: 1500-3500ml")
-            }
         )
     }
 }
@@ -548,13 +548,13 @@ private fun GenderSelector(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Gender",
+            text = "Пол",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Gender.values().forEach { gender ->
+            Gender.entries.forEach { gender ->
                 SelectableOptionCard(
                     icon = gender.icon,
                     title = gender.displayName,
@@ -575,7 +575,7 @@ private fun WeightInput(
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Weight",
+            text = "Вес",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -592,15 +592,12 @@ private fun WeightInput(
                     }
                 }
             },
-            label = { Text("Your weight") },
+            label = { Text("Ваш вес") },
             suffix = { Text("kg") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             singleLine = true,
             isError = weightText.toIntOrNull()?.let { it !in 30..200 } == true,
-            supportingText = {
-                Text("Valid range: 30-200kg")
-            }
         )
     }
 }
@@ -612,13 +609,13 @@ private fun ActivityLevelSelector(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Activity Level",
+            text = "Активность",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            ActivityLevel.values().forEach { level ->
+            ActivityLevel.entries.forEach { level ->
                 SelectableOptionCard(
                     icon = level.icon,
                     title = level.displayName,
@@ -637,7 +634,7 @@ private fun ClimateSelector(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Climate",
+            text = "Климат",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -720,7 +717,7 @@ private fun CalculatedGoalCard(goal: RecommendedGoalResult) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "✨ Recommended Goal",
+                    text = "✨ Рекомендуемая цель",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -742,23 +739,23 @@ private fun CalculatedGoalCard(goal: RecommendedGoalResult) {
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Healthy range:",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Text(
-                    text = "${goal.minimumRecommended}-${goal.maximumRecommended}ml",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.SpaceBetween
+//            ) {
+//                Text(
+//                    text = "Здоровый разброс потребления:",
+//                    style = MaterialTheme.typography.bodySmall,
+//                    fontWeight = FontWeight.Medium,
+//                    color = MaterialTheme.colorScheme.onPrimaryContainer
+//                )
+//                Text(
+//                    text = "${goal.minimumRecommended}-${goal.maximumRecommended}ml",
+//                    style = MaterialTheme.typography.bodySmall,
+//                    fontWeight = FontWeight.Bold,
+//                    color = MaterialTheme.colorScheme.primary
+//                )
+//            }
         }
     }
 }

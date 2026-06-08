@@ -19,10 +19,10 @@ fun GoalSettingDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Set Daily Goal") },
+        title = { Text("Установите ежедневную цель") },
         text = {
             Column {
-                Text("Enter your daily water intake goal (500-5000ml)")
+                Text("Введите свою цель по ежедневному потреблению воды (500-5000ml)")
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = goalText,
@@ -31,14 +31,14 @@ fun GoalSettingDialog(
                             goalText = it
                         }
                     },
-                    label = { Text("Goal (ml)") },
+                    label = { Text("Цель (ml)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     isError = !isValidGoal && goalText.isNotEmpty()
                 )
                 if (!isValidGoal && goalText.isNotEmpty()) {
                     Text(
-                        text = "Goal must be between 500ml and 5000ml",
+                        text = "Цель должна быть между 500ml и 5000ml",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(top = 4.dp)
@@ -55,12 +55,12 @@ fun GoalSettingDialog(
                 },
                 enabled = isValidGoal
             ) {
-                Text("Set Goal")
+                Text("Установить")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Отмена")
             }
         }
     )

@@ -18,6 +18,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,7 +54,6 @@ class MainActivity : ComponentActivity() {
     private var showPermissionRationale by mutableStateOf(false)
     private var showExactAlarmInfo by mutableStateOf(false)
 
-    // Track if we should keep showing splash
     private var keepSplashScreen = true
 
     private val notificationPermissionLauncher = registerForActivityResult(
@@ -68,10 +68,8 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Install splash screen BEFORE super.onCreate()
         val splashScreen = installSplashScreen()
 
-        // Keep splash screen visible while checking auth state
         splashScreen.setKeepOnScreenCondition { keepSplashScreen }
 
         enableEdgeToEdge()
@@ -79,11 +77,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             HydroMateTheme {
-                // Get AuthViewModel to check initial auth state
                 val authViewModel: AuthViewModel = hiltViewModel()
                 val authUiState by authViewModel.state.collectAsStateWithLifecycle()
 
-                // Hide splash screen once we have determined auth state
                 LaunchedEffect(authUiState.isLoading) {
                     if (!authUiState.isLoading) {
                         kotlinx.coroutines.delay(50)
@@ -92,10 +88,8 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Main content with haze source
                     HydroMateNavigation(globalSnackbarController)
 
-                    // Permission dialogs
                     if (showPermissionRationale) {
                         PermissionRationaleDialog(
                             onDismiss = { showPermissionRationale = false },
@@ -119,7 +113,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Check permissions AFTER UI is set
         checkAndRequestPermissions()
     }
 
@@ -219,23 +212,21 @@ fun PermissionRationaleDialog(
             Text("🔔", style = MaterialTheme.typography.headlineLarge)
         },
         title = {
-            Text("Notification Permission Required")
+            Text(stringResource(R.string.perm_notif_title))
         },
         text = {
             Text(
-                "HydroMate needs notification permission to remind you to drink water throughout the day. " +
-                        "This helps you stay hydrated and reach your daily goals.\n\n" +
-                        "You can enable it in the app settings."
+                stringResource(R.string.perm_notif_text)
             )
         },
         confirmButton = {
             TextButton(onClick = onOpenSettings) {
-                Text("Open Settings")
+                Text(stringResource(R.string.open_settings))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Maybe Later")
+                Text(stringResource(R.string.skip))
             }
         }
     )
@@ -252,23 +243,21 @@ fun ExactAlarmInfoDialog(
             Text("⏰", style = MaterialTheme.typography.headlineLarge)
         },
         title = {
-            Text("Precise Reminders")
+            Text(stringResource(R.string.precise_alarms_title))
         },
         text = {
             Text(
-                "For the most accurate hydration reminders, please allow HydroMate to " +
-                        "schedule exact alarms.\n\n" +
-                        "This ensures you get reminded at the right times throughout the day."
+                stringResource(R.string.precise_alarms_text)
             )
         },
         confirmButton = {
             TextButton(onClick = onOpenSettings) {
-                Text("Enable")
+                Text(stringResource(R.string.enable))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Skip")
+                Text(stringResource(R.string.skiip))
             }
         }
     )

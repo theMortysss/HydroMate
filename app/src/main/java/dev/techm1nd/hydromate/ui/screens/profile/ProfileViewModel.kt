@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dev.techm1nd.hydromate.R
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -25,6 +26,8 @@ import dev.techm1nd.hydromate.ui.screens.profile.model.ProfileEffect
 import dev.techm1nd.hydromate.ui.screens.profile.model.ProfileIntent
 import dev.techm1nd.hydromate.ui.screens.profile.model.ProfileState
 import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
+import dev.techm1nd.hydromate.utils.UiText
+import java.util.Collections.list
 import javax.inject.Inject
 
 @HiltViewModel
@@ -102,7 +105,9 @@ class ProfileViewModel @Inject constructor(
                 if (_state.value.currentUser?.isAnonymous == false) {
                     _state.update { it.copy(showEditProfileDialog = true) }
                 } else {
-                    globalSnackbarController.showError("Link your account to edit profile")
+                    globalSnackbarController.showError(
+                        UiText.StringResource(R.string.link_account_to_edit_profile)
+                    )
                 }
             }
             ProfileIntent.HideEditProfileDialog -> _state.update { it.copy(showEditProfileDialog = false) }
@@ -182,7 +187,9 @@ class ProfileViewModel @Inject constructor(
             checkAchievementProgressUseCase()
                 .onSuccess { newlyUnlocked ->
                     newlyUnlocked.forEach { achievement ->
-                        globalSnackbarController.showSuccess("🎉 Achievement unlocked: ${achievement.title}!")
+                        globalSnackbarController.showSuccess(
+                            UiText.StringResource(R.string.achievement_unlocked, listOf(achievement.title))
+                        )
 
                         achievement.unlockableCharacter?.let { character ->
                             globalSnackbarController.showCharacterUnlocked(character.displayName)
@@ -196,16 +203,16 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             // Check if user is anonymous
             if (_state.value.currentUser?.isAnonymous == true) {
-                globalSnackbarController.showError("Link your account to edit profile")
+                globalSnackbarController.showError(UiText.StringResource(R.string.link_account_to_edit_profile))
                 return@launch
             }
 
             updateAuthProfileUseCase(newDisplayName)
                 .onSuccess {
-                    globalSnackbarController.showSuccess("Profile updated")
+                    globalSnackbarController.showSuccess(UiText.StringResource(R.string.profile_updated))
                 }
                 .onFailure {
-                    globalSnackbarController.showError("Failed to update profile")
+                    globalSnackbarController.showError(UiText.StringResource(R.string.profile_update_failed))
                 }
         }
     }
@@ -215,17 +222,17 @@ class ProfileViewModel @Inject constructor(
             val currentProfile = _state.value.profile
 
             if (!currentProfile.isCharacterUnlocked(character)) {
-                globalSnackbarController.showError("Character not unlocked yet! Complete challenges to unlock.")
+                globalSnackbarController.showError(UiText.StringResource(R.string.character_locked))
                 return@launch
             }
 
             val updatedProfile = currentProfile.copy(selectedCharacter = character)
             profileRepository.updateUserProfile(updatedProfile)
                 .onSuccess {
-                    globalSnackbarController.showSuccess("Character changed to ${character.displayName}!")
+                    globalSnackbarController.showSuccess(UiText.StringResource(R.string.character_changed, listOf(character.displayName)))
                 }
                 .onFailure { exception ->
-                    globalSnackbarController.showError(exception.message ?: "Failed to change character")
+                    globalSnackbarController.showError(UiText.DynamicString(exception.message ?: "Failed to change character"))
                 }
         }
     }
@@ -235,11 +242,14 @@ class ProfileViewModel @Inject constructor(
             startChallengeUseCase(type)
                 .onSuccess { challenge ->
                     globalSnackbarController.showSuccess(
-                        "Challenge started! Complete ${challenge.durationDays} days to earn ${challenge.xpReward} XP"
-                    )
+                        UiText.StringResource(
+                            R.string.challenge_started,
+                            listOf(challenge.durationDays, challenge.xpReward)
+                            )
+                        )
                 }
                 .onFailure { exception ->
-                    globalSnackbarController.showError(exception.message ?: "Failed to start challenge")
+                    globalSnackbarController.showError(UiText.DynamicString(exception.message ?: "Failed to start challenge"))
                 }
         }
     }
@@ -248,10 +258,10 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             abandonChallengeUseCase(challengeId)
                 .onSuccess {
-                    globalSnackbarController.showSuccess("Challenge abandoned")
+                    globalSnackbarController.showSuccess(UiText.StringResource(R.string.challenge_abandoned))
                 }
                 .onFailure { exception ->
-                    globalSnackbarController.showError(exception.message ?: "Failed to abandon challenge")
+                    globalSnackbarController.showError(UiText.DynamicString(exception.message ?: "Failed to abandon challenge"))
                 }
         }
     }
@@ -265,10 +275,12 @@ class ProfileViewModel @Inject constructor(
                     .onSuccess { result ->
                         _state.update { it.copy(showChallengeCompletion = result) }
 
-                        globalSnackbarController.showSuccess("🎉 Challenge completed! +${result.xpGained} XP")
+                        globalSnackbarController.showSuccess(UiText.StringResource(R.string.challenge_completed, listOf(result.xpGained)))
 
                         result.achievementUnlocked?.let { achievement ->
-                            globalSnackbarController.showSuccess("🏆 Achievement unlocked: ${achievement.title}!")
+                            globalSnackbarController.showSuccess(
+                                UiText.StringResource(R.string.achievement_unlockedd, listOf(achievement.title))
+                            )
 
                             achievement.unlockableCharacter?.let { character ->
                                 globalSnackbarController.showCharacterUnlocked(character.displayName)
@@ -284,119 +296,119 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun syncNow() {
-        viewModelScope.launch {
-            // CRITICAL: Check if user is anonymous
-            val currentUser = _state.value.currentUser
-            if (currentUser == null) {
-                globalSnackbarController.showError("Sign in to sync your data")
-                return@launch
-            }
-
-            if (currentUser.isAnonymous) {
-                globalSnackbarController.showError("Link your account to enable sync")
-                return@launch
-            }
-
-            _state.update { it.copy(syncStatus = SyncStatus.Syncing) }
-
-            syncRepository.syncAll()
-                .onSuccess {
-                    val syncTime = java.time.LocalDateTime.now()
-                    _state.update { it.copy(syncStatus = SyncStatus.Success(syncTime)) }
-                    globalSnackbarController.showSuccess("Sync completed")
-                }
-                .onFailure { e ->
-                    _state.update { it.copy(syncStatus = SyncStatus.Error(e.message ?: "Sync failed")) }
-                    globalSnackbarController.showError(e.message ?: "Sync failed")
-                }
-        }
+//        viewModelScope.launch {
+//            // CRITICAL: Check if user is anonymous
+//            val currentUser = _state.value.currentUser
+//            if (currentUser == null) {
+//                globalSnackbarController.showError("Sign in to sync your data")
+//                return@launch
+//            }
+//
+//            if (currentUser.isAnonymous) {
+//                globalSnackbarController.showError("Link your account to enable sync")
+//                return@launch
+//            }
+//
+//            _state.update { it.copy(syncStatus = SyncStatus.Syncing) }
+//
+//            syncRepository.syncAll()
+//                .onSuccess {
+//                    val syncTime = java.time.LocalDateTime.now()
+//                    _state.update { it.copy(syncStatus = SyncStatus.Success(syncTime)) }
+//                    globalSnackbarController.showSuccess("Sync completed")
+//                }
+//                .onFailure { e ->
+//                    _state.update { it.copy(syncStatus = SyncStatus.Error(e.message ?: "Sync failed")) }
+//                    globalSnackbarController.showError(e.message ?: "Sync failed")
+//                }
+//        }
     }
 
     private fun signOut() {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            signOutUseCase()
-                .onSuccess {
-                    globalSnackbarController.showSuccess("Signed out")
-                    _effects.trySend(ProfileEffect.NavigateToAuth)
-                }
-                .onFailure { e ->
-                    globalSnackbarController.showError(e.message ?: "Sign out failed")
-                }
-            _state.update { it.copy(isLoading = false) }
-        }
+//        viewModelScope.launch {
+//            _state.update { it.copy(isLoading = true) }
+//            signOutUseCase()
+//                .onSuccess {
+//                    globalSnackbarController.showSuccess("Signed out")
+////                    _effects.trySend(ProfileEffect.NavigateToAuth)
+//                }
+//                .onFailure { e ->
+//                    globalSnackbarController.showError(e.message ?: "Sign out failed")
+//                }
+//            _state.update { it.copy(isLoading = false) }
+//        }
     }
 
     private fun linkWithEmail(email: String, password: String) {
-        viewModelScope.launch {
-            // Verify user is anonymous
-            if (_state.value.currentUser?.isAnonymous != true) {
-                globalSnackbarController.showError("Account is already linked")
-                return@launch
-            }
-
-            _state.update { it.copy(isLoading = true) }
-
-            when (val result = linkAnonymousWithEmailUseCase(email, password)) {
-                is AuthResult.Success -> {
-                    // AuthState observer will automatically update currentUser and close dialog
-                    globalSnackbarController.showSuccess("Account linked successfully! Uploading your data...")
-
-                    // Trigger sync after successful linking
-                    syncRepository.uploadAllData()
-                        .onSuccess {
-                            globalSnackbarController.showSuccess("Data synced successfully!")
-
-                            // IMPORTANT: Schedule background sync worker for registered user
-                            SyncWorker.schedule(context)
-                        }
-                        .onFailure { e ->
-                            globalSnackbarController.showError("Linked but sync failed: ${e.message}")
-                        }
-                }
-                is AuthResult.Error -> {
-                    globalSnackbarController.showError(result.message)
-                }
-            }
-
-            _state.update { it.copy(isLoading = false) }
-        }
+//        viewModelScope.launch {
+//            // Verify user is anonymous
+//            if (_state.value.currentUser?.isAnonymous != true) {
+//                globalSnackbarController.showError("Account is already linked")
+//                return@launch
+//            }
+//
+//            _state.update { it.copy(isLoading = true) }
+//
+//            when (val result = linkAnonymousWithEmailUseCase(email, password)) {
+//                is AuthResult.Success -> {
+//                    // AuthState observer will automatically update currentUser and close dialog
+//                    globalSnackbarController.showSuccess("Account linked successfully! Uploading your data...")
+//
+//                    // Trigger sync after successful linking
+//                    syncRepository.uploadAllData()
+//                        .onSuccess {
+//                            globalSnackbarController.showSuccess("Data synced successfully!")
+//
+//                            // IMPORTANT: Schedule background sync worker for registered user
+//                            SyncWorker.schedule(context)
+//                        }
+//                        .onFailure { e ->
+//                            globalSnackbarController.showError("Linked but sync failed: ${e.message}")
+//                        }
+//                }
+//                is AuthResult.Error -> {
+//                    globalSnackbarController.showError(result.message)
+//                }
+//            }
+//
+//            _state.update { it.copy(isLoading = false) }
+//        }
     }
 
     private fun linkWithGoogle(idToken: String) {
-        viewModelScope.launch {
-            // Verify user is anonymous
-            if (_state.value.currentUser?.isAnonymous != true) {
-                globalSnackbarController.showError("Account is already linked")
-                return@launch
-            }
-
-            _state.update { it.copy(isLoading = true) }
-
-            when (val result = linkAnonymousWithGoogleUseCase(idToken)) {
-                is AuthResult.Success -> {
-                    // AuthState observer will automatically update currentUser and close dialog
-                    globalSnackbarController.showSuccess("Account linked successfully! Uploading your data...")
-
-                    // Trigger sync after successful linking
-                    syncRepository.uploadAllData()
-                        .onSuccess {
-                            globalSnackbarController.showSuccess("Data synced successfully!")
-
-                            // IMPORTANT: Schedule background sync worker for registered user
-                            SyncWorker.schedule(context)
-                        }
-                        .onFailure { e ->
-                            globalSnackbarController.showError("Linked but sync failed: ${e.message}")
-                        }
-                }
-                is AuthResult.Error -> {
-                    globalSnackbarController.showError(result.message)
-                }
-            }
-
-            _state.update { it.copy(isLoading = false) }
-        }
+//        viewModelScope.launch {
+//            // Verify user is anonymous
+//            if (_state.value.currentUser?.isAnonymous != true) {
+//                globalSnackbarController.showError("Account is already linked")
+//                return@launch
+//            }
+//
+//            _state.update { it.copy(isLoading = true) }
+//
+//            when (val result = linkAnonymousWithGoogleUseCase(idToken)) {
+//                is AuthResult.Success -> {
+//                    // AuthState observer will automatically update currentUser and close dialog
+//                    globalSnackbarController.showSuccess("Account linked successfully! Uploading your data...")
+//
+//                    // Trigger sync after successful linking
+//                    syncRepository.uploadAllData()
+//                        .onSuccess {
+//                            globalSnackbarController.showSuccess("Data synced successfully!")
+//
+//                            // IMPORTANT: Schedule background sync worker for registered user
+//                            SyncWorker.schedule(context)
+//                        }
+//                        .onFailure { e ->
+//                            globalSnackbarController.showError("Linked but sync failed: ${e.message}")
+//                        }
+//                }
+//                is AuthResult.Error -> {
+//                    globalSnackbarController.showError(result.message)
+//                }
+//            }
+//
+//            _state.update { it.copy(isLoading = false) }
+//        }
     }
 
     private data class ProfileData(

@@ -32,7 +32,6 @@ import dev.techm1nd.hydromate.ui.components.DateDetailsModal
 import dev.techm1nd.hydromate.ui.components.MonthSelector
 import dev.techm1nd.hydromate.ui.components.MonthlySummary
 import dev.techm1nd.hydromate.ui.components.WaterCalendar
-import dev.techm1nd.hydromate.ui.screens.auth.AuthScreen
 import dev.techm1nd.hydromate.ui.screens.auth.model.AuthState
 import dev.techm1nd.hydromate.ui.screens.history.model.HistoryIntent
 import dev.techm1nd.hydromate.ui.screens.history.model.HistoryState

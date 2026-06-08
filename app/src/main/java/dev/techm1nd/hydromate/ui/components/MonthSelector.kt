@@ -49,7 +49,7 @@ fun MonthSelector(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "History",
+                    text = "История",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
                 )

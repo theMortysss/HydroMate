@@ -3,6 +3,7 @@ package dev.techm1nd.hydromate.ui.screens.history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.techm1nd.hydromate.R
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ import dev.techm1nd.hydromate.ui.screens.history.model.HistoryEffect
 import dev.techm1nd.hydromate.ui.screens.history.model.HistoryIntent
 import dev.techm1nd.hydromate.ui.screens.history.model.HistoryState
 import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
+import dev.techm1nd.hydromate.utils.UiText
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -63,6 +65,7 @@ class HistoryViewModel @Inject constructor(
             is HistoryIntent.AddWaterForDate -> addWaterForDate(
                 intent.date, intent.amount, intent.drink, intent.time
             )
+
             is HistoryIntent.CreateCustomDrink -> createCustomDrink(intent.drink)
         }
     }
@@ -237,16 +240,20 @@ class HistoryViewModel @Inject constructor(
             addWaterEntryForDateUseCase(amount, drink, time)
                 .onSuccess {
                     globalSnackbarController.showSuccess(
-                        "Added ${amount}ml of ${drink.name} for ${date.format(
-                            DateTimeFormatter.ofPattern("MMM dd")
-                        )}"
+                        UiText.StringResource(
+                            R.string.added, listOf(
+                                amount,
+                                drink.name,
+                                date.format(DateTimeFormatter.ofPattern("MMM dd"))
+                            )
+                        )
                     )
                     hideAddWaterDialog()
                     loadMonthlyData() // Перезагружаем данные
                 }
                 .onFailure { exception ->
                     globalSnackbarController.showError(
-                        exception.message ?: "Failed to add water entry"
+                        UiText.DynamicString(exception.message ?: "Failed to add water entry")
                     )
                 }
         }
@@ -258,11 +265,11 @@ class HistoryViewModel @Inject constructor(
                 .onSuccess {
                     // После удаления проверяем, возможно цель больше не достигнута
                     checkAndHandleGoalAchievement()
-                    globalSnackbarController.showMessage("Entry deleted")
+                    globalSnackbarController.showMessage(UiText.StringResource(R.string.entry_deleted))
                 }
                 .onFailure { exception ->
                     globalSnackbarController.showError(
-                        exception.message ?: "Failed to delete entry"
+                        UiText.DynamicString(exception.message ?: "Failed to delete entry")
                     )
                 }
         }
@@ -288,10 +295,16 @@ class HistoryViewModel @Inject constructor(
         viewModelScope.launch {
             drinkRepository.createCustomDrink(drink)
                 .onSuccess { drinkId ->
-                    globalSnackbarController.showSuccess("Custom drink \"${drink.name}\" created!")
+                    globalSnackbarController.showSuccess(
+                        UiText.StringResource(
+                            R.string.custom_drink_created, listOf(drink.name)
+                        )
+                    )
                 }
                 .onFailure { exception ->
-                    globalSnackbarController.showError(exception.message ?: "Failed to create custom drink")
+                    globalSnackbarController.showError(
+                        UiText.DynamicString(exception.message ?: "Failed to create custom drink")
+                    )
                 }
         }
     }
