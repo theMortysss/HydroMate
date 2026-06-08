@@ -118,7 +118,7 @@ class HydroMateNotificationManager @Inject constructor(
 
             builder.addAction(
                 R.drawable.ic_splash_logo,
-                "Snooze $snoozeMinutes min",
+                "Отложить на $snoozeMinutes мин",
                 snoozePendingIntent
             )
         }
@@ -154,9 +154,9 @@ class HydroMateNotificationManager @Inject constructor(
         val progressPercentage = ((currentAmount.toFloat() / goalAmount) * 100).toInt()
 
         val message = if (isGoalReached) {
-            "You've already reached your goal today! Great job! 🎉"
+            "Вы уже достигли своей цели на сегодня! Отличная работа! 🎉"
         } else {
-            "You've consumed ${currentAmount}ml. ${remainingAmount}ml remaining to reach your goal."
+            "Вы потребили ${currentAmount}ml. ${remainingAmount}ml осталось до достижения вашей цели."
         }
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID_REMINDERS)
@@ -187,7 +187,7 @@ class HydroMateNotificationManager @Inject constructor(
 
             builder.addAction(
                 R.drawable.ic_splash_logo,
-                "Snooze $snoozeMinutes min",
+                "Отложить на $snoozeMinutes мин",
                 snoozePendingIntent
             )
         }
@@ -217,14 +217,14 @@ class HydroMateNotificationManager @Inject constructor(
 
         val overachievement = currentAmount - goalAmount
         val message = if (overachievement > 0) {
-            "You've exceeded your goal by ${overachievement}ml! Keep up the amazing work! 💪"
+            "Вы превзошли свою цель на ${overachievement}ml!"
         } else {
-            "You've reached your daily hydration goal of ${goalAmount}ml! Great job staying healthy! 🌟"
+            "Вы достигли своей суточной нормы потребления жидкости. ${goalAmount}ml! 🌟"
         }
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID_ACHIEVEMENTS)
             .setSmallIcon(R.drawable.ic_splash_logo)
-            .setContentTitle("🎉 Daily Goal Achieved!")
+            .setContentTitle("🎉 Ежедневная цель достигнута!")
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -247,24 +247,24 @@ class HydroMateNotificationManager @Inject constructor(
     private fun getReminderContent(progressPercentage: Int, remainingAmount: Int): Pair<String, String> {
         return when {
             progressPercentage >= 90 -> Pair(
-                "💪 Almost There!",
-                "You're so close! Just ${remainingAmount}ml to reach your goal!"
+                "💪 Почти готово!",
+                "Вы так близки! Осталось всего ${remainingAmount}ml до достижения цели!"
             )
             progressPercentage >= 75 -> Pair(
-                "🌊 Great Progress!",
-                "You're doing amazing! ${remainingAmount}ml remaining to reach your goal"
+                "🌊 Отличный прогресс!",
+                "Отличные успехи! Осталось ${remainingAmount}ml до достижения цели."
             )
             progressPercentage >= 50 -> Pair(
-                "💧 Keep Going!",
-                "Halfway there! Drink some water - ${remainingAmount}ml remaining"
+                "💧 Продолжайте!",
+                "Половина пути позади! Выпейте воды — осталось ${remainingAmount}ml."
             )
             progressPercentage >= 25 -> Pair(
-                "🥤 Time to Hydrate!",
-                "Don't forget to drink water! ${remainingAmount}ml remaining"
+                "🥤 Время восполнить запас жидкости!",
+                "Не забудьте попить воды! Осталось ${remainingAmount}ml."
             )
             else -> Pair(
-                "💦 Stay Hydrated!",
-                "Time for a water break! ${remainingAmount}ml to reach your goal"
+                "💦 Поддерживайте водный баланс!",
+                "Время сделать перерыв на воду! Осталось ${remainingAmount}ml до достижения цели."
             )
         }
     }

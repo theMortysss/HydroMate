@@ -121,6 +121,8 @@ private fun EnhancedSnackbar(
 
     val textColor = when (message.type) {
         SnackbarType.ACHIEVEMENT -> Color.Black
+        SnackbarType.INFO -> MaterialTheme.colorScheme.onPrimary
+        SnackbarType.SUCCESS -> MaterialTheme.colorScheme.onPrimary
         else -> MaterialTheme.colorScheme.onBackground
     }
 

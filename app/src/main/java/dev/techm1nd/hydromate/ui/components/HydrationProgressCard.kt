@@ -46,6 +46,10 @@ fun HydrationProgressCard(
     var showCharacter by remember { mutableStateOf(false) }  // Persistent state for visibility
     val coroutineScope = rememberCoroutineScope()
 
+    LaunchedEffect(hydrationProgress.isGoalReached) {
+        showCharacter = hydrationProgress.isGoalReached
+    }
+
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp),

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +26,9 @@ import dev.techm1nd.hydromate.domain.entities.UserProfile
 import dev.techm1nd.hydromate.domain.usecases.hydration.RecommendedGoalResult
 import dev.techm1nd.hydromate.ui.screens.onboarding.model.*
 import dev.techm1nd.hydromate.R
+import dev.techm1nd.hydromate.domain.entities.ActivityLevel
+import dev.techm1nd.hydromate.domain.entities.Climate
+import dev.techm1nd.hydromate.domain.entities.Gender
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,6 +108,7 @@ fun OnboardingScreen(
                             recommendedGoal = state.recommendedGoal,
                             onProfileUpdate = { handleIntent(OnboardingIntent.UpdateProfile(it)) }
                         )
+
                         OnboardingStep.GOAL -> GoalStep(
                             profile = state.profile,
                             recommendedGoal = state.recommendedGoal,
@@ -111,6 +116,7 @@ fun OnboardingScreen(
                                 handleIntent(OnboardingIntent.SelectGoal(goal, isManual))
                             }
                         )
+
                         OnboardingStep.COMPLETE -> CompleteStep()
                     }
                 }
@@ -225,7 +231,10 @@ private fun ProfileStep(
 
         // Profile editor card
         Card(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+            )
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),
@@ -253,30 +262,59 @@ private fun ProfileStep(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     listOf(
-                        dev.techm1nd.hydromate.domain.entities.Gender.MALE,
-                        dev.techm1nd.hydromate.domain.entities.Gender.FEMALE,
-                        dev.techm1nd.hydromate.domain.entities.Gender.PREFER_NOT_TO_SAY
+                        Gender.MALE,
+                        Gender.FEMALE,
+                        Gender.PREFER_NOT_TO_SAY
                     ).forEach { gender ->
                         FilterChip(
                             selected = profile.gender == gender,
                             onClick = { onProfileUpdate(profile.copy(gender = gender)) },
-                            label = { Text(gender.displayName) }
+                            label = {
+                                Text(
+                                    text = gender.displayName,
+                                    color = if (profile.gender == gender)
+                                        MaterialTheme.colorScheme.onPrimary
+                                    else
+                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            ),
+                            border = null
                         )
                     }
                 }
 
                 // Activity Level
-                Text(stringResource(R.string.activity_level), style = MaterialTheme.typography.labelLarge)
+                Text(
+                    stringResource(R.string.activity_level),
+                    style = MaterialTheme.typography.labelLarge
+                )
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(
-                        dev.techm1nd.hydromate.domain.entities.ActivityLevel.LOW,
-                        dev.techm1nd.hydromate.domain.entities.ActivityLevel.MODERATE,
-                        dev.techm1nd.hydromate.domain.entities.ActivityLevel.HIGH
+                        ActivityLevel.LOW,
+                        ActivityLevel.MODERATE,
+                        ActivityLevel.HIGH
                     ).forEach { level ->
                         FilterChip(
                             selected = profile.activityLevel == level,
                             onClick = { onProfileUpdate(profile.copy(activityLevel = level)) },
-                            label = { Text(level.displayName) },
+                            label = {
+                                Text(
+                                    text = level.displayName,
+                                    color = if (profile.activityLevel == level)
+                                        MaterialTheme.colorScheme.onPrimary
+                                    else
+                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            ),
+                            border = null,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -286,15 +324,28 @@ private fun ProfileStep(
                 Text(stringResource(R.string.climate), style = MaterialTheme.typography.labelLarge)
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(
-                        dev.techm1nd.hydromate.domain.entities.Climate.COLD,
-                        dev.techm1nd.hydromate.domain.entities.Climate.MODERATE,
-                        dev.techm1nd.hydromate.domain.entities.Climate.WARM,
-                        dev.techm1nd.hydromate.domain.entities.Climate.HOT
+                        Climate.COLD,
+                        Climate.MODERATE,
+                        Climate.WARM,
+                        Climate.HOT
                     ).forEach { climate ->
                         FilterChip(
                             selected = profile.climate == climate,
                             onClick = { onProfileUpdate(profile.copy(climate = climate)) },
-                            label = { Text(climate.displayName) },
+                            label = {
+                                Text(
+                                    text = climate.displayName,
+                                    color = if (profile.climate == climate)
+                                        MaterialTheme.colorScheme.onPrimary
+                                    else
+                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                            ),
+                            border = null,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -382,14 +433,6 @@ private fun GoalStep(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
-
-                if (recommendedGoal.explanation.isNotEmpty()) {
-                    Text(
-                        text = recommendedGoal.explanation,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
             }
         }
 
@@ -409,7 +452,10 @@ private fun GoalStep(
                     MaterialTheme.colorScheme.primaryContainer
                 else
                     MaterialTheme.colorScheme.surface
-            )
+            ),
+            onClick = {
+                onGoalSelect(manualGoalText.toInt(), true)
+            }
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),

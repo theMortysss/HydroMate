@@ -13,50 +13,50 @@ enum class ChallengeType(
     val difficultyLevel: ChallengeDifficulty
 ) {
     NO_CAFFEINE(
-        displayName = "Caffeine-Free",
-        description = "No drinks with caffeine",
+        displayName = "Без кофеина",
+        description = "Никаких напитков с кофеином",
         icon = "☕",
         difficultyLevel = ChallengeDifficulty.MEDIUM
     ),
     NO_ALCOHOL(
-        displayName = "Alcohol-Free",
-        description = "No alcoholic drinks",
+        displayName = "Без алкоголя",
+        description = "Никаких алкогольных напитков",
         icon = "🍺",
         difficultyLevel = ChallengeDifficulty.HARD
     ),
     WATER_ONLY(
-        displayName = "Water Only",
-        description = "Drink only water",
+        displayName = "Только вода",
+        description = "Пить только воду",
         icon = "💧",
         difficultyLevel = ChallengeDifficulty.HARD
     ),
     NO_LACTOSE(
-        displayName = "Lactose-Free",
-        description = "No dairy products",
+        displayName = "Без лактозы",
+        description = "Без молочных продуктов",
         icon = "🥛",
         difficultyLevel = ChallengeDifficulty.EASY
     ),
     NO_SUGAR(
-        displayName = "Sugar-Free",
-        description = "No drinks with added sugar",
+        displayName = "Без сахара",
+        description = "Без напитков с добавленным сахаром",
         icon = "🍬",
         difficultyLevel = ChallengeDifficulty.MEDIUM
     ),
     NO_SODA(
-        displayName = "Soda-Free",
-        description = "No carbonated soft drinks",
+        displayName = "Без газировки",
+        description = "Без газированных напитков",
         icon = "🥤",
         difficultyLevel = ChallengeDifficulty.EASY
     ),
     PLANT_BASED(
-        displayName = "Plant-Based",
-        description = "Only plant-based drinks",
+        displayName = "Растительные напитки",
+        description = "Только растительные напитки",
         icon = "🌱",
         difficultyLevel = ChallengeDifficulty.MEDIUM
     ),
     HYDRATION_HERO(
-        displayName = "Hydration Hero",
-        description = "Reach daily goal every day",
+        displayName = "Герой гидратации",
+        description = "Достигай дневной цели каждый день",
         icon = "🏆",
         difficultyLevel = ChallengeDifficulty.MEDIUM
     );
@@ -71,13 +71,13 @@ enum class ChallengeType(
             WATER_ONLY -> drink.category != DrinkType.WATER
             NO_LACTOSE -> drink.category == DrinkType.DAIRY && !drink.isCustom
             NO_SUGAR -> drink.category == DrinkType.SOFT_DRINKS ||
-                    drink.name.contains("Syrup", ignoreCase = true)
+                    drink.name.contains("Сироп", ignoreCase = true)
             NO_SODA -> drink.category == DrinkType.SOFT_DRINKS ||
                     drink.category == DrinkType.BRANDS
             PLANT_BASED -> drink.category == DrinkType.DAIRY &&
-                    !drink.name.contains("Almond", ignoreCase = true) &&
-                    !drink.name.contains("Soy", ignoreCase = true) &&
-                    !drink.name.contains("Oat", ignoreCase = true)
+                    !drink.name.contains("Миндаль", ignoreCase = true) &&
+                    !drink.name.contains("Соя", ignoreCase = true) &&
+                    !drink.name.contains("Овёс", ignoreCase = true)
             HYDRATION_HERO -> false // Проверяется отдельно
         }
     }
@@ -91,9 +91,9 @@ enum class ChallengeDifficulty(
     val xpReward: Int,
     val color: String
 ) {
-    EASY("Easy", 300, "#4CAF50"),
-    MEDIUM("Medium", 400, "#FF9800"),
-    HARD("Hard", 600, "#F44336")
+    EASY("Легко", 300, "#4CAF50"),
+    MEDIUM("Средне", 400, "#FF9800"),
+    HARD("Сложно", 600, "#F44336")
 }
 
 /**
@@ -172,14 +172,14 @@ data class Challenge(
  */
 @Serializable
 data class ChallengeViolation(
-    val date: String, // Changed from LocalDate to String for serialization
+    val date: String,
     val drinkName: String,
     val drinkIcon: String
 ) {
     companion object {
         fun create(date: LocalDate, drinkName: String, drinkIcon: String): ChallengeViolation {
             return ChallengeViolation(
-                date = date.toString(), // Convert LocalDate to ISO-8601 string
+                date = date.toString(),
                 drinkName = drinkName,
                 drinkIcon = drinkIcon
             )
@@ -187,6 +187,6 @@ data class ChallengeViolation(
     }
 
     fun getDate(): LocalDate {
-        return LocalDate.parse(date) // Parse ISO-8601 string back to LocalDate
+        return LocalDate.parse(date)
     }
 }

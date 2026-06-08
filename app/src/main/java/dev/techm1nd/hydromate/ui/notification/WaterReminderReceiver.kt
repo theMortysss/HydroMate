@@ -270,7 +270,7 @@ class WaterReminderReceiver : BroadcastReceiver() {
         notificationManager.showCustomHydrationReminder(
             currentAmount = currentAmount,
             goalAmount = adjustedGoal,
-            reminderLabel = label ?: "Time to hydrate",
+            reminderLabel = label ?: "Время пить воду!",
             showProgress = settings.showProgressInNotification,
             canSnooze = settings.snoozeEnabled,
             snoozeMinutes = settings.snoozeDelay.minutes,

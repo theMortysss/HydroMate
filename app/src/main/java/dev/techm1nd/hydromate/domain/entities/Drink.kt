@@ -27,7 +27,7 @@ data class Drink(
         // === ВОДА ===
         val WATER = Drink(
             id = 1,
-            name = "Water",
+            name = "Вода",
             icon = "💧",
             hydrationMultiplier = 1.0f,
             category = DrinkType.WATER,
@@ -36,17 +36,17 @@ data class Drink(
 
         val MINERAL_WATER = Drink(
             id = 2,
-            name = "Mineral Water",
+            name = "Минеральная вода",
             icon = "💎",
             hydrationMultiplier = 1.0f,
             category = DrinkType.WATER,
             color = "#4da6cc"
         )
 
-        // === ЧАЙ (TEA) ===
+        // === ЧАЙ ===
         val HERBAL_TEA = Drink(
             id = 3,
-            name = "Herbal Tea",
+            name = "Травяной чай",
             icon = "🫖",
             hydrationMultiplier = 0.9f,
             category = DrinkType.TEA,
@@ -55,7 +55,7 @@ data class Drink(
 
         val GREEN_TEA = Drink(
             id = 4,
-            name = "Green Tea",
+            name = "Зеленый чай",
             icon = "🍵",
             hydrationMultiplier = 0.9f,
             category = DrinkType.TEA,
@@ -65,7 +65,7 @@ data class Drink(
 
         val BLACK_TEA = Drink(
             id = 5,
-            name = "Black Tea",
+            name = "Черный чай",
             icon = "☕",
             hydrationMultiplier = 0.9f,
             category = DrinkType.TEA,
@@ -75,7 +75,7 @@ data class Drink(
 
         val WHITE_TEA = Drink(
             id = 6,
-            name = "White Tea",
+            name = "Белый чай",
             icon = "🫖",
             hydrationMultiplier = 0.95f,
             category = DrinkType.TEA,
@@ -85,7 +85,7 @@ data class Drink(
 
         val OOLONG_TEA = Drink(
             id = 7,
-            name = "Oolong Tea",
+            name = "Улун",
             icon = "🍵",
             hydrationMultiplier = 0.9f,
             category = DrinkType.TEA,
@@ -95,7 +95,7 @@ data class Drink(
 
         val FRUIT_TEA = Drink(
             id = 8,
-            name = "Fruit Tea",
+            name = "Фруктовый чай",
             icon = "🍊",
             hydrationMultiplier = 0.9f,
             category = DrinkType.TEA,
@@ -104,7 +104,7 @@ data class Drink(
 
         val DECAF_TEA = Drink(
             id = 9,
-            name = "Decaf Tea",
+            name = "Чай без кофеина",
             icon = "🫖",
             hydrationMultiplier = 0.95f,
             category = DrinkType.TEA,
@@ -113,7 +113,7 @@ data class Drink(
 
         val CHAI_LATTE = Drink(
             id = 10,
-            name = "Chai Latte",
+            name = "Чай латте",
             icon = "☕",
             hydrationMultiplier = 1.0f,
             category = DrinkType.TEA,
@@ -123,7 +123,7 @@ data class Drink(
 
         val ROYAL_MILK_TEA = Drink(
             id = 11,
-            name = "Royal Milk Tea",
+            name = "Королевский чай с молоком",
             icon = "🫖",
             hydrationMultiplier = 0.85f,
             category = DrinkType.TEA,
@@ -133,7 +133,7 @@ data class Drink(
 
         val CHRYSANTHEMUM_TEA = Drink(
             id = 12,
-            name = "Chrysanthemum Tea",
+            name = "Чай из хризантем",
             icon = "🌼",
             hydrationMultiplier = 0.95f,
             category = DrinkType.TEA,
@@ -142,17 +142,17 @@ data class Drink(
 
         val BARLEY_TEA = Drink(
             id = 13,
-            name = "Barley Tea",
+            name = "Ячменный чай",
             icon = "🌾",
             hydrationMultiplier = 0.9f,
             category = DrinkType.TEA,
             color = "#daa520"
         )
 
-        // === КОФЕ (COFFEE) ===
+        // === КОФЕ ===
         val COFFEE = Drink(
             id = 14,
-            name = "Coffee",
+            name = "Кофе",
             icon = "☕",
             hydrationMultiplier = 0.6f,
             category = DrinkType.COFFEE,
@@ -162,7 +162,7 @@ data class Drink(
 
         val ESPRESSO = Drink(
             id = 15,
-            name = "Espresso",
+            name = "Эспрессо",
             icon = "☕",
             hydrationMultiplier = 0.4f,
             category = DrinkType.COFFEE,
@@ -172,7 +172,7 @@ data class Drink(
 
         val AMERICANO = Drink(
             id = 16,
-            name = "Americano",
+            name = "Американо",
             icon = "☕",
             hydrationMultiplier = 0.7f,
             category = DrinkType.COFFEE,
@@ -182,7 +182,7 @@ data class Drink(
 
         val LATTE = Drink(
             id = 17,
-            name = "Latte",
+            name = "Латте",
             icon = "☕",
             hydrationMultiplier = 0.6f,
             category = DrinkType.COFFEE,
@@ -192,7 +192,7 @@ data class Drink(
 
         val CAPPUCCINO = Drink(
             id = 18,
-            name = "Cappuccino",
+            name = "Капучино",
             icon = "☕",
             hydrationMultiplier = 0.6f,
             category = DrinkType.COFFEE,
@@ -202,7 +202,7 @@ data class Drink(
 
         val MOCHA = Drink(
             id = 19,
-            name = "Mocha",
+            name = "Мокко",
             icon = "☕",
             hydrationMultiplier = 0.55f,
             category = DrinkType.COFFEE,
@@ -212,7 +212,7 @@ data class Drink(
 
         val MACCHIATO = Drink(
             id = 20,
-            name = "Macchiato",
+            name = "Макиато",
             icon = "☕",
             hydrationMultiplier = 0.45f,
             category = DrinkType.COFFEE,
@@ -222,7 +222,7 @@ data class Drink(
 
         val FLAT_WHITE = Drink(
             id = 21,
-            name = "Flat White",
+            name = "Флэт уайт",
             icon = "☕",
             hydrationMultiplier = 0.7f,
             category = DrinkType.COFFEE,
@@ -232,7 +232,7 @@ data class Drink(
 
         val DECAF_COFFEE = Drink(
             id = 22,
-            name = "Decaf Coffee",
+            name = "Кофе без кофеина",
             icon = "☕",
             hydrationMultiplier = 0.9f,
             category = DrinkType.COFFEE,
@@ -242,17 +242,17 @@ data class Drink(
 
         val CHICORY = Drink(
             id = 23,
-            name = "Chicory",
+            name = "Цикорий",
             icon = "☕",
             hydrationMultiplier = 0.85f,
             category = DrinkType.COFFEE,
             color = "#a0826d"
         )
 
-        // === МОЛОЧНЫЕ (DAIRY) ===
+        // === МОЛОЧНЫЕ ===
         val MILK = Drink(
             id = 24,
-            name = "Milk",
+            name = "Молоко",
             icon = "🥛",
             hydrationMultiplier = 1.3f,
             category = DrinkType.DAIRY,
@@ -261,7 +261,7 @@ data class Drink(
 
         val SKIM_MILK = Drink(
             id = 25,
-            name = "Skim Milk",
+            name = "Обезжиренное молоко",
             icon = "🥛",
             hydrationMultiplier = 0.91f,
             category = DrinkType.DAIRY,
@@ -270,7 +270,7 @@ data class Drink(
 
         val ALMOND_MILK = Drink(
             id = 26,
-            name = "Almond Milk",
+            name = "Миндальное молоко",
             icon = "🥛",
             hydrationMultiplier = 0.9f,
             category = DrinkType.DAIRY,
@@ -279,7 +279,7 @@ data class Drink(
 
         val SOY_MILK = Drink(
             id = 27,
-            name = "Soy Milk",
+            name = "Соевое молоко",
             icon = "🥛",
             hydrationMultiplier = 0.9f,
             category = DrinkType.DAIRY,
@@ -288,7 +288,7 @@ data class Drink(
 
         val OAT_MILK = Drink(
             id = 28,
-            name = "Oat Milk",
+            name = "Овсяное молоко",
             icon = "🥛",
             hydrationMultiplier = 0.89f,
             category = DrinkType.DAIRY,
@@ -297,7 +297,7 @@ data class Drink(
 
         val KEFIR = Drink(
             id = 29,
-            name = "Kefir",
+            name = "Кефир",
             icon = "🥛",
             hydrationMultiplier = 0.7f,
             category = DrinkType.DAIRY,
@@ -306,7 +306,7 @@ data class Drink(
 
         val YOGURT = Drink(
             id = 30,
-            name = "Yogurt Drink",
+            name = "Йогуртовый напиток",
             icon = "🥛",
             hydrationMultiplier = 0.7f,
             category = DrinkType.DAIRY,
@@ -315,17 +315,17 @@ data class Drink(
 
         val MILKSHAKE = Drink(
             id = 31,
-            name = "Milkshake",
+            name = "Молочный коктейль",
             icon = "🥤",
             hydrationMultiplier = 0.8f,
             category = DrinkType.DAIRY,
             color = "#ffc0cb"
         )
 
-        // === ФРУКТОВЫЕ (JUICES) ===
+        // === ФРУКТОВЫЕ ===
         val JUICE = Drink(
             id = 32,
-            name = "Juice",
+            name = "Сок",
             icon = "🧃",
             hydrationMultiplier = 0.95f,
             category = DrinkType.JUICES,
@@ -334,7 +334,7 @@ data class Drink(
 
         val ORANGE_JUICE = Drink(
             id = 33,
-            name = "Orange Juice",
+            name = "Апельсиновый сок",
             icon = "🍊",
             hydrationMultiplier = -0.3f,
             category = DrinkType.JUICES,
@@ -343,7 +343,7 @@ data class Drink(
 
         val COCONUT_WATER = Drink(
             id = 34,
-            name = "Coconut Water",
+            name = "Кокосовая вода",
             icon = "🥥",
             hydrationMultiplier = 0.9f,
             category = DrinkType.JUICES,
@@ -352,7 +352,7 @@ data class Drink(
 
         val LEMONADE = Drink(
             id = 35,
-            name = "Lemonade",
+            name = "Лимонад",
             icon = "🍋",
             hydrationMultiplier = 0.9f,
             category = DrinkType.JUICES,
@@ -361,7 +361,7 @@ data class Drink(
 
         val APPLE_SPRITZ = Drink(
             id = 36,
-            name = "Apple Spritz",
+            name = "Яблочный спритц",
             icon = "🍎",
             hydrationMultiplier = 0.9f,
             category = DrinkType.JUICES,
@@ -370,7 +370,7 @@ data class Drink(
 
         val SMOOTHIE = Drink(
             id = 37,
-            name = "Smoothie",
+            name = "Смузи",
             icon = "🥤",
             hydrationMultiplier = 0.6f,
             category = DrinkType.JUICES,
@@ -379,17 +379,17 @@ data class Drink(
 
         val ALOE_VERA_DRINK = Drink(
             id = 38,
-            name = "Aloe Vera Drink",
+            name = "Напиток с алоэ",
             icon = "🌿",
             hydrationMultiplier = 0.85f,
             category = DrinkType.JUICES,
             color = "#90ee90"
         )
 
-        // === АКТИВНЫЕ НАПИТКИ (SPORTS) ===
+        // === СПОРТ ===
         val SPORTS_DRINK = Drink(
             id = 39,
-            name = "Sports Drink",
+            name = "Спортивный напиток",
             icon = "⚡",
             hydrationMultiplier = 0.96f,
             category = DrinkType.SPORTS,
@@ -398,7 +398,7 @@ data class Drink(
 
         val ENERGY_DRINK = Drink(
             id = 40,
-            name = "Energy Drink",
+            name = "Энергетик",
             icon = "⚡",
             hydrationMultiplier = 0.55f,
             category = DrinkType.SPORTS,
@@ -408,17 +408,17 @@ data class Drink(
 
         val PROTEIN_SHAKE = Drink(
             id = 41,
-            name = "Protein Shake",
+            name = "Протеиновый коктейль",
             icon = "💪",
             hydrationMultiplier = 0.8f,
             category = DrinkType.SPORTS,
             color = "#dda0dd"
         )
 
-        // === ГАЗИРОВКА (SOFT_DRINKS) ===
+        // === ГАЗИРОВКА ===
         val SODA = Drink(
             id = 42,
-            name = "Soda",
+            name = "Газировка",
             icon = "🥤",
             hydrationMultiplier = 0.83f,
             category = DrinkType.SOFT_DRINKS,
@@ -427,7 +427,7 @@ data class Drink(
 
         val DIET_SODA = Drink(
             id = 43,
-            name = "Diet Soda",
+            name = "Диетическая газировка",
             icon = "🥤",
             hydrationMultiplier = 0.83f,
             category = DrinkType.SOFT_DRINKS,
@@ -436,7 +436,7 @@ data class Drink(
 
         val GINGER_ALE = Drink(
             id = 44,
-            name = "Ginger Ale",
+            name = "Имбирный эль",
             icon = "🥤",
             hydrationMultiplier = 0.85f,
             category = DrinkType.SOFT_DRINKS,
@@ -445,7 +445,7 @@ data class Drink(
 
         val ROOT_BEER = Drink(
             id = 45,
-            name = "Root Beer",
+            name = "Корневое пиво",
             icon = "🥤",
             hydrationMultiplier = 0.8f,
             category = DrinkType.SOFT_DRINKS,
@@ -454,17 +454,17 @@ data class Drink(
 
         val APEROL = Drink(
             id = 46,
-            name = "Aperol",
+            name = "Апероль",
             icon = "🍹",
             hydrationMultiplier = 0.8f,
             category = DrinkType.SOFT_DRINKS,
             color = "#ff6347"
         )
 
-        // === МОКТЕЙЛИ (MOCKTAILS) ===
+        // === МОКТЕЙЛИ ===
         val ARNOLD_PALMER = Drink(
             id = 47,
-            name = "Arnold Palmer",
+            name = "Арнольд Палмер",
             icon = "🍹",
             hydrationMultiplier = 0.9f,
             category = DrinkType.MOCKTAILS,
@@ -473,7 +473,7 @@ data class Drink(
 
         val SHIRLEY_TEMPLE = Drink(
             id = 48,
-            name = "Shirley Temple",
+            name = "Ширли Темпл",
             icon = "🍹",
             hydrationMultiplier = 0.8f,
             category = DrinkType.MOCKTAILS,
@@ -482,7 +482,7 @@ data class Drink(
 
         val VIRGIN_MOJITO = Drink(
             id = 49,
-            name = "Virgin Mojito",
+            name = "Безалкогольный мохито",
             icon = "🍹",
             hydrationMultiplier = 0.9f,
             category = DrinkType.MOCKTAILS,
@@ -491,7 +491,7 @@ data class Drink(
 
         val VIRGIN_BLOODY_MARY = Drink(
             id = 50,
-            name = "Virgin Bloody Mary",
+            name = "Безалкогольная кровавая Мэри",
             icon = "🍹",
             hydrationMultiplier = 0.9f,
             category = DrinkType.MOCKTAILS,
@@ -500,7 +500,7 @@ data class Drink(
 
         val VIRGIN_MARGARITA = Drink(
             id = 51,
-            name = "Virgin Margarita",
+            name = "Безалкогольная Маргарита",
             icon = "🍹",
             hydrationMultiplier = 0.85f,
             category = DrinkType.MOCKTAILS,
@@ -509,7 +509,7 @@ data class Drink(
 
         val VIRGIN_PINA_COLADA = Drink(
             id = 52,
-            name = "Virgin Piña Colada",
+            name = "Безалкогольная Пина Колада",
             icon = "🍹",
             hydrationMultiplier = 0.85f,
             category = DrinkType.MOCKTAILS,
@@ -518,7 +518,7 @@ data class Drink(
 
         val VIRGIN_COSMOPOLITAN = Drink(
             id = 53,
-            name = "Virgin Cosmopolitan",
+            name = "Безалкогольный Космополитен",
             icon = "🍹",
             hydrationMultiplier = 0.8f,
             category = DrinkType.MOCKTAILS,
@@ -527,17 +527,17 @@ data class Drink(
 
         val VIRGIN_OLD_FASHIONED = Drink(
             id = 54,
-            name = "Virgin Old Fashioned",
+            name = "Безалкогольный Олд Фэшн",
             icon = "🍹",
             hydrationMultiplier = -0.3f,
             category = DrinkType.MOCKTAILS,
             color = "#d2691e"
         )
 
-        // === АЛКОГОЛЬ (ALCOHOL) ===
+        // === АЛКОГОЛЬ ===
         val BEER_LIGHT = Drink(
             id = 55,
-            name = "Light Beer",
+            name = "Легкое пиво",
             icon = "🍺",
             hydrationMultiplier = -0.4f,
             category = DrinkType.ALCOHOL,
@@ -547,7 +547,7 @@ data class Drink(
 
         val BEER_REGULAR = Drink(
             id = 56,
-            name = "Regular Beer",
+            name = "Пиво",
             icon = "🍺",
             hydrationMultiplier = -0.70f,
             category = DrinkType.ALCOHOL,
@@ -557,7 +557,7 @@ data class Drink(
 
         val RED_WINE = Drink(
             id = 57,
-            name = "Red Wine",
+            name = "Красное вино",
             icon = "🍷",
             hydrationMultiplier = -0.95f,
             category = DrinkType.ALCOHOL,
@@ -567,7 +567,7 @@ data class Drink(
 
         val WHITE_WINE = Drink(
             id = 58,
-            name = "White Wine",
+            name = "Белое вино",
             icon = "🍷",
             hydrationMultiplier = -0.95f,
             category = DrinkType.ALCOHOL,
@@ -577,7 +577,7 @@ data class Drink(
 
         val CHAMPAGNE = Drink(
             id = 59,
-            name = "Champagne",
+            name = "Шампанское",
             icon = "🍾",
             hydrationMultiplier = -0.95f,
             category = DrinkType.ALCOHOL,
@@ -587,7 +587,7 @@ data class Drink(
 
         val VODKA = Drink(
             id = 60,
-            name = "Vodka",
+            name = "Водка",
             icon = "🥃",
             hydrationMultiplier = -3.18f,
             category = DrinkType.ALCOHOL,
@@ -597,7 +597,7 @@ data class Drink(
 
         val WHISKEY = Drink(
             id = 61,
-            name = "Whiskey",
+            name = "Виски",
             icon = "🥃",
             hydrationMultiplier = -3.18f,
             category = DrinkType.ALCOHOL,
@@ -607,7 +607,7 @@ data class Drink(
 
         val GIN = Drink(
             id = 62,
-            name = "Gin",
+            name = "Джин",
             icon = "🥃",
             hydrationMultiplier = -3.18f,
             category = DrinkType.ALCOHOL,
@@ -617,7 +617,7 @@ data class Drink(
 
         val TEQUILA = Drink(
             id = 63,
-            name = "Tequila",
+            name = "Текила",
             icon = "🥃",
             hydrationMultiplier = -3.18f,
             category = DrinkType.ALCOHOL,
@@ -627,7 +627,7 @@ data class Drink(
 
         val COGNAC = Drink(
             id = 64,
-            name = "Cognac",
+            name = "Коньяк",
             icon = "🥃",
             hydrationMultiplier = -3.18f,
             category = DrinkType.ALCOHOL,
@@ -637,7 +637,7 @@ data class Drink(
 
         val VERMOUTH = Drink(
             id = 65,
-            name = "Vermouth",
+            name = "Вермут",
             icon = "🍸",
             hydrationMultiplier = -0.95f,
             category = DrinkType.ALCOHOL,
@@ -647,7 +647,7 @@ data class Drink(
 
         val MULLED_WINE = Drink(
             id = 66,
-            name = "Mulled Wine",
+            name = "Глинтвейн",
             icon = "🍷",
             hydrationMultiplier = -0.95f,
             category = DrinkType.ALCOHOL,
@@ -655,10 +655,10 @@ data class Drink(
             color = "#a52a2a"
         )
 
-        // Коктейли
+        // === КОКТЕЙЛИ ===
         val MARGARITA = Drink(
             id = 67,
-            name = "Margarita",
+            name = "Маргарита",
             icon = "🍹",
             hydrationMultiplier = -0.26f,
             category = DrinkType.ALCOHOL,
@@ -668,7 +668,7 @@ data class Drink(
 
         val MOJITO = Drink(
             id = 68,
-            name = "Mojito",
+            name = "Мохито",
             icon = "🍹",
             hydrationMultiplier = -0.2f,
             category = DrinkType.ALCOHOL,
@@ -678,7 +678,7 @@ data class Drink(
 
         val BLOODY_MARY = Drink(
             id = 69,
-            name = "Bloody Mary",
+            name = "Кровавая Мэри",
             icon = "🍹",
             hydrationMultiplier = -0.2f,
             category = DrinkType.ALCOHOL,
@@ -688,7 +688,7 @@ data class Drink(
 
         val COSMOPOLITAN = Drink(
             id = 70,
-            name = "Cosmopolitan",
+            name = "Космополитен",
             icon = "🍸",
             hydrationMultiplier = -0.25f,
             category = DrinkType.ALCOHOL,
@@ -698,7 +698,7 @@ data class Drink(
 
         val OLD_FASHIONED = Drink(
             id = 71,
-            name = "Old Fashioned",
+            name = "Олд Фэшн",
             icon = "🥃",
             hydrationMultiplier = -0.3f,
             category = DrinkType.ALCOHOL,
@@ -708,7 +708,7 @@ data class Drink(
 
         val MANHATTAN = Drink(
             id = 72,
-            name = "Manhattan",
+            name = "Манхэттен",
             icon = "🍸",
             hydrationMultiplier = -0.2f,
             category = DrinkType.ALCOHOL,
@@ -718,7 +718,7 @@ data class Drink(
 
         val GIN_TONIC = Drink(
             id = 73,
-            name = "Gin & Tonic",
+            name = "Джин-тоник",
             icon = "🍸",
             hydrationMultiplier = -0.2f,
             category = DrinkType.ALCOHOL,
@@ -728,7 +728,7 @@ data class Drink(
 
         val WHISKEY_SOUR = Drink(
             id = 74,
-            name = "Whiskey Sour",
+            name = "Виски сауэр",
             icon = "🍸",
             hydrationMultiplier = -0.25f,
             category = DrinkType.ALCOHOL,
@@ -738,7 +738,7 @@ data class Drink(
 
         val DAIQUIRI = Drink(
             id = 75,
-            name = "Daiquiri",
+            name = "Дайкири",
             icon = "🍹",
             hydrationMultiplier = -0.2f,
             category = DrinkType.ALCOHOL,
@@ -748,7 +748,7 @@ data class Drink(
 
         val MAI_TAI = Drink(
             id = 76,
-            name = "Mai Tai",
+            name = "Май Тай",
             icon = "🍹",
             hydrationMultiplier = -0.2f,
             category = DrinkType.ALCOHOL,
@@ -758,7 +758,7 @@ data class Drink(
 
         val LONG_ISLAND = Drink(
             id = 77,
-            name = "Long Island Iced Tea",
+            name = "Лонг Айленд",
             icon = "🍹",
             hydrationMultiplier = -0.2f,
             category = DrinkType.ALCOHOL,
@@ -768,7 +768,7 @@ data class Drink(
 
         val NEGRONI = Drink(
             id = 78,
-            name = "Negroni",
+            name = "Негрони",
             icon = "🍸",
             hydrationMultiplier = -0.3f,
             category = DrinkType.ALCOHOL,
@@ -778,7 +778,7 @@ data class Drink(
 
         val MIMOSA = Drink(
             id = 79,
-            name = "Mimosa",
+            name = "Мимоза",
             icon = "🥂",
             hydrationMultiplier = -0.23f,
             category = DrinkType.ALCOHOL,
@@ -788,7 +788,7 @@ data class Drink(
 
         val ESPRESSO_MARTINI = Drink(
             id = 80,
-            name = "Espresso Martini",
+            name = "Эспрессо мартини",
             icon = "🍸",
             hydrationMultiplier = -0.9f,
             category = DrinkType.ALCOHOL,
@@ -799,7 +799,7 @@ data class Drink(
 
         val CAESAR = Drink(
             id = 81,
-            name = "Bloody Caesar",
+            name = "Блоди Сизар",
             icon = "🍹",
             hydrationMultiplier = -0.2f,
             category = DrinkType.ALCOHOL,
@@ -807,10 +807,10 @@ data class Drink(
             color = "#cd5c5c"
         )
 
-        // === ДРУГИЕ (OTHER) ===
+        // === ДРУГОЕ ===
         val SOUP = Drink(
             id = 82,
-            name = "Soup",
+            name = "Суп",
             icon = "🍲",
             hydrationMultiplier = 0.6f,
             category = DrinkType.OTHER,
@@ -819,7 +819,7 @@ data class Drink(
 
         val BONE_BROTH = Drink(
             id = 83,
-            name = "Bone Broth",
+            name = "Костный бульон",
             icon = "🍲",
             hydrationMultiplier = 0.75f,
             category = DrinkType.OTHER,
@@ -828,7 +828,7 @@ data class Drink(
 
         val BROTH = Drink(
             id = 84,
-            name = "Broth",
+            name = "Бульон",
             icon = "🍲",
             hydrationMultiplier = 0.75f,
             category = DrinkType.OTHER,
@@ -837,7 +837,7 @@ data class Drink(
 
         val HOT_CHOCOLATE = Drink(
             id = 85,
-            name = "Hot Chocolate",
+            name = "Горячий шоколад",
             icon = "☕",
             hydrationMultiplier = 0.6f,
             category = DrinkType.OTHER,
@@ -847,7 +847,7 @@ data class Drink(
 
         val KOMBUCHA = Drink(
             id = 86,
-            name = "Kombucha",
+            name = "Комбуча",
             icon = "🫙",
             hydrationMultiplier = 0.7f,
             category = DrinkType.OTHER,
@@ -856,7 +856,7 @@ data class Drink(
 
         val BUBBLE_TEA = Drink(
             id = 87,
-            name = "Bubble Tea",
+            name = "Бабл-ти",
             icon = "🧋",
             hydrationMultiplier = 0.85f,
             category = DrinkType.OTHER,
@@ -865,7 +865,7 @@ data class Drink(
 
         val SOJU = Drink(
             id = 88,
-            name = "Soju",
+            name = "Соджу",
             icon = "🥃",
             hydrationMultiplier = -1.0f,
             category = DrinkType.OTHER,
@@ -875,7 +875,7 @@ data class Drink(
 
         val COLA_BREW = Drink(
             id = 89,
-            name = "Cola Brew",
+            name = "Кола брью",
             icon = "🥤",
             hydrationMultiplier = 0.8f,
             category = DrinkType.OTHER,
@@ -884,7 +884,7 @@ data class Drink(
 
         val SYRUP = Drink(
             id = 90,
-            name = "Syrup",
+            name = "Сироп",
             icon = "🍯",
             hydrationMultiplier = -1.0f,
             category = DrinkType.OTHER,
@@ -893,7 +893,7 @@ data class Drink(
 
         val NON_ALCOHOLIC_BEER = Drink(
             id = 91,
-            name = "Non-Alcoholic Beer",
+            name = "Безалкогольное пиво",
             icon = "🍺",
             hydrationMultiplier = 0.7f,
             category = DrinkType.OTHER,
@@ -902,17 +902,17 @@ data class Drink(
 
         val NON_ALCOHOLIC_WINE = Drink(
             id = 92,
-            name = "Non-Alcoholic Wine",
+            name = "Безалкогольное вино",
             icon = "🍷",
             hydrationMultiplier = 0.7f,
             category = DrinkType.OTHER,
             color = "#9370db"
         )
 
-        // === БРЕНДЫ (BRANDS) ===
+        // === БРЕНДЫ ===
         val COCA_COLA = Drink(
             id = 93,
-            name = "Coca Cola",
+            name = "Кока-Кола",
             icon = "🥤",
             hydrationMultiplier = 0.83f,
             category = DrinkType.BRANDS,
@@ -922,7 +922,7 @@ data class Drink(
 
         val COLA_ZERO = Drink(
             id = 94,
-            name = "Coca Cola Zero",
+            name = "Кока-Кола Зеро",
             icon = "🥤",
             hydrationMultiplier = 0.86f,
             category = DrinkType.BRANDS,
@@ -932,7 +932,7 @@ data class Drink(
 
         val PEPSI = Drink(
             id = 95,
-            name = "Pepsi",
+            name = "Пепси",
             icon = "🥤",
             hydrationMultiplier = 0.83f,
             category = DrinkType.BRANDS,
@@ -942,7 +942,7 @@ data class Drink(
 
         val SPRITE = Drink(
             id = 96,
-            name = "Sprite",
+            name = "Спрайт",
             icon = "🥤",
             hydrationMultiplier = 0.87f,
             category = DrinkType.BRANDS,
@@ -951,7 +951,7 @@ data class Drink(
 
         val FANTA = Drink(
             id = 97,
-            name = "Fanta",
+            name = "Фанта",
             icon = "🥤",
             hydrationMultiplier = 0.87f,
             category = DrinkType.BRANDS,
@@ -960,7 +960,7 @@ data class Drink(
 
         val MOUNTAIN_DEW = Drink(
             id = 98,
-            name = "Mountain Dew",
+            name = "Маунтин Дью",
             icon = "🥤",
             hydrationMultiplier = 0.83f,
             category = DrinkType.BRANDS,
@@ -970,7 +970,7 @@ data class Drink(
 
         val DR_PEPPER = Drink(
             id = 99,
-            name = "Dr Pepper",
+            name = "Доктор Пеппер",
             icon = "🥤",
             hydrationMultiplier = 0.83f,
             category = DrinkType.BRANDS,
@@ -980,7 +980,7 @@ data class Drink(
 
         val RED_BULL = Drink(
             id = 100,
-            name = "Red Bull",
+            name = "Ред Булл",
             icon = "⚡",
             hydrationMultiplier = 0.55f,
             category = DrinkType.BRANDS,
@@ -990,7 +990,7 @@ data class Drink(
 
         val MONSTER = Drink(
             id = 101,
-            name = "Monster Energy",
+            name = "Монстер",
             icon = "⚡",
             hydrationMultiplier = 0.5f,
             category = DrinkType.BRANDS,
@@ -1056,12 +1056,12 @@ data class Drink(
  * Категории алкоголя по крепости
  */
 enum class AlcoholCategory(val displayName: String, val minPercent: Float, val maxPercent: Float) {
-    NONE("No Alcohol", 0f, 0f),
-    VERY_LIGHT("Very Light (1-4%)", 1f, 4f),
-    LIGHT("Light (4-5%)", 4f, 5f),
-    MODERATE("Moderate (5-8%)", 5f, 8f),
-    MEDIUM("Medium (8-15%)", 8f, 15f),
-    STRONG("Strong (15%+)", 15f, 100f);
+    NONE("Без алкоголя", 0f, 0f),
+    VERY_LIGHT("Очень лёгкий (1–4%)", 1f, 4f),
+    LIGHT("Лёгкий (4–5%)", 4f, 5f),
+    MODERATE("Умеренный (5–8%)", 5f, 8f),
+    MEDIUM("Средний (8–15%)", 8f, 15f),
+    STRONG("Крепкий (15%+)", 15f, 100f);
 
     companion object {
         fun fromPercentage(percentage: Float): AlcoholCategory {
@@ -1081,11 +1081,11 @@ enum class AlcoholCategory(val displayName: String, val minPercent: Float, val m
  * Уровни кофеина
  */
 enum class CaffeineLevel(val displayName: String, val minMg: Int, val maxMg: Int) {
-    NONE("No Caffeine", 0, 0),
-    LOW("Low (1-40mg)", 1, 40),
-    MODERATE("Moderate (40-80mg)", 40, 80),
-    HIGH("High (80-150mg)", 80, 150),
-    VERY_HIGH("Very High (150mg+)", 150, 500);
+    NONE("Без кофеина", 0, 0),
+    LOW("Низкий (1–40 мг)", 1, 40),
+    MODERATE("Средний (40–80 мг)", 40, 80),
+    HIGH("Высокий (80–150 мг)", 80, 150),
+    VERY_HIGH("Очень высокий (150+ мг)", 150, 500);
 
     companion object {
         fun fromMg(mg: Int): CaffeineLevel {
@@ -1104,18 +1104,18 @@ enum class CaffeineLevel(val displayName: String, val minMg: Int, val maxMg: Int
  * Типы напитков (категории)
  */
 enum class DrinkType(val displayName: String, val icon: String, val order: Int) {
-    WATER("Water", "💧", 0),
-    TEA("Tea", "🍵", 1),
-    COFFEE("Coffee", "☕", 2),
-    DAIRY("Dairy & Plant-Based", "🥛", 3),
-    JUICES("Juices & Smoothies", "🧃", 4),
-    SPORTS("Sports & Energy", "⚡", 5),
-    SOFT_DRINKS("Soft Drinks", "🥤", 6),
-    MOCKTAILS("Mocktails", "🍹", 7),
-    ALCOHOL("Alcohol", "🍺", 8),
-    OTHER("Other", "🫙", 9),
-    BRANDS("Brands", "🏷️", 10),
-    CUSTOM("Custom", "✨", 11);
+    WATER("Вода", "💧", 0),
+    TEA("Чай", "🍵", 1),
+    COFFEE("Кофе", "☕", 2),
+    DAIRY("Молочные и растительные напитки", "🥛", 3),
+    JUICES("Соки и смузи", "🧃", 4),
+    SPORTS("Спортивные и энергетические", "⚡", 5),
+    SOFT_DRINKS("Газированные напитки", "🥤", 6),
+    MOCKTAILS("Безалкогольные коктейли", "🍹", 7),
+    ALCOHOL("Алкоголь", "🍺", 8),
+    OTHER("Другое", "🫙", 9),
+    BRANDS("Бренды", "🏷️", 10),
+    CUSTOM("Пользовательские", "✨", 11);
 
     companion object {
         /**

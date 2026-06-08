@@ -66,8 +66,8 @@ data class Achievement(
             Achievement(
                 id = "char_penguin",
                 type = AchievementType.CHARACTER_UNLOCKED,
-                title = "Penguin Pal",
-                description = "Your first companion",
+                title = "Друг-Пингвин",
+                description = "Ваш первый спутник",
                 icon = "🐧",
                 xpReward = 0,
                 isUnlocked = true,
@@ -78,8 +78,8 @@ data class Achievement(
             Achievement(
                 id = "challenge_caffeine_14",
                 type = AchievementType.CHALLENGE_CAFFEINE_FREE_COMPLETED,
-                title = "Caffeine Conqueror",
-                description = "Complete 14-day caffeine-free challenge",
+                title = "Покоритель кофеина",
+                description = "Пройдите 14-дневный челлендж без кофеина",
                 icon = "☕",
                 xpReward = 200,
                 unlockableCharacter = CharacterType.CAT
@@ -87,8 +87,8 @@ data class Achievement(
             Achievement(
                 id = "challenge_alcohol_14",
                 type = AchievementType.CHALLENGE_ALCOHOL_FREE_COMPLETED,
-                title = "Sober Superstar",
-                description = "Complete 14-day alcohol-free challenge",
+                title = "Трезвый супергерой",
+                description = "Пройдите 14-дневный челлендж без алкоголя",
                 icon = "🍺",
                 xpReward = 300,
                 unlockableCharacter = CharacterType.FROG
@@ -96,8 +96,8 @@ data class Achievement(
             Achievement(
                 id = "challenge_water_14",
                 type = AchievementType.CHALLENGE_WATER_ONLY_COMPLETED,
-                title = "Pure Hydration",
-                description = "Complete 14-day water-only challenge",
+                title = "Чистая гидратация",
+                description = "Пройдите 14-дневный челлендж только на воде",
                 icon = "💧",
                 xpReward = 300,
                 unlockableCharacter = CharacterType.DUCK
@@ -105,40 +105,40 @@ data class Achievement(
             Achievement(
                 id = "challenge_lactose_14",
                 type = AchievementType.CHALLENGE_LACTOSE_FREE_COMPLETED,
-                title = "Lactose Liberator",
-                description = "Complete 14-day lactose-free challenge",
+                title = "Освободитель лактозы",
+                description = "Пройдите 14-дневный челлендж без лактозы",
                 icon = "🥛",
                 xpReward = 150
             ),
             Achievement(
                 id = "challenge_sugar_14",
                 type = AchievementType.CHALLENGE_SUGAR_FREE_COMPLETED,
-                title = "Sugar Slayer",
-                description = "Complete 14-day sugar-free challenge",
+                title = "Уничтожитель сахара",
+                description = "Пройдите 14-дневный челлендж без сахара",
                 icon = "🍬",
                 xpReward = 200
             ),
             Achievement(
                 id = "challenge_soda_14",
                 type = AchievementType.CHALLENGE_SODA_FREE_COMPLETED,
-                title = "Soda Survivor",
-                description = "Complete 14-day soda-free challenge",
+                title = "Выживший без газировки",
+                description = "Пройдите 14-дневный челлендж без газировки",
                 icon = "🥤",
                 xpReward = 150
             ),
             Achievement(
                 id = "challenge_plant_14",
                 type = AchievementType.CHALLENGE_PLANT_BASED_COMPLETED,
-                title = "Plant Power",
-                description = "Complete 14-day plant-based drinks challenge",
+                title = "Сила растений",
+                description = "Пройдите 14-дневный челлендж растительных напитков",
                 icon = "🌱",
                 xpReward = 200
             ),
             Achievement(
                 id = "challenge_hero_14",
                 type = AchievementType.CHALLENGE_HYDRATION_HERO_COMPLETED,
-                title = "Hydration Hero",
-                description = "Reach daily goal every day for 14 days",
+                title = "Герой гидратации",
+                description = "Достигайте дневной цели 14 дней подряд",
                 icon = "🏆",
                 xpReward = 250
             ),
@@ -147,8 +147,8 @@ data class Achievement(
             Achievement(
                 id = "streak_7",
                 type = AchievementType.STREAK_7,
-                title = "Week Warrior",
-                description = "Reach your goal 7 days in a row",
+                title = "Воин недели",
+                description = "Достигайте цели 7 дней подряд",
                 icon = "🔥",
                 xpReward = 100,
                 progressMax = 7
@@ -156,8 +156,8 @@ data class Achievement(
             Achievement(
                 id = "streak_30",
                 type = AchievementType.STREAK_30,
-                title = "Month Master",
-                description = "Reach your goal 30 days in a row",
+                title = "Мастер месяца",
+                description = "Достигайте цели 30 дней подряд",
                 icon = "🔥",
                 xpReward = 500,
                 progressMax = 30,
@@ -168,8 +168,8 @@ data class Achievement(
             Achievement(
                 id = "perfect_week",
                 type = AchievementType.PERFECT_WEEK,
-                title = "Perfect Week",
-                description = "Reach your goal every day for a week",
+                title = "Идеальная неделя",
+                description = "Достигайте цели каждый день в течение недели",
                 icon = "⭐",
                 xpReward = 150,
                 progressMax = 7
@@ -177,8 +177,8 @@ data class Achievement(
             Achievement(
                 id = "perfect_month",
                 type = AchievementType.PERFECT_MONTH,
-                title = "Perfect Month",
-                description = "Reach your goal every day for a month",
+                title = "Идеальный месяц",
+                description = "Достигайте цели каждый день в течение месяца",
                 icon = "🌟",
                 xpReward = 600,
                 progressMax = 30,
@@ -189,8 +189,8 @@ data class Achievement(
             Achievement(
                 id = "total_10000ml",
                 type = AchievementType.TOTAL_10000ML,
-                title = "Hydration Beginner",
-                description = "Drink 10 liters total",
+                title = "Новичок гидратации",
+                description = "Выпейте 10 литров всего",
                 icon = "💧",
                 xpReward = 100,
                 progressMax = 10000
@@ -198,8 +198,8 @@ data class Achievement(
             Achievement(
                 id = "total_100000ml",
                 type = AchievementType.TOTAL_100000ML,
-                title = "Hydration Expert",
-                description = "Drink 100 liters total",
+                title = "Эксперт гидратации",
+                description = "Выпейте 100 литров всего",
                 icon = "💎",
                 xpReward = 500,
                 progressMax = 100000,
@@ -210,8 +210,8 @@ data class Achievement(
             Achievement(
                 id = "early_bird",
                 type = AchievementType.EARLY_BIRD,
-                title = "Early Bird",
-                description = "Drink water within an hour of waking up 10 times",
+                title = "Жаворонок",
+                description = "Пейте воду в течение часа после пробуждения 10 раз",
                 icon = "🌅",
                 xpReward = 100,
                 progressMax = 10
@@ -219,8 +219,8 @@ data class Achievement(
             Achievement(
                 id = "variety_master",
                 type = AchievementType.VARIETY_MASTER,
-                title = "Variety Master",
-                description = "Try 20 different drinks",
+                title = "Мастер разнообразия",
+                description = "Попробуйте 20 разных напитков",
                 icon = "🎨",
                 xpReward = 200,
                 progressMax = 20,

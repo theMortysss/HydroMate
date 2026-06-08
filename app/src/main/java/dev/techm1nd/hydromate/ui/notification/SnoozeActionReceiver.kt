@@ -48,7 +48,7 @@ class SnoozeActionReceiver : BroadcastReceiver() {
                     launch(Dispatchers.Main) {
                         Toast.makeText(
                             context,
-                            "Reminder snoozed for $snoozeMinutes minutes ⏰",
+                            "Напоминание отложено на $snoozeMinutes минут ⏰",
                             Toast.LENGTH_SHORT
                         ).show()
                     }

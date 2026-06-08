@@ -154,11 +154,9 @@ fun HydroMateNavigation(
     }
 
     // Determine auth state and start destination
-    val isAuthenticated = authUiState.currentUser != null
-    val needsOnboarding = isAuthenticated && authUiState.needsOnboarding
+    val needsOnboarding = authUiState.needsOnboarding
 
     val startDestination = when {
-        !isAuthenticated -> Screen.Home.route // Screen.Auth.route
         needsOnboarding -> Screen.Onboarding.route
         else -> Screen.Home.route
     }
@@ -169,24 +167,24 @@ fun HydroMateNavigation(
     val currentRoute = navBackStackEntry?.destination?.route
 
     // Handle auth state changes after initial load
-    LaunchedEffect(isAuthenticated, needsOnboarding) {
+    LaunchedEffect(needsOnboarding) {
         val currentDestination = navController.currentDestination?.route
 
         when {
             // User logged in and completed onboarding, but on wrong screen
-            isAuthenticated && !needsOnboarding && currentDestination != Screen.Home.route -> {
+            !needsOnboarding && currentDestination != Screen.Home.route -> {
                 navController.navigate(Screen.Home.route) {
                     popUpTo(0) { inclusive = true }
                 }
             }
             // User logged in but needs onboarding
-            isAuthenticated && needsOnboarding && currentDestination != Screen.Onboarding.route -> {
+             needsOnboarding && currentDestination != Screen.Onboarding.route -> {
                 navController.navigate(Screen.Onboarding.route) {
                     popUpTo(0) { inclusive = true }
                 }
             }
             // User logged out, go to auth
-//            !isAuthenticated && currentDestination != Screen.Auth.route -> {
+//            currentDestination != Screen.Auth.route -> {
 //                navController.navigate(Screen.Auth.route) {
 //                    popUpTo(0) { inclusive = true }
 //                }

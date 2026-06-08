@@ -32,7 +32,7 @@ data class UserProfile(
         get() = level * 200
 
     /**
-     * Прогресс до следующего уровня (0-100%)
+     * Прогресс до следующего уровня (0–100%)
      */
     val levelProgress: Float
         get() = (currentXP.toFloat() / xpForNextLevel * 100).coerceIn(0f, 100f)
@@ -70,7 +70,7 @@ data class UserProfile(
     }
 
     /**
-     * Проверка разблокирован ли персонаж
+     * Проверка, разблокирован ли персонаж
      */
     fun isCharacterUnlocked(character: CharacterType): Boolean {
         return character.isUnlockedByDefault || unlockedCharacters.contains(character)
@@ -89,11 +89,11 @@ data class UserProfile(
  * Пол пользователя (учитывается при расчете нормы)
  */
 enum class Gender(val displayName: String, val icon: String) {
-    MALE("Male", "👨"),
-    FEMALE("Female", "👩"),
-    PREGNANT("Pregnant", "🤰"),
-    BREASTFEEDING("Breastfeeding", "🤱"),
-    PREFER_NOT_TO_SAY("Prefer not to say", "👤");
+    MALE("Мужской", "👨"),
+    FEMALE("Женский", "👩"),
+    PREGNANT("Беременность", "🤰"),
+    BREASTFEEDING("Грудное вскармливание", "🤱"),
+    PREFER_NOT_TO_SAY("Предпочитаю не указывать", "👤");
 
     companion object {
         /**
@@ -114,17 +114,17 @@ enum class ActivityLevel(
     val additionalMl: Int
 ) {
     LOW(
-        displayName = "Low Activity",
+        displayName = "Низкая активность",
         icon = "🛋️",
         additionalMl = 0
     ),
     MODERATE(
-        displayName = "Moderate Activity",
+        displayName = "Умеренная активность",
         icon = "🚶",
         additionalMl = 300
     ),
     HIGH(
-        displayName = "High Activity",
+        displayName = "Высокая активность",
         icon = "🏃",
         additionalMl = 700
     );
@@ -146,27 +146,27 @@ enum class Climate(
     val additionalMl: Int
 ) {
     COLD(
-        displayName = "Cold",
+        displayName = "Холодный",
         icon = "❄️",
-        description = "Cold climate, minimal sweating",
+        description = "Холодный климат, минимальное потоотделение",
         additionalMl = 0
     ),
     MODERATE(
-        displayName = "Moderate",
+        displayName = "Умеренный",
         icon = "🌤️",
-        description = "Comfortable temperature",
+        description = "Комфортная температура",
         additionalMl = 200
     ),
     WARM(
-        displayName = "Warm",
+        displayName = "Тёплый",
         icon = "☀️",
-        description = "Warm weather, increased sweating",
+        description = "Тёплая погода, повышенное потоотделение",
         additionalMl = 450
     ),
     HOT(
-        displayName = "Hot",
+        displayName = "Жаркий",
         icon = "🔥",
-        description = "Hot climate, high perspiration",
+        description = "Жаркий климат, сильное потоотделение",
         additionalMl = 700
     );
 

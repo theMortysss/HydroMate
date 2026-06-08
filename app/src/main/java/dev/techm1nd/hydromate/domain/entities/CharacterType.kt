@@ -8,52 +8,52 @@ enum class CharacterType(
     val isUnlockedByDefault: Boolean = false
 ) {
     PENGUIN(
-        displayName = "Penguin",
+        displayName = "Пингвин",
         emoji = "🐧",
-        description = "Your first companion",
-        unlockRequirement = "Available from start",
+        description = "Ваш первый спутник",
+        unlockRequirement = "Доступен с самого начала",
         isUnlockedByDefault = true
     ),
     CAT(
-        displayName = "Cat",
+        displayName = "Кот",
         emoji = "🐱",
-        description = "Independent and curious",
-        unlockRequirement = "Complete caffeine-free challenge"
+        description = "Независимый и любопытный",
+        unlockRequirement = "Завершите испытание без кофеина"
     ),
     FROG(
-        displayName = "Frog",
+        displayName = "Лягушка",
         emoji = "🐸",
-        description = "Always happy and hydrated",
-        unlockRequirement = "Complete alcohol-free challenge"
+        description = "Всегда счастлива и поддерживает водный баланс",
+        unlockRequirement = "Завершите испытание без алкоголя"
     ),
     DUCK(
-        displayName = "Duck",
+        displayName = "Утка",
         emoji = "🦆",
-        description = "Loves pure water",
-        unlockRequirement = "Complete water-only challenge"
+        description = "Любит чистую воду",
+        unlockRequirement = "Завершите испытание только с водой"
     ),
     FISH(
-        displayName = "Fish",
+        displayName = "Рыбка",
         emoji = "🐠",
-        description = "Master of consistency",
-        unlockRequirement = "30-day streak"
+        description = "Мастер постоянства",
+        unlockRequirement = "Серия из 30 дней"
     ),
     UNICORN(
-        displayName = "Unicorn",
+        displayName = "Единорог",
         emoji = "🦄",
-        description = "Legendary perfectionist",
-        unlockRequirement = "Perfect month"
+        description = "Легендарный перфекционист",
+        unlockRequirement = "Идеальный месяц"
     ),
     DRAGON(
-        displayName = "Dragon",
+        displayName = "Дракон",
         emoji = "🐉",
-        description = "Mythical hydration expert",
-        unlockRequirement = "Drink 100 liters total"
+        description = "Мифический эксперт по гидратации",
+        unlockRequirement = "Выпейте всего 100 литров"
     ),
     CHAMELEON(
-        displayName = "Chameleon",
+        displayName = "Хамелеон",
         emoji = "🦎",
-        description = "Loves variety",
-        unlockRequirement = "Try 20 different drinks"
+        description = "Любит разнообразие",
+        unlockRequirement = "Попробуйте 20 разных напитков"
     )
 }
