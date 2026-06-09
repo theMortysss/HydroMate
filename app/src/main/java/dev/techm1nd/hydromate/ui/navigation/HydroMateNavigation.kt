@@ -239,9 +239,9 @@ fun HydroMateNavigation(
                                     .padding(horizontal = 12.dp)
                                     .clickable {
                                         navController.navigate(Screen.Profile.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
+//                                            popUpTo(navController.graph.findStartDestination().id) {
+//                                                saveState = true
+//                                            }
                                             launchSingleTop = true
                                             restoreState = true
                                         }
