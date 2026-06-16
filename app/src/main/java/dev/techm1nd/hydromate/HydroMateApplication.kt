@@ -56,8 +56,6 @@ class HydroMateApplication : Application(), Configuration.Provider {
                 }
         }
 
-        // FIXED: Schedule sync ONLY if user is authenticated and NOT anonymous
-        // Don't schedule on first launch - will be scheduled after successful login/linking
         val currentUser = firebaseAuth.currentUser
         if (currentUser != null && !currentUser.isAnonymous) {
             if (!SyncWorker.isScheduled(this)) {

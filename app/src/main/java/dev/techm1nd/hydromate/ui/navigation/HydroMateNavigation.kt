@@ -57,7 +57,6 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -84,7 +83,7 @@ import dev.techm1nd.hydromate.ui.screens.settings.navigation.settingsScreen
 import dev.techm1nd.hydromate.ui.screens.statistics.navigation.statisticsScreen
 import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarController
 import dev.techm1nd.hydromate.ui.snackbar.GlobalSnackbarHost
-import dev.techm1nd.hydromate.R
+import javax.inject.Inject
 
 sealed class Screen(
     val route: String,
@@ -102,34 +101,34 @@ sealed class Screen(
 
 sealed class BottomBarTab(
     val route: String,
-    val title: Int,
+    val title: String,
     val icon: ImageVector,
     val color: Color
 ) {
     data object Home : BottomBarTab(
         route = Screen.Home.route,
-        title = R.string.home,
+        title = "Home",
         icon = Icons.Filled.Home,
         color = Color(0xFF81D4FA)
     )
 
     data object Statistics : BottomBarTab(
         route = Screen.Statistics.route,
-        title = R.string.statistics,
+        title = "Statistics",
         icon = Icons.Outlined.BarChart,
         color = Color(0xFFFA6FFF)
     )
 
     data object History : BottomBarTab(
         route = Screen.History.route,
-        title = R.string.history,
+        title = "History",
         icon = Icons.Outlined.History,
         color = Color(0xFFFFE082)
     )
 
     data object Settings : BottomBarTab(
         route = Screen.Settings.route,
-        title = R.string.settings,
+        title = "Settings",
         icon = Icons.Filled.Settings,
         color = Color(0xFFAED581)
     )
@@ -146,6 +145,7 @@ fun HydroMateNavigation(
     val authViewModel: AuthViewModel = hiltViewModel()
     val authUiState by authViewModel.state.collectAsStateWithLifecycle()
 
+    // CRITICAL FIX: Don't render ANYTHING until auth state is determined
     // This prevents the flicker of auth screen while splash is visible
     if (authUiState.isLoading) {
         // Show nothing - splash screen is still visible
@@ -154,9 +154,11 @@ fun HydroMateNavigation(
     }
 
     // Determine auth state and start destination
-    val needsOnboarding = authUiState.needsOnboarding
+    val isAuthenticated = authUiState.currentUser != null
+    val needsOnboarding = isAuthenticated && authUiState.needsOnboarding
 
     val startDestination = when {
+        !isAuthenticated -> Screen.Auth.route
         needsOnboarding -> Screen.Onboarding.route
         else -> Screen.Home.route
     }
@@ -167,34 +169,34 @@ fun HydroMateNavigation(
     val currentRoute = navBackStackEntry?.destination?.route
 
     // Handle auth state changes after initial load
-    LaunchedEffect(needsOnboarding) {
+    LaunchedEffect(isAuthenticated, needsOnboarding) {
         val currentDestination = navController.currentDestination?.route
 
         when {
             // User logged in and completed onboarding, but on wrong screen
-            !needsOnboarding && currentDestination != Screen.Home.route -> {
+            isAuthenticated && !needsOnboarding && currentDestination != Screen.Home.route -> {
                 navController.navigate(Screen.Home.route) {
                     popUpTo(0) { inclusive = true }
                 }
             }
             // User logged in but needs onboarding
-             needsOnboarding && currentDestination != Screen.Onboarding.route -> {
+            isAuthenticated && needsOnboarding && currentDestination != Screen.Onboarding.route -> {
                 navController.navigate(Screen.Onboarding.route) {
                     popUpTo(0) { inclusive = true }
                 }
             }
             // User logged out, go to auth
-//            currentDestination != Screen.Auth.route -> {
-//                navController.navigate(Screen.Auth.route) {
-//                    popUpTo(0) { inclusive = true }
-//                }
-//            }
+            !isAuthenticated && currentDestination != Screen.Auth.route -> {
+                navController.navigate(Screen.Auth.route) {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
         }
     }
 
     Scaffold(
         topBar = {
-            if (!needsOnboarding) {
+            if (isAuthenticated && !needsOnboarding) {
                 TopAppBar(
                     modifier = Modifier
                         .hazeEffect(
@@ -202,7 +204,7 @@ fun HydroMateNavigation(
                         ),
                     title = {
                         Text(
-                            text = stringResource(R.string.app_name),
+                            text = "HydroMate",
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onBackground
@@ -259,7 +261,7 @@ fun HydroMateNavigation(
             }
         },
         bottomBar = {
-            if (!needsOnboarding) {
+            if (isAuthenticated && !needsOnboarding) {
                 val tabs = listOf(
                     BottomBarTab.Home,
                     BottomBarTab.Statistics,
@@ -361,6 +363,7 @@ fun HydroMateNavigation(
             }
         },
     ) { innerPadding ->
+        // Global Snackbar Host - поверх всего контента
         GlobalSnackbarHost(
             modifier = Modifier
                 .padding(top = innerPadding.calculateTopPadding()),
@@ -376,14 +379,14 @@ fun HydroMateNavigation(
                 )
                 .padding(top = innerPadding.calculateTopPadding())
         ) {
-//            authScreen(
-//                modifier = Modifier,
-//                navController = navController,
-//                onNavigateToHome = {
-//                    navController.navigate(Screen.Home.route) {
-//                        popUpTo(Screen.Auth.route) { inclusive = true }
-//                    }
-//                })
+            authScreen(
+                modifier = Modifier,
+                navController = navController,
+                onNavigateToHome = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Auth.route) { inclusive = true }
+                    }
+                })
             onboardingScreen(
                 modifier = Modifier,
                 navController = navController,
@@ -399,11 +402,11 @@ fun HydroMateNavigation(
             profileScreen(
                 modifier = Modifier,
                 navController = navController,
-//                onNavigateToAuth = {
-//                    navController.navigate(Screen.Auth.route) {
-//                        popUpTo(0) { inclusive = true }
-//                    }
-//                },
+                onNavigateToAuth = {
+                    navController.navigate(Screen.Auth.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
             )
             settingsScreen(modifier = Modifier, navController = navController)
         }
@@ -460,7 +463,7 @@ fun BottomBarTabs(
                         contentDescription = "tab ${tab.title}"
                     )
                     Text(
-                        text = stringResource(tab.title),
+                        text = tab.title,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 }

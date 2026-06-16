@@ -10,12 +10,11 @@ import dev.techm1nd.hydromate.data.local.entities.*
         WaterEntryEntity::class,
         UserSettingsEntity::class,
         DrinkEntity::class,
-        // NEW: Profile, Challenges, Achievements
         UserProfileEntity::class,
         ChallengeEntity::class,
         AchievementEntity::class
     ],
-    version = 2, // UPDATED VERSION
+    version = 2,
     exportSchema = false
 )
 abstract class HydroMateDatabase : RoomDatabase() {
@@ -24,7 +23,6 @@ abstract class HydroMateDatabase : RoomDatabase() {
     abstract fun userSettingsDao(): UserSettingsDao
     abstract fun drinkDao(): DrinkDao
 
-    // NEW DAOS
     abstract fun userProfileDao(): UserProfileDao
     abstract fun challengeDao(): ChallengeDao
     abstract fun achievementDao(): AchievementDao

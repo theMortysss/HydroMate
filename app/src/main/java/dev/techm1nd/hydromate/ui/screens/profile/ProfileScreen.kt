@@ -71,28 +71,28 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 // Account Settings - UPDATED with anonymous check
-//                AccountSettingsCard(
-//                    currentUser = state.currentUser,
-//                    syncStatus = state.syncStatus,
-//                    onSyncNow = {
-//                        if (!isAnonymous) {
-//                            handleIntent(ProfileIntent.SyncNow)
-//                        }
-//                    },
-//                    onSignOut = {
-//                        handleIntent(ProfileIntent.SignOut)
-//                    },
-//                    onLinkAccount = {
-//                        handleIntent(ProfileIntent.ShowLinkAccount)
-//                    },
-//                    onEditProfile = {
-//                        if (!isAnonymous) {
-//                            handleIntent(ProfileIntent.ShowEditProfileDialog)
-//                        }
-//                    },
-//                    // NEW: Disable sync for anonymous users
-//                    isSyncEnabled = !isAnonymous
-//                )
+                AccountSettingsCard(
+                    currentUser = state.currentUser,
+                    syncStatus = state.syncStatus,
+                    onSyncNow = {
+                        if (!isAnonymous) {
+                            handleIntent(ProfileIntent.SyncNow)
+                        }
+                    },
+                    onSignOut = {
+                        handleIntent(ProfileIntent.SignOut)
+                    },
+                    onLinkAccount = {
+                        handleIntent(ProfileIntent.ShowLinkAccount)
+                    },
+                    onEditProfile = {
+                        if (!isAnonymous) {
+                            handleIntent(ProfileIntent.ShowEditProfileDialog)
+                        }
+                    },
+                    // NEW: Disable sync for anonymous users
+                    isSyncEnabled = !isAnonymous
+                )
 
                 // Profile Header
                 ProfileHeaderCard(
@@ -160,19 +160,19 @@ fun ProfileScreen(
         )
     }
 
-//    if (state.showLinkAccountDialog && isAnonymous) {
-//        LinkAccountDialog(
-//            onLinkWithEmail = { email, password ->
-//                handleIntent(ProfileIntent.LinkWithEmail(email, password))
-//            },
-//            onLinkWithGoogle = { idToken ->
-//                handleIntent(ProfileIntent.LinkWithGoogle(idToken))
-//            },
-//            onDismiss = {
-//                handleIntent(ProfileIntent.HideLinkAccount)
-//            }
-//        )
-//    }
+    if (state.showLinkAccountDialog && isAnonymous) {
+        LinkAccountDialog(
+            onLinkWithEmail = { email, password ->
+                handleIntent(ProfileIntent.LinkWithEmail(email, password))
+            },
+            onLinkWithGoogle = { idToken ->
+                handleIntent(ProfileIntent.LinkWithGoogle(idToken))
+            },
+            onDismiss = {
+                handleIntent(ProfileIntent.HideLinkAccount)
+            }
+        )
+    }
 
     if (state.showCharacterSelection) {
         CharacterSelectionDialogEnhanced(

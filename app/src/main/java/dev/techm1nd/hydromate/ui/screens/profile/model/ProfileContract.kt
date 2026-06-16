@@ -59,5 +59,5 @@ sealed class ProfileEffect {
     data class ShowError(val message: String) : ProfileEffect()
     data class CharacterUnlocked(val character: CharacterType) : ProfileEffect()
     object LevelUp : ProfileEffect()
-//    object NavigateToAuth : ProfileEffect()
+    object NavigateToAuth : ProfileEffect()
 }
